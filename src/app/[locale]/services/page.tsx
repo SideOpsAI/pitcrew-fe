@@ -1,6 +1,6 @@
-import Link from "next/link";
 import type { Metadata } from "next";
 
+import { BookNowButton } from "@/components/booking/book-now-button";
 import { ServiceCard } from "@/components/service-card";
 import { getDictionary, getLocaleFromParams } from "@/lib/content";
 
@@ -45,7 +45,7 @@ export default async function ServicesPage({ params }: ServicesPageProps) {
             locale={safeLocale}
             service={service}
             labels={dict.servicesPage}
-            detailLabel={dict.serviceDetail.getQuote}
+            detailLabel={dict.serviceDetail.viewDetails}
           />
         ))}
       </div>
@@ -55,12 +55,10 @@ export default async function ServicesPage({ params }: ServicesPageProps) {
           {dict.servicesPage.ctaTitle}
         </h2>
         <p className="mt-3 max-w-2xl text-white/80">{dict.servicesPage.ctaCopy}</p>
-        <Link
-          href={`/${safeLocale}/contact#contact-form`}
+        <BookNowButton
+          label={dict.servicesPage.ctaButton}
           className="mt-6 inline-flex rounded-xl bg-accent px-6 py-3 text-sm font-bold uppercase tracking-wider text-black transition hover:bg-white"
-        >
-          {dict.servicesPage.ctaButton}
-        </Link>
+        />
       </div>
     </section>
   );

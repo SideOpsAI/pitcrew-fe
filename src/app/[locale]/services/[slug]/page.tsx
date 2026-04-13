@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 
+import { BookNowButton } from "@/components/booking/book-now-button";
 import {
   getDictionary,
   getLocaleFromParams,
@@ -107,12 +108,11 @@ export default async function ServiceDetailPage({
               </div>
             </dl>
 
-            <Link
-              href={`/${safeLocale}/contact#contact-form`}
+            <BookNowButton
+              label={dict.serviceDetail.getQuote}
+              planSlug={service.slug}
               className="mt-6 inline-flex w-full items-center justify-center rounded-xl bg-accent px-5 py-3 text-sm font-bold uppercase tracking-wider text-black transition hover:bg-white"
-            >
-              {dict.serviceDetail.getQuote}
-            </Link>
+            />
           </aside>
         </div>
       </article>

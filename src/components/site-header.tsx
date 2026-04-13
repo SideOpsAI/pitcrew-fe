@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 
+import { BookNowButton } from "@/components/booking/book-now-button";
 import { localeLabels, locales } from "@/lib/locales";
 import type { Locale, TranslationSchema } from "@/types/content";
 
@@ -99,12 +100,10 @@ export function SiteHeader({ locale, labels }: SiteHeaderProps) {
               </option>
             ))}
           </select>
-          <Link
-            href={`/${locale}/contact#contact-form`}
+          <BookNowButton
+            label={labels.bookNow}
             className="rounded-lg bg-accent px-5 py-2 text-sm font-semibold text-black transition hover:bg-white"
-          >
-            {labels.bookNow}
-          </Link>
+          />
         </div>
 
         <button
@@ -150,13 +149,11 @@ export function SiteHeader({ locale, labels }: SiteHeaderProps) {
                   </option>
                 ))}
               </select>
-              <Link
-                href={`/${locale}/contact#contact-form`}
+              <BookNowButton
+                label={labels.bookNow}
                 className="rounded-lg bg-accent px-4 py-3 text-xs font-bold uppercase tracking-wide text-black"
-                onClick={() => setMenuOpen(false)}
-              >
-                {labels.bookNow}
-              </Link>
+                onOpen={() => setMenuOpen(false)}
+              />
             </div>
           </div>
         </div>

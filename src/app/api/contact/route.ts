@@ -6,7 +6,10 @@ export const runtime = "nodejs";
 
 function getNetlifyBaseUrl() {
   const value =
-    process.env.URL ?? process.env.DEPLOY_PRIME_URL ?? process.env.DEPLOY_URL;
+    process.env.NETLIFY_FORMS_URL ??
+    process.env.URL ??
+    process.env.DEPLOY_PRIME_URL ??
+    process.env.DEPLOY_URL;
 
   if (!value) {
     return null;
@@ -39,38 +42,54 @@ export async function POST(request: Request) {
       return NextResponse.json({ ok: true });
     }
 
+    const netlifyBaseUrl = getNetlifyBaseUrl();
+    if (!netlifyBaseUrl) {
+      return NextResponse.json(
+        {
+          ok: false,
+          error: "email_not_configured",
+          details: "Missing NETLIFY_FORMS_URL (or URL/DEPLOY_PRIME_URL/DEPLOY_URL)",
+        },
+        { status: 500 },
+      );
+    }
+
     const encoded = new URLSearchParams({
       "form-name": "pitcrew-contact",
       name: parsed.data.name,
       phone: parsed.data.phone,
       email: parsed.data.email ?? "",
       vehicleType: parsed.data.vehicleType ?? "",
-      serviceInterest: parsed.data.serviceInterest,
-      message: parsed.data.message,
+      serviceInterest: parsed.data.serviceInterest ?? "",
+      message: parsed.data.message ?? "",
       locale: parsed.data.locale,
+      source: parsed.data.source,
+      planSlug: parsed.data.planSlug ?? "",
+      vehicleMakeModel: parsed.data.vehicleMakeModel ?? "",
+      vehicleYear: parsed.data.vehicleYear ?? "",
+      addressLine: parsed.data.addressLine ?? "",
+      cityArea: parsed.data.cityArea ?? "",
+      notes: parsed.data.notes ?? "",
       "bot-field": "",
     });
 
-    const netlifyBaseUrl = getNetlifyBaseUrl();
+    const netlifyResponse = await fetch(netlifyBaseUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      body: encoded.toString(),
+    });
 
-    if (netlifyBaseUrl) {
-      const netlifyResponse = await fetch(netlifyBaseUrl, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
+    if (!netlifyResponse.ok) {
+      return NextResponse.json(
+        {
+          ok: false,
+          error: "delivery_failed",
+          details: `Netlify response status: ${netlifyResponse.status}`,
         },
-        body: encoded.toString(),
-      });
-
-      if (!netlifyResponse.ok) {
-        return NextResponse.json(
-          {
-            ok: false,
-            error: "delivery_failed",
-          },
-          { status: 502 },
-        );
-      }
+        { status: 502 },
+      );
     }
 
     return NextResponse.json({ ok: true });
