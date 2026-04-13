@@ -77,7 +77,9 @@ export async function POST(request: Request) {
       "bot-field": "",
     });
 
-    const netlifyResponse = await fetch(getNetlifyFormsTargetUrl(netlifyBaseUrl), {
+    const formsEndpoint = `${netlifyBaseUrl}/__forms.html`;
+
+    const netlifyResponse = await fetch(formsEndpoint, {
       method: "POST",
       headers: {
         "Content-Type": "application/x-www-form-urlencoded",
@@ -90,7 +92,7 @@ export async function POST(request: Request) {
         {
           ok: false,
           error: "delivery_failed",
-          details: `Netlify response status: ${netlifyResponse.status}`,
+          details: `Netlify response status: ${netlifyResponse.status} (${formsEndpoint})`,
         },
         { status: 502 },
       );

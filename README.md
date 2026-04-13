@@ -42,11 +42,10 @@ If `NETLIFY_FORMS_URL` is missing, `/api/contact` returns `email_not_configured`
 ## Netlify setup
 
 1. Deploy the project to Netlify.
-2. In Netlify Forms page, click **Enable form detection**.
-3. Trigger a new deploy (clear cache optional).
-4. Submit one form from production (`/en/contact` or booking modal) to register entries.
-5. Go to Netlify Dashboard -> Site -> Forms -> `pitcrew-contact`.
-6. Add Email Notifications and set your recipient email.
+2. Keep `public/__forms.html` in the repo. Netlify Runtime v5 scans this static file to detect form names/fields.
+3. Submit one form from production (`/en/contact` or booking modal) to register fields.
+4. Go to Netlify Dashboard -> Site -> Forms -> `pitcrew-contact`.
+5. Add Email Notifications and set your recipient email.
 
 ## Cloudflare note
 
