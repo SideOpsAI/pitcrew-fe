@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 
+import { BookingProvider } from "@/components/booking/booking-provider";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { getDictionary, getLocaleFromParams } from "@/lib/content";
@@ -68,16 +69,22 @@ export default async function LocaleLayout({
       <div className="pointer-events-none absolute -right-24 bottom-10 h-72 w-72 rounded-full bg-accent-deep/20 blur-3xl" />
 
       <div className="relative z-10 flex min-h-screen flex-col">
-        <SiteHeader locale={safeLocale} labels={dict.nav} />
-        <main className="flex-1" lang={safeLocale}>
-          {children}
-        </main>
-        <SiteFooter
+        <BookingProvider
           locale={safeLocale}
-          nav={dict.nav}
-          footer={dict.footer}
-          siteName={dict.meta.siteName}
-        />
+          labels={dict.bookingModal}
+          services={dict.services}
+        >
+          <SiteHeader locale={safeLocale} labels={dict.nav} />
+          <main className="flex-1" lang={safeLocale}>
+            {children}
+          </main>
+          <SiteFooter
+            locale={safeLocale}
+            nav={dict.nav}
+            footer={dict.footer}
+            siteName={dict.meta.siteName}
+          />
+        </BookingProvider>
       </div>
     </div>
   );

@@ -27,6 +27,30 @@ npm run lint
 npm run build
 ```
 
+## Email delivery (Netlify Forms)
+
+Booking/contact submissions are handled by `src/app/api/contact/route.ts`.
+
+1. Create `.env.local` from `.env.example`.
+2. Set in `.env.local`:
+   - `NETLIFY_FORMS_URL=https://your-site-name.netlify.app`
+3. Restart `npm run dev`.
+
+If `NETLIFY_FORMS_URL` is missing, `/api/contact` returns `email_not_configured`.
+
+## Netlify setup
+
+1. Deploy the project to Netlify.
+2. Submit one form from production (`/en/contact` or booking modal) to register fields.
+3. Go to Netlify Dashboard -> Site -> Forms -> `pitcrew-contact`.
+4. Add Email Notifications and set your recipient email.
+
+## Cloudflare note
+
+Netlify Forms only sends notifications for forms processed by Netlify.
+
+If you deploy only on Cloudflare Pages, Netlify Forms notifications will not run unless you still post to a Netlify-hosted site via `NETLIFY_FORMS_URL`.
+
 ## Smoke test (testable quick check)
 
 1. Start the app in one terminal:

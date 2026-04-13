@@ -1,5 +1,14 @@
 const baseUrl = process.env.BASE_URL || "http://localhost:3000";
-const routes = ["/en", "/en/services", "/en/contact", "/robots.txt", "/sitemap.xml"];
+const routes = [
+  "/en",
+  "/en/services",
+  "/en/services/basic",
+  "/en/services/medium",
+  "/en/services/full",
+  "/en/contact",
+  "/robots.txt",
+  "/sitemap.xml",
+];
 
 async function run() {
   console.log(`Running smoke test against ${baseUrl}`);

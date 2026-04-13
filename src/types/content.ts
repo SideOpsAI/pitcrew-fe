@@ -1,4 +1,6 @@
-export type Locale = "en" | "es" | "pt-BR" | "it" | "zh-CN" | "de";
+﻿export type Locale = "en" | "es" | "pt-BR" | "it" | "zh-CN" | "de";
+
+export type PlanSlug = "basic" | "medium" | "full";
 
 export type FormStatus = "idle" | "submitting" | "success" | "error";
 
@@ -8,7 +10,7 @@ export interface FeatureItem {
 }
 
 export interface ServiceItem {
-  slug: string;
+  slug: PlanSlug;
   name: string;
   shortDescription: string;
   longDescription: string;
@@ -32,6 +34,52 @@ export interface QuickContactItem {
   label: string;
   value: string;
   href: string;
+}
+
+export interface BookingModalCopy {
+  title: string;
+  subtitle: string;
+  steps: {
+    choosePlan: string;
+    vehicleInfo: string;
+    locationContact: string;
+  };
+  actions: {
+    next: string;
+    back: string;
+    send: string;
+    close: string;
+  };
+  fields: {
+    plan: string;
+    vehicleType: string;
+    vehicleMakeModel: string;
+    vehicleYear: string;
+    addressLine: string;
+    cityArea: string;
+    name: string;
+    phone: string;
+    email: string;
+    notes: string;
+  };
+  placeholders: {
+    vehicleType: string;
+    vehicleMakeModel: string;
+    vehicleYear: string;
+    addressLine: string;
+    cityArea: string;
+    name: string;
+    phone: string;
+    email: string;
+    notes: string;
+  };
+  validation: {
+    required: string;
+    planRequired: string;
+    phoneRequired: string;
+  };
+  success: string;
+  error: string;
 }
 
 export interface TranslationSchema {
@@ -82,6 +130,7 @@ export interface TranslationSchema {
     duration: string;
     includes: string;
     backToServices: string;
+    viewDetails: string;
     getQuote: string;
   };
   services: ServiceItem[];
@@ -128,6 +177,7 @@ export interface TranslationSchema {
       minMessage: string;
     };
   };
+  bookingModal: BookingModalCopy;
   cta: {
     title: string;
     subtitle: string;
@@ -145,7 +195,16 @@ export interface ContactLeadInput {
   phone: string;
   email?: string;
   vehicleType?: string;
-  serviceInterest: string;
-  message: string;
+  serviceInterest?: string;
+  message?: string;
   locale: Locale;
+  source?: "contact-form" | "booking-modal";
+  planSlug?: PlanSlug;
+  vehicleMakeModel?: string;
+  vehicleYear?: string;
+  addressLine?: string;
+  cityArea?: string;
+  notes?: string;
+  botField?: string;
 }
+

@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import type { Metadata } from "next";
 
+import { BookNowButton } from "@/components/booking/book-now-button";
 import { ServiceCard } from "@/components/service-card";
 import { getDictionary, getLocaleFromParams } from "@/lib/content";
 
@@ -56,12 +57,10 @@ export default async function HomePage({ params }: HomePageProps) {
             </div>
 
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-              <Link
-                href={`/${safeLocale}/contact#contact-form`}
+              <BookNowButton
+                label={dict.hero.primaryCta}
                 className="inline-flex items-center justify-center rounded-xl bg-accent px-6 py-3 text-sm font-bold uppercase tracking-wider text-black transition hover:bg-white"
-              >
-                {dict.hero.primaryCta}
-              </Link>
+              />
               <Link
                 href={`/${safeLocale}/services`}
                 className="inline-flex items-center justify-center rounded-xl border border-white/25 px-6 py-3 text-sm font-bold uppercase tracking-wider text-white transition hover:border-accent hover:text-accent"
@@ -137,7 +136,7 @@ export default async function HomePage({ params }: HomePageProps) {
               locale={safeLocale}
               service={service}
               labels={dict.servicesPage}
-              detailLabel={dict.serviceDetail.getQuote}
+              detailLabel={dict.serviceDetail.viewDetails}
             />
           ))}
         </div>
@@ -198,12 +197,10 @@ export default async function HomePage({ params }: HomePageProps) {
           </h2>
           <p className="mt-3 max-w-2xl text-white/80">{dict.cta.subtitle}</p>
           <div className="mt-7 flex flex-col gap-3 sm:flex-row">
-            <Link
-              href={`/${safeLocale}/contact#contact-form`}
+            <BookNowButton
+              label={dict.cta.primary}
               className="inline-flex items-center justify-center rounded-xl bg-accent px-6 py-3 text-sm font-bold uppercase tracking-wider text-black transition hover:bg-white"
-            >
-              {dict.cta.primary}
-            </Link>
+            />
             <a
               href="https://wa.me/15552147788"
               target="_blank"
