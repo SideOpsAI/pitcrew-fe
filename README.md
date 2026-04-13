@@ -1,36 +1,53 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Pit Crew FE
 
-## Getting Started
+Frontend for Pit Crew Mobile Auto Detailing built with Next.js, React, Tailwind CSS and TypeScript.
 
-First, run the development server:
+## Development
+
+Stable dev mode (recommended on Windows):
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+This uses `next dev --webpack` for better stability.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Optional Turbopack mode:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm run dev:turbo
+```
 
-## Learn More
+Open [http://localhost:3000/en](http://localhost:3000/en).
 
-To learn more about Next.js, take a look at the following resources:
+## Build
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+npm run lint
+npm run build
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Smoke test (testable quick check)
 
-## Deploy on Vercel
+1. Start the app in one terminal:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```bash
+npm run dev
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+2. In another terminal run:
+
+```bash
+npm run test:smoke
+```
+
+This validates key routes:
+- `/en`
+- `/en/services`
+- `/en/contact`
+- `/robots.txt`
+- `/sitemap.xml`
+
+## Stability note
+
+If local dev feels slow/hangs on Windows, avoid OneDrive-synced folders for active development when possible.
