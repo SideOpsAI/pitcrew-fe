@@ -80,6 +80,13 @@ export default async function ContactPage({ params }: ContactPageProps) {
             <input type="text" name="serviceInterest" />
             <textarea name="message" />
             <input type="text" name="locale" />
+            <input type="text" name="source" />
+            <input type="text" name="planSlug" />
+            <input type="text" name="vehicleMakeModel" />
+            <input type="text" name="vehicleYear" />
+            <input type="text" name="addressLine" />
+            <input type="text" name="cityArea" />
+            <textarea name="notes" />
             <input type="text" name="bot-field" />
           </form>
 

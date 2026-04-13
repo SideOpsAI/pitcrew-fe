@@ -1,4 +1,4 @@
-import { defaultLocale, locales } from "@/lib/locales";
+﻿import { defaultLocale, locales } from "@/lib/locales";
 import type {
   FeatureItem,
   GalleryItem,
@@ -36,160 +36,7 @@ const baseFeatures: FeatureItem[] = [
   },
   {
     title: "Affordable Packages",
-    description:
-      "Transparent pricing with options for compact cars, SUVs, trucks, and motorcycles.",
-  },
-];
-
-const baseServices: ServiceItem[] = [
-  {
-    slug: "total-vehicle-reset",
-    name: "Total Vehicle Reset",
-    shortDescription: "Complete interior + exterior restoration package.",
-    longDescription:
-      "Our most complete package for vehicles that need a full reset. We deep-clean interior surfaces, decontaminate exterior paint, and finish with protection to restore a sharp, premium look.",
-    price: "$199+",
-    duration: "3.5 - 5 hours",
-    highlights: [
-      "Interior vacuum + fabric and trim cleaning",
-      "Exterior hand wash + decontamination",
-      "Gloss finish and protection layer",
-      "Wheels, tires, and door-jamb detail",
-    ],
-    featured: true,
-  },
-  {
-    slug: "interior-reset",
-    name: "Interior Reset",
-    shortDescription: "Deep interior clean for seats, carpets, and trim.",
-    longDescription:
-      "Perfect for families and daily drivers that need a cleaner, fresher cabin. We focus on high-touch points, stains, and hard-to-reach areas to leave your interior revitalized.",
-    price: "$119+",
-    duration: "2 - 3 hours",
-    highlights: [
-      "Steam-safe detailing on key surfaces",
-      "Carpet and mat extraction",
-      "Dashboard, console, and vents cleaned",
-      "UV-friendly trim dressing",
-    ],
-    featured: true,
-  },
-  {
-    slug: "exterior-reset",
-    name: "Exterior Reset",
-    shortDescription: "Paint-safe wash, decontamination, and gloss finish.",
-    longDescription:
-      "Bring back curb appeal with a full exterior detail. This package removes bonded contamination and restores gloss while preserving paint with safe, controlled techniques.",
-    price: "$109+",
-    duration: "1.5 - 2.5 hours",
-    highlights: [
-      "Foam pre-wash and hand wash",
-      "Clay-bar decontamination",
-      "Trim and tire dressing",
-      "Spray sealant protection",
-    ],
-    featured: true,
-  },
-  {
-    slug: "motorcycle-detail",
-    name: "Motorcycle Detail",
-    shortDescription: "Targeted care for bikes, fairings, and chrome.",
-    longDescription:
-      "Specialized care for motorcycles with attention to delicate finishes and tight spaces. We clean and protect painted, plastic, and metallic surfaces without over-saturating components.",
-    price: "$89+",
-    duration: "1.5 - 2 hours",
-    highlights: [
-      "Safe wash for fairings and trim",
-      "Detailing around engine area",
-      "Chrome and wheel cleanup",
-      "Finish protection",
-    ],
-    featured: true,
-  },
-  {
-    slug: "gloss-enhancement",
-    name: "Gloss Enhancement",
-    shortDescription: "Single-step polish to elevate clarity and shine.",
-    longDescription:
-      "A one-step machine polish designed to improve gloss and reduce light swirl marks. Great for vehicles that look dull but do not require full paint correction.",
-    price: "$169+",
-    duration: "2.5 - 4 hours",
-    highlights: [
-      "Paint prep and panel wipe",
-      "Single-step machine polish",
-      "Noticeable gloss boost",
-      "Sealant protection",
-    ],
-  },
-  {
-    slug: "headlight-restoration",
-    name: "Headlight Restoration",
-    shortDescription: "Improve clarity and nighttime visibility.",
-    longDescription:
-      "Cloudy headlights reduce visibility and make a vehicle look older. We polish and refine the lens, then apply a protection layer to delay oxidation return.",
-    price: "$69+",
-    duration: "45 - 75 min",
-    highlights: [
-      "Lens oxidation removal",
-      "Progressive polish finish",
-      "UV-protection coating",
-    ],
-  },
-  {
-    slug: "clay-bar-treatment",
-    name: "Clay Bar Treatment",
-    shortDescription: "Removes bonded contamination from paint surfaces.",
-    longDescription:
-      "If paint feels rough after a wash, this treatment removes embedded contamination and leaves the surface smooth for better shine and protection performance.",
-    price: "$59+",
-    duration: "45 - 90 min",
-    highlights: [
-      "Surface decontamination",
-      "Smoother paint finish",
-      "Ideal prep before polishing",
-    ],
-  },
-  {
-    slug: "scratch-removal",
-    name: "Light Scratch Reduction",
-    shortDescription: "Targeted correction for minor clear-coat defects.",
-    longDescription:
-      "Focused treatment for isolated light scratches and scuffs. We assess paint depth and correct only where safe, aiming for major visual improvement.",
-    price: "$99+",
-    duration: "60 - 120 min",
-    highlights: [
-      "Spot polishing approach",
-      "Paint-safe correction workflow",
-      "Before/after walkthrough",
-    ],
-  },
-  {
-    slug: "engine-bay-cleaning",
-    name: "Engine Bay Refresh",
-    shortDescription: "Safe cleaning and dressing for engine compartments.",
-    longDescription:
-      "A careful, low-moisture process to remove dirt and grime from visible engine bay areas while protecting sensitive components.",
-    price: "$49+",
-    duration: "30 - 50 min",
-    highlights: [
-      "Controlled degreasing",
-      "Plastic trim dressing",
-      "Neat showroom-style finish",
-    ],
-  },
-  {
-    slug: "trim-restoration",
-    name: "Trim Restoration",
-    shortDescription: "Revives faded exterior plastic and rubber trim.",
-    longDescription:
-      "Bring faded trim back to life with cleaning and restorative treatment that darkens and evens out worn surfaces.",
-    price: "$59+",
-    duration: "45 - 75 min",
-    highlights: [
-      "Deep trim cleaning",
-      "Restorative darkening treatment",
-      "Weather-resistant finish",
-    ],
+    description: "Simple and transparent packages: Basic, Medium, and Full.",
   },
 ];
 
@@ -220,7 +67,7 @@ const baseGallery: GalleryItem[] = [
   { src: "/gallery/detail-ceramic.svg", alt: "High-gloss protection finish" },
 ];
 
-const contactItemsEn: QuickContactItem[] = [
+const contactItems: QuickContactItem[] = [
   { label: "Phone", value: "+1 (555) 214-7788", href: "tel:+15552147788" },
   {
     label: "WhatsApp",
@@ -234,25 +81,290 @@ const contactItemsEn: QuickContactItem[] = [
   },
 ];
 
-function copyServicesWithOverrides(
-  overrides: Record<string, Partial<Omit<ServiceItem, "slug">>>,
-): ServiceItem[] {
-  return baseServices.map((service) => {
-    const patch = overrides[service.slug];
-    return {
-      ...service,
-      ...patch,
-      highlights: patch?.highlights ?? [...service.highlights],
-    };
-  });
-}
-
-function copyGalleryWithAlt(altList: string[]): GalleryItem[] {
-  return baseGallery.map((item, index) => ({
-    ...item,
-    alt: altList[index] ?? item.alt,
-  }));
-}
+const servicesByLocale: Record<Locale, ServiceItem[]> = {
+  en: [
+    {
+      slug: "basic",
+      name: "Basic Plan",
+      shortDescription: "Maintenance wash with quick interior refresh.",
+      longDescription:
+        "Great for weekly or bi-weekly maintenance. Exterior hand wash, tire dressing, and a fast cabin reset so your vehicle stays clean between deeper sessions.",
+      price: "$89+",
+      duration: "60 - 90 min",
+      highlights: [
+        "Foam wash and hand dry",
+        "Wheel face and tire dressing",
+        "Quick vacuum and wipe-down",
+      ],
+      featured: true,
+    },
+    {
+      slug: "medium",
+      name: "Medium Plan",
+      shortDescription: "Deep clean for interior + enhanced exterior finish.",
+      longDescription:
+        "Balanced package for drivers who want visible transformation. Includes deeper interior cleaning, decontamination touchpoints, and longer-lasting shine.",
+      price: "$149+",
+      duration: "2 - 3.5 hours",
+      highlights: [
+        "Interior deep vacuum and plastics detail",
+        "Carpet and mat treatment",
+        "Exterior decontamination + gloss protection",
+      ],
+      featured: true,
+    },
+    {
+      slug: "full",
+      name: "Full Plan",
+      shortDescription: "Complete premium detail with maximum finish quality.",
+      longDescription:
+        "Our most complete package for vehicles needing a full reset. Deep interior detailing, exterior decontamination, gloss enhancement, and protection from top to bottom.",
+      price: "$229+",
+      duration: "3.5 - 5.5 hours",
+      highlights: [
+        "Full interior detailing workflow",
+        "Exterior decontamination and polish enhancement",
+        "Longer-lasting protection finish",
+      ],
+      featured: true,
+    },
+  ],
+  es: [
+    {
+      slug: "basic",
+      name: "Plan Básico",
+      shortDescription: "Lavado de mantenimiento y refresh interior rápido.",
+      longDescription:
+        "Ideal para mantenimiento semanal o quincenal. Lavado exterior a mano, brillo en llantas y limpieza ligera de cabina.",
+      price: "$89+",
+      duration: "60 - 90 min",
+      highlights: [
+        "Lavado con espuma y secado a mano",
+        "Limpieza de rines y llantas",
+        "Aspirado y limpieza rápida interior",
+      ],
+      featured: true,
+    },
+    {
+      slug: "medium",
+      name: "Plan Medio",
+      shortDescription: "Limpieza profunda interior + mejor acabado exterior.",
+      longDescription:
+        "Paquete balanceado para lograr cambio visible. Incluye limpieza interior profunda y mejor protección exterior.",
+      price: "$149+",
+      duration: "2 - 3.5 horas",
+      highlights: [
+        "Aspirado profundo y detalle de plásticos",
+        "Tratamiento de tapetes y alfombras",
+        "Descontaminación y protección de brillo",
+      ],
+      featured: true,
+    },
+    {
+      slug: "full",
+      name: "Plan Full",
+      shortDescription: "Detailing premium completo con máximo nivel de acabado.",
+      longDescription:
+        "Nuestro paquete más completo para reset total del vehículo. Interior y exterior con procesos detallados y protección duradera.",
+      price: "$229+",
+      duration: "3.5 - 5.5 horas",
+      highlights: [
+        "Flujo completo de detalle interior",
+        "Descontaminación exterior y mejora de brillo",
+        "Acabado premium con mayor duración",
+      ],
+      featured: true,
+    },
+  ],
+  "pt-BR": [
+    {
+      slug: "basic",
+      name: "Plano Básico",
+      shortDescription: "Lavagem de manutenção com limpeza interna rápida.",
+      longDescription:
+        "Ideal para manutenção semanal. Lavagem externa, acabamento dos pneus e organização rápida da cabine.",
+      price: "$89+",
+      duration: "60 - 90 min",
+      highlights: [
+        "Lavagem com espuma e secagem manual",
+        "Limpeza de rodas e pneus",
+        "Aspiração rápida interna",
+      ],
+      featured: true,
+    },
+    {
+      slug: "medium",
+      name: "Plano Médio",
+      shortDescription: "Limpeza interna profunda e acabamento externo superior.",
+      longDescription:
+        "Pacote equilibrado para quem quer transformação visível com mais cuidado em interior e proteção externa.",
+      price: "$149+",
+      duration: "2 - 3.5 horas",
+      highlights: [
+        "Aspiração profunda e detalhes internos",
+        "Tratamento de tapetes",
+        "Descontaminação externa e proteção",
+      ],
+      featured: true,
+    },
+    {
+      slug: "full",
+      name: "Plano Full",
+      shortDescription: "Detalhamento premium completo com acabamento máximo.",
+      longDescription:
+        "Nosso pacote mais completo para reset total. Processo completo de interior e exterior com proteção duradoura.",
+      price: "$229+",
+      duration: "3.5 - 5.5 horas",
+      highlights: [
+        "Detalhamento interno completo",
+        "Melhoria de brilho externo",
+        "Proteção premium de longa duração",
+      ],
+      featured: true,
+    },
+  ],
+  it: [
+    {
+      slug: "basic",
+      name: "Piano Basic",
+      shortDescription: "Lavaggio di mantenimento con refresh interno rapido.",
+      longDescription:
+        "Perfetto per mantenere l'auto pulita ogni settimana con lavaggio esterno e riordino rapido dell'abitacolo.",
+      price: "$89+",
+      duration: "60 - 90 min",
+      highlights: [
+        "Lavaggio esterno a mano",
+        "Pulizia ruote e gomme",
+        "Aspirazione interna rapida",
+      ],
+      featured: true,
+    },
+    {
+      slug: "medium",
+      name: "Piano Medium",
+      shortDescription: "Pulizia interna profonda + finitura esterna migliorata.",
+      longDescription:
+        "Pacchetto bilanciato per ottenere un miglioramento evidente con cura più approfondita di interni ed esterni.",
+      price: "$149+",
+      duration: "2 - 3.5 ore",
+      highlights: [
+        "Pulizia interna dettagliata",
+        "Trattamento tappetini",
+        "Decontaminazione esterna e protezione",
+      ],
+      featured: true,
+    },
+    {
+      slug: "full",
+      name: "Piano Full",
+      shortDescription: "Detailing premium completo con finitura massima.",
+      longDescription:
+        "Il pacchetto più completo per un reset totale del veicolo con workflow completo interno/esterno.",
+      price: "$229+",
+      duration: "3.5 - 5.5 ore",
+      highlights: [
+        "Workflow completo interno",
+        "Miglioria brillantezza esterna",
+        "Protezione premium duratura",
+      ],
+      featured: true,
+    },
+  ],
+  "zh-CN": [
+    {
+      slug: "basic",
+      name: "????",
+      shortDescription: "??????,????????",
+      longDescription:
+        "?????????????????????????????",
+      price: "$89+",
+      duration: "60 - 90 ??",
+      highlights: [
+        "?????????",
+        "?????????",
+        "?????????",
+      ],
+      featured: true,
+    },
+    {
+      slug: "medium",
+      name: "????",
+      shortDescription: "?????? + ???????",
+      longDescription:
+        "?????,?????????????,????????????",
+      price: "$149+",
+      duration: "2 - 3.5 ??",
+      highlights: [
+        "???????????",
+        "???????",
+        "?????????",
+      ],
+      featured: true,
+    },
+    {
+      slug: "full",
+      name: "????",
+      shortDescription: "??????,?????????",
+      longDescription:
+        "??????????,????????????????????",
+      price: "$229+",
+      duration: "3.5 - 5.5 ??",
+      highlights: [
+        "????????",
+        "?????????",
+        "??????",
+      ],
+      featured: true,
+    },
+  ],
+  de: [
+    {
+      slug: "basic",
+      name: "Basic Paket",
+      shortDescription: "Pflegewäsche mit schnellem Innenraum-Refresh.",
+      longDescription:
+        "Ideal für regelmäßige Pflege. Außenwäsche, Reifenfinish und schnelle Innenraumreinigung.",
+      price: "$89+",
+      duration: "60 - 90 Min",
+      highlights: [
+        "Handwäsche mit Schaum",
+        "Felgen- und Reifenpflege",
+        "Schnelles Saugen innen",
+      ],
+      featured: true,
+    },
+    {
+      slug: "medium",
+      name: "Medium Paket",
+      shortDescription: "Tiefenreinigung innen + verbessertes Außenfinish.",
+      longDescription:
+        "Ausgewogenes Paket für sichtbare Verbesserung mit stärkerem Fokus auf Innenraum und Lackbild.",
+      price: "$149+",
+      duration: "2 - 3.5 Std",
+      highlights: [
+        "Innenraum-Tiefenreinigung",
+        "Matten- und Teppichbehandlung",
+        "Außen-Decontamination und Schutz",
+      ],
+      featured: true,
+    },
+    {
+      slug: "full",
+      name: "Full Paket",
+      shortDescription: "Komplettes Premium-Detailing mit maximalem Finish.",
+      longDescription:
+        "Unser umfassendstes Paket für den kompletten Fahrzeug-Reset mit Premium-Schutz.",
+      price: "$229+",
+      duration: "3.5 - 5.5 Std",
+      highlights: [
+        "Kompletter Innenraum-Workflow",
+        "Glanzverbesserung außen",
+        "Langanhaltendes Schutzfinish",
+      ],
+      featured: true,
+    },
+  ],
+};
 
 const en: TranslationSchema = {
   localeName: "English",
@@ -272,8 +384,8 @@ const en: TranslationSchema = {
     eyebrow: "Mobile Auto Detailing",
     title: "Premium detailing. Delivered to your driveway.",
     subtitle:
-      "Pit Crew provides high-impact interior and exterior detailing for cars, SUVs, trucks, and motorcycles.",
-    primaryCta: "Get a Free Quote",
+      "Pit Crew provides high-impact interior and exterior detailing for cars, SUVs, and trucks.",
+    primaryCta: "Book Now",
     secondaryCta: "Explore Services",
     badges: ["Fully Mobile", "Paint-Safe", "Transparent Pricing"],
   },
@@ -288,29 +400,27 @@ const en: TranslationSchema = {
     items: baseFeatures,
   },
   servicesHome: {
-    title: "Featured Services",
-    subtitle:
-      "Start with our most requested packages or browse every detail option.",
-    viewAll: "View All Services",
+    title: "Featured Plans",
+    subtitle: "Choose Basic, Medium, or Full depending on your vehicle condition.",
+    viewAll: "View All Plans",
   },
   servicesPage: {
-    title: "Detailing Packages",
-    subtitle:
-      "Choose the right package for your vehicle and finish level. Every service can be customized.",
+    title: "Detailing Plans",
+    subtitle: "Three clear plans built for different care levels.",
     includesLabel: "Includes",
-    ctaTitle: "Need help choosing a package?",
-    ctaCopy:
-      "Tell us your vehicle type and condition. We will recommend the right service.",
-    ctaButton: "Contact Pit Crew",
+    ctaTitle: "Need help choosing a plan?",
+    ctaCopy: "Open booking and we will recommend the right plan for your vehicle.",
+    ctaButton: "Book Now",
   },
   serviceDetail: {
     startingAt: "Starting at",
     duration: "Estimated duration",
     includes: "What's included",
-    backToServices: "Back to services",
-    getQuote: "Request this service",
+    backToServices: "Back to plans",
+    viewDetails: "View plan details",
+    getQuote: "Book this plan",
   },
-  services: baseServices,
+  services: servicesByLocale.en,
   testimonials: {
     title: "Customer Reviews",
     subtitle: "Real feedback from recurring clients.",
@@ -326,7 +436,7 @@ const en: TranslationSchema = {
     subtitle:
       "Send your request and we will reply with availability, pricing, and next steps.",
     quickContactTitle: "Quick contact",
-    quickContactItems: contactItemsEn,
+    quickContactItems: contactItems,
     formTitle: "Tell us about your vehicle",
     formDescription:
       "We review each request manually to give accurate pricing and scheduling options.",
@@ -345,7 +455,7 @@ const en: TranslationSchema = {
       vehicleType: "SUV - BMW X5",
       message: "Tell us current condition, location, and preferred date.",
     },
-    serviceFallbackOption: "Select a service",
+    serviceFallbackOption: "Select a plan",
     submit: "Send Request",
     submitting: "Sending...",
     success: "Your request was sent. Pit Crew will contact you soon.",
@@ -357,11 +467,55 @@ const en: TranslationSchema = {
       minMessage: "Please add a bit more detail to your message.",
     },
   },
+  bookingModal: {
+    title: "Book Your Detailing",
+    subtitle: "Complete these steps and we will confirm pricing and schedule by email.",
+    steps: {
+      choosePlan: "Choose plan",
+      vehicleInfo: "Vehicle information",
+      locationContact: "Location and contact",
+    },
+    actions: {
+      next: "Next",
+      back: "Back",
+      send: "Send Booking",
+      close: "Close",
+    },
+    fields: {
+      plan: "Plan",
+      vehicleType: "Vehicle type",
+      vehicleMakeModel: "Vehicle make/model",
+      vehicleYear: "Vehicle year",
+      addressLine: "Address",
+      cityArea: "City / Area",
+      name: "Full name",
+      phone: "Phone",
+      email: "Email (optional)",
+      notes: "Notes (optional)",
+    },
+    placeholders: {
+      vehicleType: "SUV, Sedan, Truck...",
+      vehicleMakeModel: "Toyota RAV4, BMW 3 Series...",
+      vehicleYear: "2022",
+      addressLine: "123 Main St",
+      cityArea: "Boston, MA",
+      name: "John Carter",
+      phone: "+1 (555) 000-0000",
+      email: "you@example.com",
+      notes: "Parking access, gate code, preferred time...",
+    },
+    validation: {
+      required: "Please complete the required fields.",
+      planRequired: "Please choose a plan.",
+      phoneRequired: "Please enter a valid phone number.",
+    },
+    success: "Booking sent successfully. We'll contact you shortly.",
+    error: "We couldn't send your booking. Please try again.",
+  },
   cta: {
     title: "Ready For A Better Finish?",
-    subtitle:
-      "Book your detailing session and get clear pricing before the appointment.",
-    primary: "Book With Form",
+    subtitle: "Book your detailing session and get clear pricing before the appointment.",
+    primary: "Book Now",
     secondary: "Open WhatsApp",
   },
   footer: {
@@ -370,708 +524,285 @@ const en: TranslationSchema = {
   },
 };
 
-const es: TranslationSchema = {
-  ...en,
-  localeName: "Español",
-  meta: {
-    siteName: "Pit Crew Mobile Auto Detailing",
-    tagline: "Acabado de pista, comodidad a domicilio.",
-    description:
-      "Detailing móvil premium con precios claros, paquetes de servicio y reserva rápida.",
-  },
-  nav: {
-    home: "Inicio",
-    services: "Servicios",
-    contact: "Contacto",
-    bookNow: "Reservar",
-  },
-  hero: {
-    eyebrow: "Detailing Móvil",
-    title: "Detailing premium directo en tu ubicación.",
-    subtitle:
-      "Pit Crew ofrece limpieza interior y exterior de alto nivel para autos, SUVs, pickups y motos.",
-    primaryCta: "Solicitar Cotización",
-    secondaryCta: "Ver Servicios",
-    badges: ["100% Móvil", "Seguro para pintura", "Precios claros"],
-  },
-  about: {
-    title: "Hecho Para Quienes Cuidan Cada Detalle",
-    body: "Desde el primer enjuague hasta la revisión final, cada paquete sigue una checklist para mantener resultados consistentes.",
-  },
-  features: {
-    title: "Por Qué Eligen Pit Crew",
-    subtitle:
-      "Una experiencia móvil enfocada en calidad, comunicación y conveniencia.",
-    items: [
-      {
-        title: "Vamos Hasta Tu Ubicación",
-        description:
-          "Servicio 100% móvil en casa, oficina o parqueadero dentro de cobertura.",
-      },
-      {
-        title: "Resultados Excepcionales",
-        description:
-          "Métodos seguros para pintura y cuidado interior con control de calidad final.",
-      },
-      {
-        title: "Tu Vehículo En Buenas Manos",
-        description:
-          "Proceso ordenado desde la inspección inicial hasta la entrega.",
-      },
-      {
-        title: "Experiencia Comprobada",
-        description:
-          "Flujo de trabajo optimizado en cientos de servicios de detailing.",
-      },
-      {
-        title: "Productos De Nivel Profesional",
-        description:
-          "Compuestos premium, limpiadores pH balanceado y microfibras de calidad.",
-      },
-      {
-        title: "Precios Accesibles",
-        description:
-          "Tarifas transparentes con opciones para diferentes tipos de vehículo.",
-      },
-    ],
-  },
-  servicesHome: {
-    title: "Servicios Destacados",
-    subtitle:
-      "Empieza con los paquetes más solicitados o revisa todo el catálogo.",
-    viewAll: "Ver Todos Los Servicios",
-  },
-  servicesPage: {
-    title: "Paquetes de Detailing",
-    subtitle:
-      "Elige el paquete ideal según el estado y nivel de acabado de tu vehículo.",
-    includesLabel: "Incluye",
-    ctaTitle: "¿No sabes cuál paquete elegir?",
-    ctaCopy:
-      "Cuéntanos tipo de vehículo y estado actual. Te recomendamos el mejor servicio.",
-    ctaButton: "Contactar Pit Crew",
-  },
-  serviceDetail: {
-    startingAt: "Desde",
-    duration: "Duración estimada",
-    includes: "Incluye",
-    backToServices: "Volver a servicios",
-    getQuote: "Solicitar este servicio",
-  },
-  services: copyServicesWithOverrides({
-    "total-vehicle-reset": {
-      name: "Reset Total del Vehículo",
-      shortDescription: "Restauración completa interior + exterior.",
-    },
-    "interior-reset": {
-      name: "Reset Interior",
-      shortDescription: "Limpieza profunda de cabina, tapicería y paneles.",
-    },
-    "exterior-reset": {
-      name: "Reset Exterior",
-      shortDescription: "Lavado seguro, descontaminación y brillo.",
-    },
-    "motorcycle-detail": {
-      name: "Detailing de Motocicleta",
-      shortDescription: "Cuidado especializado para moto, plásticos y cromados.",
-    },
-    "gloss-enhancement": {
-      name: "Mejora de Brillo",
-      shortDescription: "Pulido de una etapa para mejorar reflejo y claridad.",
-    },
-    "headlight-restoration": {
-      name: "Restauración de Farolas",
-      shortDescription: "Mejora de transparencia y visibilidad nocturna.",
-    },
-    "clay-bar-treatment": {
-      name: "Tratamiento Clay Bar",
-      shortDescription: "Remueve contaminación adherida de la pintura.",
-    },
-    "scratch-removal": {
-      name: "Reducción de Rayones Leves",
-      shortDescription: "Corrección localizada de marcas superficiales.",
-    },
-    "engine-bay-cleaning": {
-      name: "Refresh de Motor",
-      shortDescription: "Limpieza segura del compartimiento del motor.",
-    },
-    "trim-restoration": {
-      name: "Restauración de Plásticos",
-      shortDescription: "Recupera plásticos exteriores opacos o decolorados.",
-    },
-  }),
-  testimonials: {
-    title: "Opiniones de Clientes",
-    subtitle: "Comentarios reales de clientes recurrentes.",
-    items: [
-      {
-        name: "Laura P.",
-        quote:
-          "Llegaron puntuales y dejaron mi camioneta impecable. Servicio muy profesional.",
-      },
-      {
-        name: "Camilo G.",
-        quote:
-          "Excelente detailing móvil. El resultado se mantuvo por varias semanas.",
-      },
-      {
-        name: "Andrés M.",
-        quote:
-          "El interior quedó como nuevo después de un viaje largo con niños.",
-      },
-    ],
-  },
-  gallery: {
-    title: "Resultados Recientes",
-    subtitle: "Ejemplos de acabado y consistencia de trabajo.",
-    items: copyGalleryWithAlt([
-      "Resultado de detailing exterior",
-      "Resultado de detailing interior",
-      "Motor detallado",
-      "Farolas restauradas",
-      "Detailing de motocicleta",
-      "Acabado con alto brillo",
-    ]),
-  },
-  contact: {
-    title: "Contacto y Reserva",
-    subtitle:
-      "Envíanos tu solicitud y te responderemos con disponibilidad y precio.",
-    quickContactTitle: "Contacto rápido",
-    quickContactItems: contactItemsEn,
-    formTitle: "Cuéntanos sobre tu vehículo",
-    formDescription:
-      "Revisamos cada solicitud para ofrecer una cotización precisa.",
-    fields: {
-      name: "Nombre completo",
-      phone: "Teléfono o WhatsApp",
-      email: "Correo (opcional)",
-      vehicleType: "Tipo de vehículo",
-      serviceInterest: "Servicio de interés",
-      message: "Mensaje",
-    },
-    placeholders: {
-      name: "Juan Pérez",
-      phone: "+57 300 000 0000",
-      email: "tu@email.com",
-      vehicleType: "SUV - Mazda CX-5",
-      message: "Comparte estado actual, ubicación y fecha ideal.",
-    },
-    serviceFallbackOption: "Selecciona un servicio",
-    submit: "Enviar Solicitud",
-    submitting: "Enviando...",
-    success: "Solicitud enviada. Pit Crew te contactará pronto.",
-    error:
-      "No pudimos procesar tu solicitud ahora. Intenta de nuevo o escríbenos por WhatsApp.",
-    validation: {
-      required: "Completa los campos requeridos.",
-      invalidEmail: "Ingresa un correo válido.",
-      minMessage: "Agrega un poco más de detalle en tu mensaje.",
-    },
-  },
-  cta: {
-    title: "¿Listo Para Mejorar El Acabado?",
-    subtitle:
-      "Reserva tu sesión y recibe precio claro antes de la cita.",
-    primary: "Reservar con Formulario",
-    secondary: "Abrir WhatsApp",
-  },
-  footer: {
-    rights: "Todos los derechos reservados.",
-    serviceArea: "Cobertura móvil bajo cita previa.",
-  },
-};
-
-const ptBr: TranslationSchema = {
-  ...en,
-  localeName: "Português (Brasil)",
-  nav: {
-    home: "Início",
-    services: "Serviços",
-    contact: "Contato",
-    bookNow: "Agendar",
-  },
-  hero: {
-    ...en.hero,
-    eyebrow: "Estética Automotiva Móvel",
-    title: "Detalhamento premium no seu endereço.",
-    subtitle:
-      "A Pit Crew atende carros, SUVs, picapes e motos com padrão profissional.",
-    primaryCta: "Solicitar Orçamento",
-    secondaryCta: "Ver Serviços",
-    badges: ["100% Móvel", "Seguro para pintura", "Preço transparente"],
-  },
-  about: {
-    title: "Feito Para Quem Repara nos Detalhes",
-    body: "Cada pacote segue checklist técnico do início ao acabamento final.",
-  },
-  features: {
-    ...en.features,
-    title: "Por Que Escolher a Pit Crew",
-    subtitle: "Conveniência móvel com qualidade consistente.",
-  },
-  servicesHome: {
-    title: "Serviços em Destaque",
-    subtitle: "Pacotes mais pedidos para começar rápido.",
-    viewAll: "Ver Todos os Serviços",
-  },
-  servicesPage: {
-    ...en.servicesPage,
-    title: "Pacotes de Detalhamento",
-    subtitle:
-      "Escolha o pacote ideal para o nível de cuidado e acabamento que você precisa.",
-    includesLabel: "Inclui",
-    ctaTitle: "Precisa de ajuda para escolher?",
-    ctaCopy:
-      "Informe o tipo e a condição do veículo para recomendarmos o melhor pacote.",
-    ctaButton: "Falar com a Pit Crew",
-  },
-  serviceDetail: {
-    startingAt: "A partir de",
-    duration: "Duração estimada",
-    includes: "Inclui",
-    backToServices: "Voltar para serviços",
-    getQuote: "Solicitar este serviço",
-  },
-  services: copyServicesWithOverrides({
-    "total-vehicle-reset": { name: "Reset Total do Veículo" },
-    "interior-reset": { name: "Reset Interno" },
-    "exterior-reset": { name: "Reset Externo" },
-    "motorcycle-detail": { name: "Detalhamento de Moto" },
-    "gloss-enhancement": { name: "Aumento de Brilho" },
-    "headlight-restoration": { name: "Restauração de Faróis" },
-    "clay-bar-treatment": { name: "Tratamento com Clay Bar" },
-    "scratch-removal": { name: "Redução de Riscos Leves" },
-    "engine-bay-cleaning": { name: "Limpeza do Cofre do Motor" },
-    "trim-restoration": { name: "Restauração de Plásticos Externos" },
-  }),
-  testimonials: {
-    ...en.testimonials,
-    title: "Avaliações de Clientes",
-    subtitle: "Experiências reais de clientes recorrentes.",
-  },
-  gallery: {
-    ...en.gallery,
-    title: "Resultados Recentes",
-    subtitle: "Acabamento consistente em diferentes tipos de veículo.",
-  },
-  contact: {
-    ...en.contact,
-    title: "Contato e Agendamento",
-    subtitle:
-      "Envie sua solicitação para receber disponibilidade e orçamento.",
-    quickContactTitle: "Contato rápido",
-    formTitle: "Conte sobre seu veículo",
-    formDescription:
-      "Cada solicitação é analisada para enviar um orçamento preciso.",
-    fields: {
-      name: "Nome completo",
-      phone: "Telefone ou WhatsApp",
-      email: "E-mail (opcional)",
-      vehicleType: "Tipo de veículo",
-      serviceInterest: "Serviço de interesse",
-      message: "Mensagem",
-    },
-    placeholders: {
-      name: "João Silva",
-      phone: "+55 (11) 90000-0000",
-      email: "voce@email.com",
-      vehicleType: "SUV - Jeep Compass",
-      message: "Informe estado atual, local e data desejada.",
-    },
-    serviceFallbackOption: "Selecione um serviço",
-    submit: "Enviar Solicitação",
-    submitting: "Enviando...",
-    success: "Solicitação enviada. A Pit Crew falará com você em breve.",
-    error: "Não foi possível enviar agora. Tente novamente em instantes.",
-    validation: {
-      required: "Preencha os campos obrigatórios.",
-      invalidEmail: "Digite um e-mail válido.",
-      minMessage: "Escreva um pouco mais de detalhes.",
-    },
-  },
-  cta: {
-    title: "Pronto Para Um Acabamento Superior?",
-    subtitle: "Agende seu detalhamento com preço claro desde o início.",
-    primary: "Agendar com Formulário",
-    secondary: "Abrir WhatsApp",
-  },
-  footer: {
-    rights: "Todos os direitos reservados.",
-    serviceArea: "Atendimento móvel com agendamento prévio.",
-  },
-};
-
-const it: TranslationSchema = {
-  ...en,
-  localeName: "Italiano",
-  nav: {
-    home: "Home",
-    services: "Servizi",
-    contact: "Contatto",
-    bookNow: "Prenota",
-  },
-  hero: {
-    ...en.hero,
-    eyebrow: "Car Detailing Mobile",
-    title: "Detailing premium direttamente da te.",
-    subtitle:
-      "Pit Crew offre servizi professionali per auto, SUV, pick-up e moto.",
-    primaryCta: "Richiedi Preventivo",
-    secondaryCta: "Scopri i Servizi",
-  },
-  about: {
-    title: "Pensato Per Chi Nota La Differenza",
-    body: "Ogni intervento segue un processo preciso, dal controllo iniziale alla consegna.",
-  },
-  features: {
-    ...en.features,
-    title: "Perché Scegliere Pit Crew",
-    subtitle: "Qualità costante, comunicazione chiara e comodità totale.",
-  },
-  servicesHome: {
-    title: "Servizi in Evidenza",
-    subtitle: "I pacchetti più richiesti per risultati immediati.",
-    viewAll: "Vedi Tutti i Servizi",
-  },
-  servicesPage: {
-    ...en.servicesPage,
-    title: "Pacchetti Detailing",
-    subtitle:
-      "Scegli il pacchetto in base alle condizioni del veicolo e al livello di finitura desiderato.",
-    includesLabel: "Include",
-    ctaTitle: "Hai dubbi sul pacchetto?",
-    ctaCopy:
-      "Scrivici tipo di veicolo e condizioni attuali: ti consigliamo l'opzione migliore.",
-    ctaButton: "Contatta Pit Crew",
-  },
-  serviceDetail: {
-    startingAt: "Da",
-    duration: "Durata stimata",
-    includes: "Include",
-    backToServices: "Torna ai servizi",
-    getQuote: "Richiedi questo servizio",
-  },
-  services: copyServicesWithOverrides({
-    "total-vehicle-reset": { name: "Reset Totale Veicolo" },
-    "interior-reset": { name: "Reset Interni" },
-    "exterior-reset": { name: "Reset Esterni" },
-    "motorcycle-detail": { name: "Detailing Moto" },
-    "gloss-enhancement": { name: "Aumento Brillantezza" },
-    "headlight-restoration": { name: "Ripristino Fari" },
-    "clay-bar-treatment": { name: "Trattamento Clay Bar" },
-    "scratch-removal": { name: "Riduzione Graffi Leggeri" },
-    "engine-bay-cleaning": { name: "Pulizia Vano Motore" },
-    "trim-restoration": { name: "Ripristino Plastiche Esterne" },
-  }),
-  testimonials: {
-    ...en.testimonials,
-    title: "Recensioni Clienti",
-    subtitle: "Feedback reali da clienti abituali.",
-  },
-  gallery: {
-    ...en.gallery,
-    title: "Risultati Recenti",
-    subtitle: "Qualità costante su più tipologie di veicoli.",
-  },
-  contact: {
-    ...en.contact,
-    title: "Contatto e Prenotazione",
-    subtitle:
-      "Invia la richiesta e ricevi disponibilità e prezzo in breve tempo.",
-    quickContactTitle: "Contatto rapido",
-    formTitle: "Parlaci del tuo veicolo",
-    formDescription:
-      "Ogni richiesta viene analizzata per fornire un preventivo preciso.",
-    fields: {
-      name: "Nome completo",
-      phone: "Telefono o WhatsApp",
-      email: "Email (opzionale)",
-      vehicleType: "Tipo veicolo",
-      serviceInterest: "Servizio richiesto",
-      message: "Messaggio",
-    },
-    placeholders: {
-      name: "Luca Bianchi",
-      phone: "+39 333 000 0000",
-      email: "tuo@email.it",
-      vehicleType: "SUV - Audi Q5",
-      message: "Indica condizioni attuali, posizione e data preferita.",
-    },
-    serviceFallbackOption: "Seleziona un servizio",
-    submit: "Invia Richiesta",
-    submitting: "Invio in corso...",
-    success: "Richiesta inviata. Ti contatteremo presto.",
-    error: "Invio non riuscito. Riprova o contattaci su WhatsApp.",
-    validation: {
-      required: "Compila i campi obbligatori.",
-      invalidEmail: "Inserisci un'email valida.",
-      minMessage: "Aggiungi qualche dettaglio in più.",
-    },
-  },
-  cta: {
-    title: "Vuoi Un Livello di Finitura Superiore?",
-    subtitle: "Prenota oggi e ricevi subito prezzo e disponibilità.",
-    primary: "Prenota con Modulo",
-    secondary: "Apri WhatsApp",
-  },
-  footer: {
-    rights: "Tutti i diritti riservati.",
-    serviceArea: "Copertura mobile su appuntamento.",
-  },
-};
-
-const zhCn: TranslationSchema = {
-  ...en,
-  localeName: "简体中文",
-  nav: {
-    home: "首页",
-    services: "服务",
-    contact: "联系",
-    bookNow: "立即预约",
-  },
-  hero: {
-    ...en.hero,
-    eyebrow: "上门汽车精洗",
-    title: "高端汽车美容，直接到您所在地服务。",
-    subtitle:
-      "Pit Crew 提供汽车、SUV、皮卡与摩托车的专业内外饰精洗与护理服务。",
-    primaryCta: "获取报价",
-    secondaryCta: "查看服务",
-    badges: ["上门服务", "安全护漆", "价格透明"],
-  },
-  about: {
-    title: "为注重细节的车主而设",
-    body: "从初检到交付，每一步都有标准流程，确保每次服务品质稳定。",
-  },
-  features: {
-    ...en.features,
-    title: "选择 Pit Crew 的理由",
-    subtitle: "便捷、专业、稳定的移动汽车美容体验。",
-  },
-  servicesHome: {
-    title: "热门服务",
-    subtitle: "先从最受欢迎的套餐开始，或浏览全部服务。",
-    viewAll: "查看全部服务",
-  },
-  servicesPage: {
-    ...en.servicesPage,
-    title: "精洗套餐",
-    subtitle: "根据车辆状况与目标效果选择最合适的套餐。",
-    includesLabel: "包含内容",
-    ctaTitle: "不确定该选哪个套餐？",
-    ctaCopy: "告诉我们车型与当前车况，我们会推荐最合适的方案。",
-    ctaButton: "联系 Pit Crew",
-  },
-  serviceDetail: {
-    startingAt: "起价",
-    duration: "预计时长",
-    includes: "服务内容",
-    backToServices: "返回服务列表",
-    getQuote: "咨询此服务",
-  },
-  services: copyServicesWithOverrides({
-    "total-vehicle-reset": { name: "全车焕新套餐" },
-    "interior-reset": { name: "内饰深度焕新" },
-    "exterior-reset": { name: "外观深度焕新" },
-    "motorcycle-detail": { name: "摩托车精洗" },
-    "gloss-enhancement": { name: "亮度提升护理" },
-    "headlight-restoration": { name: "大灯修复" },
-    "clay-bar-treatment": { name: "去污泥处理" },
-    "scratch-removal": { name: "轻微划痕改善" },
-    "engine-bay-cleaning": { name: "发动机舱清洁" },
-    "trim-restoration": { name: "外饰塑料件修复" },
-  }),
-  testimonials: {
-    ...en.testimonials,
-    title: "客户评价",
-    subtitle: "来自长期客户的真实反馈。",
-  },
-  gallery: {
-    ...en.gallery,
-    title: "近期效果展示",
-    subtitle: "不同车型下的施工品质与一致性。",
-    items: copyGalleryWithAlt([
-      "外观精洗完成效果",
-      "内饰深度清洁效果",
-      "发动机舱清洁效果",
-      "大灯修复效果",
-      "摩托车精洗效果",
-      "高亮保护效果",
-    ]),
-  },
-  contact: {
-    ...en.contact,
-    title: "联系与预约",
-    subtitle: "提交需求后，我们将尽快回复时间与报价。",
-    quickContactTitle: "快速联系",
-    formTitle: "请介绍您的车辆情况",
-    formDescription: "我们会逐条审核需求，给出更准确的报价与建议。",
-    fields: {
-      name: "姓名",
-      phone: "电话或 WhatsApp",
-      email: "邮箱（可选）",
-      vehicleType: "车型",
-      serviceInterest: "感兴趣的服务",
-      message: "留言",
-    },
-    placeholders: {
-      name: "张伟",
-      phone: "+86 138 0000 0000",
-      email: "you@example.com",
-      vehicleType: "SUV - BMW X3",
-      message: "请填写车辆现状、所在位置和希望预约日期。",
-    },
-    serviceFallbackOption: "请选择服务",
-    submit: "提交需求",
-    submitting: "提交中...",
-    success: "已提交成功，我们会尽快与您联系。",
-    error: "提交失败，请稍后重试或通过电话联系。",
-    validation: {
-      required: "请填写必填字段。",
-      invalidEmail: "请输入有效邮箱地址。",
-      minMessage: "请补充更多车辆信息。",
-    },
-  },
-  cta: {
-    title: "准备好让爱车焕然一新了吗？",
-    subtitle: "立即预约，先确认价格再安排服务。",
-    primary: "表单预约",
-    secondary: "打开 WhatsApp",
-  },
-  footer: {
-    rights: "保留所有权利。",
-    serviceArea: "上门服务范围按预约安排。",
-  },
-};
-
-const de: TranslationSchema = {
-  ...en,
-  localeName: "Deutsch",
-  nav: {
-    home: "Start",
-    services: "Leistungen",
-    contact: "Kontakt",
-    bookNow: "Buchen",
-  },
-  hero: {
-    ...en.hero,
-    eyebrow: "Mobiles Auto Detailing",
-    title: "Premium-Detailing direkt bei dir vor Ort.",
-    subtitle:
-      "Pit Crew bietet professionelle Innen- und Außenaufbereitung für Auto, SUV, Truck und Motorrad.",
-    primaryCta: "Angebot anfordern",
-    secondaryCta: "Leistungen ansehen",
-  },
-  about: {
-    title: "Für Fahrer, die auf Details achten",
-    body: "Jeder Service folgt einer klaren Qualitäts-Checkliste vom Start bis zur Übergabe.",
-  },
-  features: {
-    ...en.features,
-    title: "Warum Kunden Pit Crew wählen",
-    subtitle: "Mobile Flexibilität, saubere Prozesse und sichtbare Ergebnisse.",
-  },
-  servicesHome: {
-    title: "Beliebte Leistungen",
-    subtitle: "Starte mit den meistgebuchten Paketen.",
-    viewAll: "Alle Leistungen ansehen",
-  },
-  servicesPage: {
-    ...en.servicesPage,
-    title: "Detailing-Pakete",
-    subtitle:
-      "Wähle das passende Paket nach Zustand und gewünschtem Finish.",
-    includesLabel: "Enthält",
-    ctaTitle: "Unsicher bei der Paketauswahl?",
-    ctaCopy:
-      "Schicke uns Fahrzeugtyp und Zustand, wir empfehlen dir die beste Option.",
-    ctaButton: "Pit Crew kontaktieren",
-  },
-  serviceDetail: {
-    startingAt: "Ab",
-    duration: "Geschätzte Dauer",
-    includes: "Leistungsumfang",
-    backToServices: "Zurück zu Leistungen",
-    getQuote: "Dieses Paket anfragen",
-  },
-  services: copyServicesWithOverrides({
-    "total-vehicle-reset": { name: "Komplett-Reset Fahrzeug" },
-    "interior-reset": { name: "Innenraum-Reset" },
-    "exterior-reset": { name: "Außen-Reset" },
-    "motorcycle-detail": { name: "Motorrad-Detailing" },
-    "gloss-enhancement": { name: "Glanz-Upgrade" },
-    "headlight-restoration": { name: "Scheinwerfer-Aufbereitung" },
-    "clay-bar-treatment": { name: "Lackknete-Behandlung" },
-    "scratch-removal": { name: "Leichte Kratzer reduzieren" },
-    "engine-bay-cleaning": { name: "Motorraum-Reinigung" },
-    "trim-restoration": { name: "Kunststoff-Aufbereitung" },
-  }),
-  testimonials: {
-    ...en.testimonials,
-    title: "Kundenstimmen",
-    subtitle: "Echtes Feedback von wiederkehrenden Kunden.",
-  },
-  gallery: {
-    ...en.gallery,
-    title: "Aktuelle Ergebnisse",
-    subtitle: "Beispiele für Finish-Qualität und saubere Ausführung.",
-  },
-  contact: {
-    ...en.contact,
-    title: "Kontakt & Buchung",
-    subtitle:
-      "Sende deine Anfrage und erhalte zeitnah Verfügbarkeit und Preis.",
-    quickContactTitle: "Schnellkontakt",
-    formTitle: "Infos zu deinem Fahrzeug",
-    formDescription:
-      "Wir prüfen jede Anfrage persönlich für ein passendes Angebot.",
-    fields: {
-      name: "Vollständiger Name",
-      phone: "Telefon oder WhatsApp",
-      email: "E-Mail (optional)",
-      vehicleType: "Fahrzeugtyp",
-      serviceInterest: "Gewünschte Leistung",
-      message: "Nachricht",
-    },
-    placeholders: {
-      name: "Max Mustermann",
-      phone: "+49 170 000 0000",
-      email: "du@example.de",
-      vehicleType: "SUV - Mercedes GLC",
-      message: "Beschreibe Zustand, Standort und Wunschtermin.",
-    },
-    serviceFallbackOption: "Leistung auswählen",
-    submit: "Anfrage senden",
-    submitting: "Wird gesendet...",
-    success: "Anfrage gesendet. Pit Crew meldet sich zeitnah.",
-    error:
-      "Anfrage konnte nicht gesendet werden. Bitte erneut versuchen.",
-    validation: {
-      required: "Bitte Pflichtfelder ausfüllen.",
-      invalidEmail: "Bitte eine gültige E-Mail eingeben.",
-      minMessage: "Bitte etwas mehr Details in die Nachricht schreiben.",
-    },
-  },
-  cta: {
-    title: "Bereit für ein besseres Finish?",
-    subtitle: "Buche jetzt und erhalte transparente Preise vor dem Termin.",
-    primary: "Per Formular buchen",
-    secondary: "WhatsApp öffnen",
-  },
-  footer: {
-    rights: "Alle Rechte vorbehalten.",
-    serviceArea: "Mobiler Service nach Terminvereinbarung.",
-  },
-};
-
 export const translations: Record<Locale, TranslationSchema> = {
   en,
-  es,
-  "pt-BR": ptBr,
-  it,
-  "zh-CN": zhCn,
-  de,
+  es: {
+    ...en,
+    localeName: "Español",
+    nav: { home: "Inicio", services: "Servicios", contact: "Contacto", bookNow: "Reservar" },
+    hero: {
+      ...en.hero,
+      eyebrow: "Detailing Móvil",
+      title: "Detailing premium directo en tu ubicación.",
+      primaryCta: "Reservar Ahora",
+      secondaryCta: "Ver Planes",
+    },
+    servicesPage: {
+      ...en.servicesPage,
+      title: "Planes de Detailing",
+      subtitle: "Tres planes claros: Básico, Medio y Full.",
+      ctaButton: "Reservar",
+    },
+    serviceDetail: {
+      ...en.serviceDetail,
+      backToServices: "Volver a planes",
+      getQuote: "Reservar este plan",
+      duration: "Duración estimada",
+      startingAt: "Desde",
+      includes: "Incluye",
+    },
+    services: servicesByLocale.es,
+    contact: {
+      ...en.contact,
+      title: "Contacto y Reserva",
+      subtitle: "Envíanos tu solicitud y te contactamos con disponibilidad y precio.",
+      quickContactTitle: "Contacto rápido",
+      formTitle: "Cuéntanos sobre tu vehículo",
+      fields: {
+        name: "Nombre completo",
+        phone: "Teléfono o WhatsApp",
+        email: "Correo (opcional)",
+        vehicleType: "Tipo de vehículo",
+        serviceInterest: "Plan de interés",
+        message: "Mensaje",
+      },
+      placeholders: {
+        name: "Juan Pérez",
+        phone: "+57 300 000 0000",
+        email: "tu@email.com",
+        vehicleType: "SUV - Mazda CX-5",
+        message: "Cuéntanos ubicación, estado y fecha ideal.",
+      },
+      serviceFallbackOption: "Selecciona un plan",
+      submit: "Enviar Solicitud",
+      submitting: "Enviando...",
+      success: "Solicitud enviada. Te contactaremos pronto.",
+      error: "No pudimos procesar la solicitud. Intenta nuevamente.",
+      validation: {
+        required: "Completa los campos requeridos.",
+        invalidEmail: "Ingresa un correo válido.",
+        minMessage: "Agrega más detalle en tu mensaje.",
+      },
+    },
+    bookingModal: {
+      ...en.bookingModal,
+      title: "Reserva Tu Detailing",
+      subtitle: "Completa estos pasos y confirmaremos precio y horario por email.",
+      steps: {
+        choosePlan: "Elegir plan",
+        vehicleInfo: "Información del vehículo",
+        locationContact: "Ubicación y contacto",
+      },
+      actions: { next: "Siguiente", back: "Atrás", send: "Enviar Reserva", close: "Cerrar" },
+      fields: {
+        plan: "Plan",
+        vehicleType: "Tipo de vehículo",
+        vehicleMakeModel: "Marca y modelo",
+        vehicleYear: "Año",
+        addressLine: "Dirección",
+        cityArea: "Ciudad / Zona",
+        name: "Nombre completo",
+        phone: "Teléfono",
+        email: "Correo (opcional)",
+        notes: "Notas (opcional)",
+      },
+      placeholders: {
+        vehicleType: "SUV, Sedan, Pickup...",
+        vehicleMakeModel: "Toyota Corolla, Mazda CX-5...",
+        vehicleYear: "2021",
+        addressLine: "Calle 123 #45-67",
+        cityArea: "Bogotá",
+        name: "Juan Pérez",
+        phone: "+57 300 000 0000",
+        email: "tu@email.com",
+        notes: "Acceso, parqueadero, horario preferido...",
+      },
+      validation: {
+        required: "Completa los campos requeridos.",
+        planRequired: "Selecciona un plan.",
+        phoneRequired: "Ingresa un teléfono válido.",
+      },
+      success: "Reserva enviada. Te contactaremos pronto.",
+      error: "No pudimos enviar tu reserva. Intenta nuevamente.",
+    },
+    cta: { ...en.cta, primary: "Reservar Ahora", secondary: "Abrir WhatsApp" },
+    footer: { ...en.footer, rights: "Todos los derechos reservados." },
+  },
+  "pt-BR": {
+    ...en,
+    localeName: "Português (Brasil)",
+    nav: { home: "Início", services: "Serviços", contact: "Contato", bookNow: "Agendar" },
+    hero: {
+      ...en.hero,
+      eyebrow: "Detalhamento Móvel",
+      title: "Detalhamento premium no seu endereço.",
+      primaryCta: "Agendar Agora",
+      secondaryCta: "Ver Planos",
+    },
+    servicesPage: {
+      ...en.servicesPage,
+      title: "Planos de Detalhamento",
+      subtitle: "Três opções claras: Básico, Médio e Full.",
+      ctaButton: "Agendar",
+    },
+    serviceDetail: {
+      ...en.serviceDetail,
+      backToServices: "Voltar para planos",
+      getQuote: "Agendar este plano",
+      startingAt: "A partir de",
+      duration: "Duração estimada",
+      includes: "Inclui",
+    },
+    services: servicesByLocale["pt-BR"],
+    bookingModal: {
+      ...en.bookingModal,
+      title: "Agende Seu Detalhamento",
+      steps: {
+        choosePlan: "Escolher plano",
+        vehicleInfo: "Informações do veículo",
+        locationContact: "Localização e contato",
+      },
+      actions: { next: "Próximo", back: "Voltar", send: "Enviar Agendamento", close: "Fechar" },
+      validation: {
+        required: "Preencha os campos obrigatórios.",
+        planRequired: "Escolha um plano.",
+        phoneRequired: "Informe um telefone válido.",
+      },
+      success: "Agendamento enviado com sucesso.",
+      error: "Não foi possível enviar. Tente novamente.",
+    },
+    cta: { ...en.cta, primary: "Agendar Agora", secondary: "Abrir WhatsApp" },
+    footer: { ...en.footer, rights: "Todos os direitos reservados." },
+  },
+  it: {
+    ...en,
+    localeName: "Italiano",
+    nav: { home: "Home", services: "Servizi", contact: "Contatto", bookNow: "Prenota" },
+    hero: {
+      ...en.hero,
+      eyebrow: "Detailing Mobile",
+      title: "Detailing premium direttamente da te.",
+      primaryCta: "Prenota Ora",
+      secondaryCta: "Vedi Piani",
+    },
+    servicesPage: {
+      ...en.servicesPage,
+      title: "Piani Detailing",
+      subtitle: "Tre piani chiari: Basic, Medium e Full.",
+      ctaButton: "Prenota",
+    },
+    serviceDetail: {
+      ...en.serviceDetail,
+      backToServices: "Torna ai piani",
+      getQuote: "Prenota questo piano",
+      startingAt: "Da",
+      duration: "Durata stimata",
+      includes: "Include",
+    },
+    services: servicesByLocale.it,
+    bookingModal: {
+      ...en.bookingModal,
+      title: "Prenota il tuo detailing",
+      steps: {
+        choosePlan: "Scegli piano",
+        vehicleInfo: "Info veicolo",
+        locationContact: "Posizione e contatto",
+      },
+      actions: { next: "Avanti", back: "Indietro", send: "Invia Prenotazione", close: "Chiudi" },
+      success: "Prenotazione inviata con successo.",
+      error: "Invio non riuscito. Riprova.",
+    },
+    cta: { ...en.cta, primary: "Prenota Ora", secondary: "Apri WhatsApp" },
+    footer: { ...en.footer, rights: "Tutti i diritti riservati." },
+  },
+  "zh-CN": {
+    ...en,
+    localeName: "????",
+    nav: { home: "??", services: "??", contact: "??", bookNow: "????" },
+    hero: {
+      ...en.hero,
+      eyebrow: "??????",
+      title: "??????,??????????",
+      primaryCta: "????",
+      secondaryCta: "????",
+    },
+    servicesPage: {
+      ...en.servicesPage,
+      title: "????",
+      subtitle: "??????:?????????",
+      ctaButton: "????",
+    },
+    serviceDetail: {
+      ...en.serviceDetail,
+      backToServices: "????",
+      getQuote: "?????",
+      startingAt: "??",
+      duration: "????",
+      includes: "????",
+    },
+    services: servicesByLocale["zh-CN"],
+    bookingModal: {
+      ...en.bookingModal,
+      title: "????????",
+      subtitle: "???????,???????????????",
+      steps: {
+        choosePlan: "????",
+        vehicleInfo: "????",
+        locationContact: "???????",
+      },
+      actions: { next: "???", back: "???", send: "????", close: "??" },
+      validation: {
+        required: "???????",
+        planRequired: "??????",
+        phoneRequired: "????????",
+      },
+      success: "??????,?????????",
+      error: "??????,??????",
+    },
+    cta: { ...en.cta, primary: "????", secondary: "?? WhatsApp" },
+    footer: { ...en.footer, rights: "???????" },
+  },
+  de: {
+    ...en,
+    localeName: "Deutsch",
+    nav: { home: "Start", services: "Leistungen", contact: "Kontakt", bookNow: "Buchen" },
+    hero: {
+      ...en.hero,
+      eyebrow: "Mobiles Auto Detailing",
+      title: "Premium-Detailing direkt bei dir vor Ort.",
+      primaryCta: "Jetzt Buchen",
+      secondaryCta: "Pläne ansehen",
+    },
+    servicesPage: {
+      ...en.servicesPage,
+      title: "Detailing-Pläne",
+      subtitle: "Drei klare Optionen: Basic, Medium und Full.",
+      ctaButton: "Jetzt buchen",
+    },
+    serviceDetail: {
+      ...en.serviceDetail,
+      backToServices: "Zurück zu Plänen",
+      getQuote: "Diesen Plan buchen",
+      startingAt: "Ab",
+      duration: "Geschätzte Dauer",
+      includes: "Enthält",
+    },
+    services: servicesByLocale.de,
+    bookingModal: {
+      ...en.bookingModal,
+      title: "Detailing buchen",
+      steps: {
+        choosePlan: "Plan wählen",
+        vehicleInfo: "Fahrzeuginfo",
+        locationContact: "Ort und Kontakt",
+      },
+      actions: { next: "Weiter", back: "Zurück", send: "Buchung senden", close: "Schließen" },
+      success: "Buchung erfolgreich gesendet.",
+      error: "Buchung konnte nicht gesendet werden.",
+    },
+    cta: { ...en.cta, primary: "Jetzt buchen", secondary: "WhatsApp öffnen" },
+    footer: { ...en.footer, rights: "Alle Rechte vorbehalten." },
+  },
 };
 
 function validateTranslations() {
@@ -1098,3 +829,4 @@ function validateTranslations() {
 }
 
 validateTranslations();
+
