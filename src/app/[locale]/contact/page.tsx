@@ -66,30 +66,6 @@ export default async function ContactPage({ params }: ContactPageProps) {
             {dict.contact.formTitle}
           </h2>
 
-          <form
-            name="pitcrew-contact"
-            data-netlify="true"
-            netlify-honeypot="bot-field"
-            hidden
-          >
-            <input type="hidden" name="form-name" value="pitcrew-contact" />
-            <input type="text" name="name" />
-            <input type="text" name="phone" />
-            <input type="text" name="email" />
-            <input type="text" name="vehicleType" />
-            <input type="text" name="serviceInterest" />
-            <textarea name="message" />
-            <input type="text" name="locale" />
-            <input type="text" name="source" />
-            <input type="text" name="planSlug" />
-            <input type="text" name="vehicleMakeModel" />
-            <input type="text" name="vehicleYear" />
-            <input type="text" name="addressLine" />
-            <input type="text" name="cityArea" />
-            <textarea name="notes" />
-            <input type="text" name="bot-field" />
-          </form>
-
           <ContactForm
             locale={safeLocale}
             labels={dict.contact}

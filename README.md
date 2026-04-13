@@ -30,6 +30,7 @@ npm run build
 ## Email delivery (Netlify Forms)
 
 Booking/contact submissions are handled by `src/app/api/contact/route.ts`.
+Form detection for Netlify Runtime v5 is defined in `public/__forms.html`.
 
 1. Create `.env.local` from `.env.example`.
 2. Set in `.env.local`:

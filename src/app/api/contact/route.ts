@@ -22,6 +22,10 @@ function getNetlifyBaseUrl() {
   return `https://${value.replace(/\/$/, "")}`;
 }
 
+function getNetlifyFormsTargetUrl(baseUrl: string) {
+  return `${baseUrl}/__forms.html`;
+}
+
 export async function POST(request: Request) {
   try {
     const json = (await request.json()) as unknown;
