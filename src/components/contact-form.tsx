@@ -147,8 +147,6 @@ export function ContactForm({ locale, labels, services }: ContactFormProps) {
       className="panel space-y-5 p-6 md:p-8"
       name="pitcrew-contact"
       method="POST"
-      data-netlify="true"
-      netlify-honeypot="bot-field"
       onSubmit={onSubmit}
     >
       <input type="hidden" name="form-name" value="pitcrew-contact" />

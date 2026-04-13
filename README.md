@@ -30,6 +30,7 @@ npm run build
 ## Email delivery (Netlify Forms)
 
 Booking/contact submissions are handled by `src/app/api/contact/route.ts`.
+Form detection for Netlify Runtime v5 is defined in `public/__forms.html`.
 
 1. Create `.env.local` from `.env.example`.
 2. Set in `.env.local`:
@@ -41,9 +42,11 @@ If `NETLIFY_FORMS_URL` is missing, `/api/contact` returns `email_not_configured`
 ## Netlify setup
 
 1. Deploy the project to Netlify.
-2. Submit one form from production (`/en/contact` or booking modal) to register fields.
-3. Go to Netlify Dashboard -> Site -> Forms -> `pitcrew-contact`.
-4. Add Email Notifications and set your recipient email.
+2. In Netlify Forms page, click **Enable form detection**.
+3. Trigger a new deploy (clear cache optional).
+4. Submit one form from production (`/en/contact` or booking modal) to register entries.
+5. Go to Netlify Dashboard -> Site -> Forms -> `pitcrew-contact`.
+6. Add Email Notifications and set your recipient email.
 
 ## Cloudflare note
 

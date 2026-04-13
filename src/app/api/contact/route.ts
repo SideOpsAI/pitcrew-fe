@@ -22,6 +22,10 @@ function getNetlifyBaseUrl() {
   return `https://${value.replace(/\/$/, "")}`;
 }
 
+function getNetlifyFormsTargetUrl(baseUrl: string) {
+  return `${baseUrl}/__forms.html`;
+}
+
 export async function POST(request: Request) {
   try {
     const json = (await request.json()) as unknown;
@@ -73,7 +77,7 @@ export async function POST(request: Request) {
       "bot-field": "",
     });
 
-    const netlifyResponse = await fetch(netlifyBaseUrl, {
+    const netlifyResponse = await fetch(getNetlifyFormsTargetUrl(netlifyBaseUrl), {
       method: "POST",
       headers: {
         "Content-Type": "application/x-www-form-urlencoded",
