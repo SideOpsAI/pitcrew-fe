@@ -23,6 +23,26 @@ import type {
   TranslationSchema,
 } from "@/types/content";
 
+type TurnstileRenderOptions = {
+  sitekey: string;
+  callback: (token: string) => void;
+  "expired-callback"?: () => void;
+  "error-callback"?: () => void;
+  theme?: "light" | "dark";
+};
+
+type TurnstileApi = {
+  render: (container: HTMLElement, options: TurnstileRenderOptions) => string;
+  reset: (widgetId?: string) => void;
+  remove?: (widgetId: string) => void;
+};
+
+declare global {
+  interface Window {
+    turnstile?: TurnstileApi;
+  }
+}
+
 type OpenBookingOptions = {
   planSlug?: PlanSlug;
 };
@@ -69,6 +89,117 @@ const initialFormData: BookingFormData = {
   botField: "",
 };
 
+const turnstileScriptId = "cf-turnstile-script";
+const turnstileSiteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ?? "";
+
+const captchaMessages: Record<
+  Locale,
+  {
+    required: string;
+    unavailable: string;
+    retry: string;
+    loading: string;
+    label: string;
+  }
+> = {
+  en: {
+    required: "Please complete the CAPTCHA before sending your booking.",
+    unavailable: "Security check is not available right now. Please try again later.",
+    retry: "CAPTCHA validation failed. Please complete it again and retry.",
+    loading: "Loading security check...",
+    label: "Security verification",
+  },
+  es: {
+    required: "Completa el CAPTCHA antes de enviar tu reserva.",
+    unavailable: "La validación de seguridad no está disponible en este momento.",
+    retry: "No pudimos validar el CAPTCHA. Vuelve a completarlo e intenta otra vez.",
+    loading: "Cargando validación de seguridad...",
+    label: "Verificación de seguridad",
+  },
+  "pt-BR": {
+    required: "Complete o CAPTCHA antes de enviar seu agendamento.",
+    unavailable: "A verificacao de seguranca nao esta disponivel no momento.",
+    retry: "Nao foi possivel validar o CAPTCHA. Complete novamente e tente de novo.",
+    loading: "Carregando verificacao de seguranca...",
+    label: "Verificacao de seguranca",
+  },
+  it: {
+    required: "Completa il CAPTCHA prima di inviare la prenotazione.",
+    unavailable: "Il controllo di sicurezza non e disponibile in questo momento.",
+    retry: "Validazione CAPTCHA non riuscita. Completalo di nuovo e riprova.",
+    loading: "Caricamento controllo di sicurezza...",
+    label: "Verifica di sicurezza",
+  },
+  "zh-CN": {
+    required: "Please complete CAPTCHA before sending.",
+    unavailable: "Security verification is unavailable right now.",
+    retry: "CAPTCHA verification failed. Please try again.",
+    loading: "Loading security verification...",
+    label: "Security verification",
+  },
+  de: {
+    required: "Bitte CAPTCHA ausfullen, bevor du die Buchung sendest.",
+    unavailable: "Die Sicherheitsprufung ist derzeit nicht verfugbar.",
+    retry: "CAPTCHA-Prufung fehlgeschlagen. Bitte erneut ausfullen und versuchen.",
+    loading: "Sicherheitsprufung wird geladen...",
+    label: "Sicherheitsprufung",
+  },
+};
+
+function getCaptchaMessages(locale: Locale) {
+  return captchaMessages[locale];
+}
+
+function loadTurnstileScript(): Promise<void> {
+  if (typeof window === "undefined") {
+    return Promise.resolve();
+  }
+
+  if (window.turnstile) {
+    return Promise.resolve();
+  }
+
+  return new Promise((resolve, reject) => {
+    const existingScript = document.getElementById(turnstileScriptId) as HTMLScriptElement | null;
+
+    if (existingScript) {
+      if (existingScript.dataset.loaded === "true") {
+        resolve();
+        return;
+      }
+
+      existingScript.addEventListener("load", () => resolve(), { once: true });
+      existingScript.addEventListener(
+        "error",
+        () => reject(new Error("turnstile_script_failed")),
+        { once: true },
+      );
+      return;
+    }
+
+    const script = document.createElement("script");
+    script.id = turnstileScriptId;
+    script.src = "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit";
+    script.async = true;
+    script.defer = true;
+    script.dataset.loaded = "false";
+    script.addEventListener(
+      "load",
+      () => {
+        script.dataset.loaded = "true";
+        resolve();
+      },
+      { once: true },
+    );
+    script.addEventListener(
+      "error",
+      () => reject(new Error("turnstile_script_failed")),
+      { once: true },
+    );
+    document.head.appendChild(script);
+  });
+}
+
 function getStepTitle(step: number, labels: TranslationSchema["bookingModal"]) {
   if (step === 1) return labels.steps.choosePlan;
   if (step === 2) return labels.steps.vehicleInfo;
@@ -95,15 +226,20 @@ function BookingModal({
   preselectedPlan: PlanSlug | null;
 }) {
   const dialogRef = useRef<HTMLDivElement | null>(null);
+  const captchaContainerRef = useRef<HTMLDivElement | null>(null);
+  const turnstileWidgetIdRef = useRef<string | null>(null);
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState<BookingFormData>(initialFormData);
   const [errors, setErrors] = useState<ContactLeadErrors>({});
   const [isEntering, setIsEntering] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState("");
+  const [captchaReady, setCaptchaReady] = useState(false);
   const [formState, setFormState] = useState<ContactFormState>({
     status: "idle",
     errors: {},
     message: "",
   });
+  const captchaCopy = getCaptchaMessages(locale);
 
   const isSubmitting = formState.status === "submitting";
 
@@ -111,6 +247,8 @@ function BookingModal({
     (planSlug: PlanSlug | null) => {
       setStep(planSlug ? 2 : 1);
       setErrors({});
+      setCaptchaToken("");
+      setCaptchaReady(false);
       setFormState({ status: "idle", errors: {}, message: "" });
       setFormData({
         ...initialFormData,
@@ -206,6 +344,81 @@ function BookingModal({
     };
   }, [isOpen, isSubmitting, onClose]);
 
+  useEffect(() => {
+    if (isOpen) {
+      return;
+    }
+
+    setCaptchaToken("");
+    setCaptchaReady(false);
+
+    if (typeof window === "undefined") {
+      turnstileWidgetIdRef.current = null;
+      return;
+    }
+
+    if (window.turnstile && turnstileWidgetIdRef.current) {
+      window.turnstile.remove?.(turnstileWidgetIdRef.current);
+    }
+
+    turnstileWidgetIdRef.current = null;
+  }, [isOpen]);
+
+  useEffect(() => {
+    if (!isOpen || step !== 3 || !turnstileSiteKey) {
+      return;
+    }
+
+    let cancelled = false;
+
+    const mountTurnstile = async () => {
+      try {
+        await loadTurnstileScript();
+
+        if (
+          cancelled ||
+          !captchaContainerRef.current ||
+          !window.turnstile
+        ) {
+          return;
+        }
+
+        if (turnstileWidgetIdRef.current) {
+          setCaptchaReady(true);
+          window.turnstile.reset(turnstileWidgetIdRef.current);
+          return;
+        }
+
+        const widgetId = window.turnstile.render(captchaContainerRef.current, {
+          sitekey: turnstileSiteKey,
+          callback: (token: string) => {
+            setCaptchaToken(token);
+          },
+          "expired-callback": () => {
+            setCaptchaToken("");
+          },
+          "error-callback": () => {
+            setCaptchaToken("");
+          },
+          theme: "dark",
+        });
+
+        turnstileWidgetIdRef.current = widgetId;
+        setCaptchaReady(true);
+      } catch {
+        if (!cancelled) {
+          setCaptchaReady(false);
+        }
+      }
+    };
+
+    void mountTurnstile();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [isOpen, step]);
+
   const updateField = (field: keyof BookingFormData, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
 
@@ -278,6 +491,24 @@ function BookingModal({
       return;
     }
 
+    if (!turnstileSiteKey) {
+      setFormState({
+        status: "error",
+        errors: {},
+        message: captchaCopy.unavailable,
+      });
+      return;
+    }
+
+    if (!captchaToken) {
+      setFormState({
+        status: "error",
+        errors: {},
+        message: captchaCopy.required,
+      });
+      return;
+    }
+
     const selectedService = services.find((service) => service.slug === formData.planSlug);
 
     const payload = {
@@ -296,6 +527,7 @@ function BookingModal({
       addressLine: formData.addressLine,
       cityArea: formData.cityArea,
       notes: formData.notes,
+      captchaToken,
     };
 
     const parsed = contactLeadSchema.safeParse(payload);
@@ -320,7 +552,25 @@ function BookingModal({
         body: JSON.stringify(parsed.data),
       });
 
+      const responseBody = (await response.json().catch(() => null)) as
+        | { error?: string }
+        | null;
+
       if (!response.ok) {
+        if (responseBody?.error === "invalid_captcha") {
+          setCaptchaToken("");
+          if (window.turnstile && turnstileWidgetIdRef.current) {
+            window.turnstile.reset(turnstileWidgetIdRef.current);
+          }
+
+          setFormState({
+            status: "error",
+            errors: {},
+            message: captchaCopy.retry,
+          });
+          return;
+        }
+
         throw new Error("submit_failed");
       }
 
@@ -555,6 +805,17 @@ function BookingModal({
                     className="min-h-28 w-full rounded-xl border border-white/15 bg-black/60 px-4 py-3 text-white outline-none ring-accent transition placeholder:text-white/40 focus:ring-2"
                   />
                 </label>
+
+                <div className="rounded-xl border border-white/15 bg-black/60 p-4 sm:col-span-2">
+                  <p className="text-sm font-semibold text-white">{captchaCopy.label}</p>
+                  <div ref={captchaContainerRef} className="mt-3 min-h-[65px]" />
+                  {!turnstileSiteKey ? (
+                    <p className="mt-2 text-xs text-red-300">{captchaCopy.unavailable}</p>
+                  ) : null}
+                  {turnstileSiteKey && !captchaReady ? (
+                    <p className="mt-2 text-xs text-white/60">{captchaCopy.loading}</p>
+                  ) : null}
+                </div>
               </div>
             ) : null}
 

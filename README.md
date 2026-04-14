@@ -29,23 +29,27 @@ npm run build
 
 ## Email delivery (Netlify Forms)
 
-Booking/contact submissions are handled by `src/app/api/contact/route.ts`.
+Booking submissions are handled by `src/app/api/contact/route.ts`.
 Form detection for Netlify Runtime v5 is defined in `public/__forms.html`.
 
 1. Create `.env.local` from `.env.example`.
 2. Set in `.env.local`:
    - `NETLIFY_FORMS_URL=https://your-site-name.netlify.app`
+   - `NEXT_PUBLIC_TURNSTILE_SITE_KEY=your-cloudflare-site-key`
+   - `TURNSTILE_SECRET_KEY=your-cloudflare-secret-key`
 3. Restart `npm run dev`.
 
 If `NETLIFY_FORMS_URL` is missing, `/api/contact` returns `email_not_configured`.
+If `TURNSTILE_SECRET_KEY` is missing, booking requests return `captcha_not_configured`.
 
 ## Netlify setup
 
 1. Deploy the project to Netlify.
-2. Keep `public/__forms.html` in the repo. Netlify Runtime v5 scans this static file to detect form names/fields.
-3. Submit one form from production (`/en/contact` or booking modal) to register fields.
-4. Go to Netlify Dashboard -> Site -> Forms -> `pitcrew-contact`.
-5. Add Email Notifications and set your recipient email.
+2. In Netlify Forms page, click **Enable form detection**.
+3. Trigger a new deploy (clear cache optional).
+4. Submit one booking request from production (booking modal) to register entries.
+5. Go to Netlify Dashboard -> Site -> Forms -> `pitcrew-contact`.
+6. Add Email Notifications and set your recipient email.
 
 ## Cloudflare note
 
@@ -70,7 +74,6 @@ npm run test:smoke
 This validates key routes:
 - `/en`
 - `/en/services`
-- `/en/contact`
 - `/robots.txt`
 - `/sitemap.xml`
 

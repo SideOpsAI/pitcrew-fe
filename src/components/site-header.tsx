@@ -30,9 +30,8 @@ export function SiteHeader({ locale, labels }: SiteHeaderProps) {
     () => [
       { href: `/${locale}`, label: labels.home },
       { href: `/${locale}/services`, label: labels.services },
-      { href: `/${locale}/contact`, label: labels.contact },
     ],
-    [labels.contact, labels.home, labels.services, locale],
+    [labels.home, labels.services, locale],
   );
 
   const switchLocale = (nextLocale: string) => {
