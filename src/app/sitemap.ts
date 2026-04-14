@@ -12,7 +12,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     const basePages = [
       `/${locale}`,
       `/${locale}/services`,
-      `/${locale}/contact`,
     ];
 
     const servicePages = translations[defaultLocale].services.map(
@@ -26,6 +25,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     url: `${siteUrl}${path}`,
     lastModified: now,
     changeFrequency: "weekly",
-    priority: path.endsWith("contact") ? 0.8 : 0.9,
+    priority: 0.9,
   }));
 }

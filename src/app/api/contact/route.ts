@@ -26,6 +26,68 @@ function getNetlifyFormsTargetUrl(baseUrl: string) {
   return `${baseUrl}/__forms.html`;
 }
 
+function getTurnstileSecretKey() {
+  const secret = process.env.TURNSTILE_SECRET_KEY;
+  return secret ? secret.trim() : null;
+}
+
+function getClientIp(request: Request) {
+  const forwardedFor = request.headers.get("x-forwarded-for");
+  if (forwardedFor) {
+    return forwardedFor.split(",")[0]?.trim() || null;
+  }
+
+  const realIp = request.headers.get("x-real-ip");
+  if (realIp) {
+    return realIp.trim();
+  }
+
+  const cfIp = request.headers.get("cf-connecting-ip");
+  if (cfIp) {
+    return cfIp.trim();
+  }
+
+  return null;
+}
+
+type TurnstileVerificationResponse = {
+  success: boolean;
+};
+
+async function verifyTurnstileToken({
+  secret,
+  token,
+  remoteIp,
+}: {
+  secret: string;
+  token: string;
+  remoteIp: string | null;
+}) {
+  const payload = new URLSearchParams({
+    secret,
+    response: token,
+  });
+
+  if (remoteIp) {
+    payload.set("remoteip", remoteIp);
+  }
+
+  const response = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+    },
+    body: payload.toString(),
+  });
+
+  if (!response.ok) {
+    return false;
+  }
+
+  const json = (await response.json()) as TurnstileVerificationResponse;
+  return json.success;
+}
+
 export async function POST(request: Request) {
   try {
     const json = (await request.json()) as unknown;
@@ -44,6 +106,36 @@ export async function POST(request: Request) {
 
     if (parsed.data.botField) {
       return NextResponse.json({ ok: true });
+    }
+
+    if (parsed.data.source === "booking-modal") {
+      const secret = getTurnstileSecretKey();
+      if (!secret) {
+        return NextResponse.json(
+          {
+            ok: false,
+            error: "captcha_not_configured",
+            details: "Missing TURNSTILE_SECRET_KEY",
+          },
+          { status: 500 },
+        );
+      }
+
+      const isCaptchaValid = await verifyTurnstileToken({
+        secret,
+        token: parsed.data.captchaToken,
+        remoteIp: getClientIp(request),
+      });
+
+      if (!isCaptchaValid) {
+        return NextResponse.json(
+          {
+            ok: false,
+            error: "invalid_captcha",
+          },
+          { status: 400 },
+        );
+      }
     }
 
     const netlifyBaseUrl = getNetlifyBaseUrl();

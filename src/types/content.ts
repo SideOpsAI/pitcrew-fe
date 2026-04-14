@@ -206,5 +206,6 @@ export interface ContactLeadInput {
   cityArea?: string;
   notes?: string;
   botField?: string;
+  captchaToken?: string;
 }
 

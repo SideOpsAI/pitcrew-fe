@@ -25,7 +25,6 @@ export function SiteFooter({ locale, nav, footer, siteName }: SiteFooterProps) {
         <div className="flex flex-wrap items-center gap-4 text-sm text-white/80">
           <Link href={`/${locale}`}>{nav.home}</Link>
           <Link href={`/${locale}/services`}>{nav.services}</Link>
-          <Link href={`/${locale}/contact`}>{nav.contact}</Link>
         </div>
       </div>
 

@@ -5,7 +5,6 @@ const routes = [
   "/en/services/basic",
   "/en/services/medium",
   "/en/services/full",
-  "/en/contact",
   "/robots.txt",
   "/sitemap.xml",
 ];
