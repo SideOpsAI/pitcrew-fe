@@ -20,7 +20,7 @@ export type CaptchaValidationResult =
   | { ok: false; error: "captcha_not_configured" | "invalid_captcha" };
 
 function getCaptchaSecret() {
-  const secret = process.env.CAPTCHA_SECRET;
+  const secret = process.env.CAPTCHA_SECRET ?? process.env.BOOKING_CAPTCHA_SECRET;
   return secret?.trim() ? secret.trim() : null;
 }
 
