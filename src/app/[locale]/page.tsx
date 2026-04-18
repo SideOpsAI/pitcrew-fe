@@ -32,54 +32,54 @@ export default async function HomePage({ params }: HomePageProps) {
 
   return (
     <>
-      <section className="section-shell py-16 md:py-24">
-        <div className="grid gap-10 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
-          <div>
-            <p className="mb-4 inline-flex rounded-full border border-accent/40 bg-accent/10 px-4 py-1 text-xs font-bold uppercase tracking-[0.25em] text-accent">
-              {dict.hero.eyebrow}
-            </p>
-            <h1 className="font-heading text-4xl uppercase leading-tight text-white sm:text-5xl lg:text-6xl">
-              {dict.hero.title}
-            </h1>
-            <p className="mt-5 max-w-2xl text-base text-white/80 sm:text-lg">
-              {dict.hero.subtitle}
-            </p>
+      <section className="section-shell relative overflow-hidden py-16 md:py-24">
+        <div className="pointer-events-none absolute inset-0">
+          <div className="absolute inset-y-0 right-0 w-1/2 overflow-hidden">
+            <Image
+              src="/hero-sportscar-black.jpg"
+              alt=""
+              fill
+              priority
+              sizes="50vw"
+              className="object-cover object-right opacity-25"
+            />
+          </div>
+          <div className="absolute inset-0 bg-gradient-to-r from-black/72 via-black/55 to-black/76" />
+        </div>
 
-            <div className="mt-8 flex flex-wrap gap-3">
-              {dict.hero.badges.map((badge) => (
-                <span
-                  key={badge}
-                  className="rounded-full border border-white/20 bg-white/5 px-4 py-2 text-xs font-semibold uppercase tracking-wider text-white"
-                >
-                  {badge}
-                </span>
-              ))}
-            </div>
+        <div className="relative z-10 max-w-3xl">
+          <p className="mb-4 inline-flex rounded-full border border-accent/40 bg-accent/10 px-4 py-1 text-xs font-bold uppercase tracking-[0.25em] text-accent">
+            {dict.hero.eyebrow}
+          </p>
+          <h1 className="font-heading text-4xl uppercase leading-tight text-white sm:text-5xl lg:text-7xl">
+            {dict.hero.title}
+          </h1>
+          <p className="mt-5 max-w-2xl text-base text-white/80 sm:text-lg">
+            {dict.hero.subtitle}
+          </p>
 
-            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-              <BookNowButton
-                label={dict.hero.primaryCta}
-                className="inline-flex items-center justify-center rounded-xl bg-accent px-6 py-3 text-sm font-bold uppercase tracking-wider text-black transition hover:bg-white"
-              />
-              <Link
-                href={`/${safeLocale}/services`}
-                className="inline-flex items-center justify-center rounded-xl border border-white/25 px-6 py-3 text-sm font-bold uppercase tracking-wider text-white transition hover:border-accent hover:text-accent"
+          <div className="mt-8 flex flex-wrap gap-3">
+            {dict.hero.badges.map((badge) => (
+              <span
+                key={badge}
+                className="rounded-full border border-white/20 bg-white/5 px-4 py-2 text-xs font-semibold uppercase tracking-wider text-white"
               >
-                {dict.hero.secondaryCta}
-              </Link>
-            </div>
+                {badge}
+              </span>
+            ))}
           </div>
 
-          <div className="panel p-4 sm:p-6">
-            <Image
-              src="/pitcrew-logo.jpeg"
-              alt="Pit Crew logo"
-              width={1200}
-              height={670}
-              className="h-auto w-full rounded-xl border border-white/10 object-cover"
-              priority
+          <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+            <BookNowButton
+              label={dict.hero.primaryCta}
+              className="inline-flex items-center justify-center rounded-xl bg-accent px-6 py-3 text-sm font-bold uppercase tracking-wider text-black transition hover:bg-white"
             />
-            <p className="mt-4 text-sm text-white/75">{dict.meta.tagline}</p>
+            <Link
+              href={`/${safeLocale}/services`}
+              className="inline-flex items-center justify-center rounded-xl border border-white/25 px-6 py-3 text-sm font-bold uppercase tracking-wider text-white transition hover:border-accent hover:text-accent"
+            >
+              {dict.hero.secondaryCta}
+            </Link>
           </div>
         </div>
       </section>
