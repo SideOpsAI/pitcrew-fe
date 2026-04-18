@@ -114,7 +114,7 @@ export async function POST(request: Request) {
       "bot-field": "",
     });
 
-    const formsEndpoint = `${netlifyBaseUrl}/__forms.html`;
+    const formsEndpoint = getNetlifyFormsTargetUrl(netlifyBaseUrl);
 
     const netlifyResponse = await fetch(formsEndpoint, {
       method: "POST",

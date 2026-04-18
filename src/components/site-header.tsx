@@ -3,15 +3,82 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import { BookNowButton } from "@/components/booking/book-now-button";
-import { localeLabels, locales } from "@/lib/locales";
+import { locales } from "@/lib/locales";
 import type { Locale, TranslationSchema } from "@/types/content";
 
 type SiteHeaderProps = {
   locale: Locale;
   labels: TranslationSchema["nav"];
+};
+
+type LocaleCard = {
+  countryName: string;
+  primaryLanguage: string;
+  secondaryLanguage?: string;
+  flagSrc: string;
+};
+
+const localeFlags: Record<Locale, string> = {
+  en: "/flags/us.svg",
+  es: "/flags/co.svg",
+  "pt-BR": "/flags/br.svg",
+  it: "/flags/it.svg",
+  "zh-CN": "/flags/cn.svg",
+  de: "/flags/de.svg",
+};
+
+const localeCardsByUiLocale: Record<Locale, Record<Locale, Omit<LocaleCard, "flagSrc">>> = {
+  en: {
+    en: { countryName: "United States", primaryLanguage: "English" },
+    es: { countryName: "Colombia", primaryLanguage: "Espanol", secondaryLanguage: "English" },
+    "pt-BR": { countryName: "Brazil", primaryLanguage: "Portugues", secondaryLanguage: "English" },
+    it: { countryName: "Italy", primaryLanguage: "Italiano", secondaryLanguage: "English" },
+    "zh-CN": { countryName: "China", primaryLanguage: "Chinese", secondaryLanguage: "English" },
+    de: { countryName: "Germany", primaryLanguage: "Deutsch", secondaryLanguage: "English" },
+  },
+  es: {
+    en: { countryName: "Estados Unidos", primaryLanguage: "Ingles" },
+    es: { countryName: "Colombia", primaryLanguage: "Espanol", secondaryLanguage: "Ingles" },
+    "pt-BR": { countryName: "Brasil", primaryLanguage: "Portugues", secondaryLanguage: "Ingles" },
+    it: { countryName: "Italia", primaryLanguage: "Italiano", secondaryLanguage: "Ingles" },
+    "zh-CN": { countryName: "China", primaryLanguage: "Chino", secondaryLanguage: "Ingles" },
+    de: { countryName: "Alemania", primaryLanguage: "Aleman", secondaryLanguage: "Ingles" },
+  },
+  "pt-BR": {
+    en: { countryName: "Estados Unidos", primaryLanguage: "Ingles" },
+    es: { countryName: "Colombia", primaryLanguage: "Espanol", secondaryLanguage: "Ingles" },
+    "pt-BR": { countryName: "Brasil", primaryLanguage: "Portugues", secondaryLanguage: "Ingles" },
+    it: { countryName: "Italia", primaryLanguage: "Italiano", secondaryLanguage: "Ingles" },
+    "zh-CN": { countryName: "China", primaryLanguage: "Chines", secondaryLanguage: "Ingles" },
+    de: { countryName: "Alemanha", primaryLanguage: "Alemao", secondaryLanguage: "Ingles" },
+  },
+  it: {
+    en: { countryName: "Stati Uniti", primaryLanguage: "Inglese" },
+    es: { countryName: "Colombia", primaryLanguage: "Spagnolo", secondaryLanguage: "Inglese" },
+    "pt-BR": { countryName: "Brasile", primaryLanguage: "Portoghese", secondaryLanguage: "Inglese" },
+    it: { countryName: "Italia", primaryLanguage: "Italiano", secondaryLanguage: "Inglese" },
+    "zh-CN": { countryName: "Cina", primaryLanguage: "Cinese", secondaryLanguage: "Inglese" },
+    de: { countryName: "Germania", primaryLanguage: "Tedesco", secondaryLanguage: "Inglese" },
+  },
+  "zh-CN": {
+    en: { countryName: "Meiguo", primaryLanguage: "Yingyu" },
+    es: { countryName: "Gelunbiya", primaryLanguage: "Xibanyayu", secondaryLanguage: "Yingyu" },
+    "pt-BR": { countryName: "Baxi", primaryLanguage: "Putaoyaoyu", secondaryLanguage: "Yingyu" },
+    it: { countryName: "Yidali", primaryLanguage: "Yidaliyu", secondaryLanguage: "Yingyu" },
+    "zh-CN": { countryName: "Zhongguo", primaryLanguage: "Zhongwen", secondaryLanguage: "Yingyu" },
+    de: { countryName: "Deguo", primaryLanguage: "Deyu", secondaryLanguage: "Yingyu" },
+  },
+  de: {
+    en: { countryName: "Vereinigte Staaten", primaryLanguage: "Englisch" },
+    es: { countryName: "Kolumbien", primaryLanguage: "Spanisch", secondaryLanguage: "Englisch" },
+    "pt-BR": { countryName: "Brasilien", primaryLanguage: "Portugiesisch", secondaryLanguage: "Englisch" },
+    it: { countryName: "Italien", primaryLanguage: "Italienisch", secondaryLanguage: "Englisch" },
+    "zh-CN": { countryName: "China", primaryLanguage: "Chinesisch", secondaryLanguage: "Englisch" },
+    de: { countryName: "Deutschland", primaryLanguage: "Deutsch", secondaryLanguage: "Englisch" },
+  },
 };
 
 function isNavActive(pathname: string, href: string): boolean {
@@ -20,6 +87,145 @@ function isNavActive(pathname: string, href: string): boolean {
   }
 
   return pathname === href || pathname.startsWith(`${href}/`);
+}
+
+type LocalePickerProps = {
+  locale: Locale;
+  id: string;
+  mobile?: boolean;
+  onSelect: (nextLocale: string) => void;
+  onAfterSelect?: () => void;
+};
+
+function LocalePicker({
+  locale,
+  id,
+  mobile = false,
+  onSelect,
+  onAfterSelect,
+}: LocalePickerProps) {
+  const [open, setOpen] = useState(false);
+  const rootRef = useRef<HTMLDivElement | null>(null);
+  const selected = {
+    ...localeCardsByUiLocale[locale][locale],
+    flagSrc: localeFlags[locale],
+  };
+
+  useEffect(() => {
+    const handleOutsideClick = (event: MouseEvent) => {
+      if (!rootRef.current) {
+        return;
+      }
+
+      if (event.target instanceof Node && !rootRef.current.contains(event.target)) {
+        setOpen(false);
+      }
+    };
+
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setOpen(false);
+      }
+    };
+
+    window.addEventListener("mousedown", handleOutsideClick);
+    window.addEventListener("keydown", handleEscape);
+
+    return () => {
+      window.removeEventListener("mousedown", handleOutsideClick);
+      window.removeEventListener("keydown", handleEscape);
+    };
+  }, []);
+
+  return (
+    <div ref={rootRef} className="relative">
+      <button
+        id={id}
+        type="button"
+        aria-haspopup="listbox"
+        aria-expanded={open}
+        onClick={() => setOpen((prev) => !prev)}
+        className={`group w-full rounded-lg border border-white/20 bg-black/90 px-3 text-left outline-none ring-accent transition hover:border-white/35 focus:ring-2 ${
+          mobile ? "h-12" : "h-10 min-w-[220px]"
+        }`}
+      >
+        <span className="flex items-center justify-between gap-3">
+          <span className="flex min-w-0 items-center gap-3">
+            <span className="inline-flex h-4 w-6 overflow-hidden rounded-sm border border-white/25">
+              <Image src={selected.flagSrc} alt={selected.countryName} width={24} height={16} />
+            </span>
+            <span className="min-w-0">
+              <span className="block truncate text-[11px] font-medium text-violet-300">
+                {selected.countryName}
+              </span>
+              <span className="block truncate text-sm font-semibold text-white">
+                {selected.primaryLanguage}
+              </span>
+            </span>
+          </span>
+          <svg
+            viewBox="0 0 20 20"
+            className={`h-4 w-4 shrink-0 text-white/75 transition-transform ${open ? "rotate-180" : ""}`}
+            aria-hidden="true"
+          >
+            <path d="M5.5 7.5 10 12l4.5-4.5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </span>
+      </button>
+
+      {open ? (
+        <div
+          role="listbox"
+          aria-labelledby={id}
+          className={`absolute z-[70] mt-2 overflow-hidden rounded-xl border border-white/15 bg-[#05070c] shadow-2xl ${
+            mobile ? "left-0 right-0" : "right-0 w-[320px]"
+          }`}
+        >
+          {locales.map((item) => {
+            const option = {
+              ...localeCardsByUiLocale[locale][item],
+              flagSrc: localeFlags[item],
+            };
+            const active = item === locale;
+
+            return (
+              <button
+                key={item}
+                type="button"
+                role="option"
+                aria-selected={active}
+                onClick={() => {
+                  onSelect(item);
+                  setOpen(false);
+                  onAfterSelect?.();
+                }}
+                className={`flex w-full items-start gap-3 border-b border-white/10 px-4 py-3 text-left transition last:border-b-0 ${
+                  active ? "bg-accent/10" : "hover:bg-white/5"
+                }`}
+              >
+                <span className="mt-0.5 inline-flex h-4 w-6 shrink-0 overflow-hidden rounded-sm border border-white/25">
+                  <Image src={option.flagSrc} alt={option.countryName} width={24} height={16} />
+                </span>
+                <span className="min-w-0">
+                  <span className="block text-[11px] font-medium text-violet-300">
+                    {option.countryName}
+                  </span>
+                  <span className="mt-0.5 flex flex-wrap gap-x-3 gap-y-0.5 text-sm">
+                    <span className={`font-semibold ${active ? "text-accent" : "text-white"}`}>
+                      {option.primaryLanguage}
+                    </span>
+                    {option.secondaryLanguage ? (
+                      <span className="font-medium text-white/60">{option.secondaryLanguage}</span>
+                    ) : null}
+                  </span>
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      ) : null}
+    </div>
+  );
 }
 
 export function SiteHeader({ locale, labels }: SiteHeaderProps) {
@@ -53,7 +259,7 @@ export function SiteHeader({ locale, labels }: SiteHeaderProps) {
   };
 
   return (
-    <header className="sticky top-0 z-50 border-b border-white/10 bg-black/75 backdrop-blur-lg">
+    <header className="fixed left-0 right-0 top-0 z-50 border-b border-white/10 bg-black/75 backdrop-blur-lg">
       <div className="section-shell flex h-20 items-center justify-between gap-4">
         <Link href={`/${locale}`} className="flex items-center" prefetch>
           <Image
@@ -84,21 +290,7 @@ export function SiteHeader({ locale, labels }: SiteHeaderProps) {
         </nav>
 
         <div className="hidden items-center gap-3 lg:flex">
-          <label className="sr-only" htmlFor="locale-switcher">
-            Language
-          </label>
-          <select
-            id="locale-switcher"
-            value={locale}
-            onChange={(event) => switchLocale(event.target.value)}
-            className="rounded-lg border border-white/20 bg-black px-3 py-2 text-xs font-semibold uppercase tracking-wide text-white outline-none ring-accent transition focus:ring-2"
-          >
-            {locales.map((item) => (
-              <option key={item} value={item}>
-                {localeLabels[item]}
-              </option>
-            ))}
-          </select>
+          <LocalePicker id="locale-switcher" locale={locale} onSelect={switchLocale} />
           <BookNowButton
             label={labels.bookNow}
             className="rounded-lg bg-accent px-5 py-2 text-sm font-semibold text-black transition hover:bg-white"
@@ -129,28 +321,17 @@ export function SiteHeader({ locale, labels }: SiteHeaderProps) {
                 {item.label}
               </Link>
             ))}
-            <div className="flex items-center gap-2">
-              <label className="sr-only" htmlFor="locale-switcher-mobile">
-                Language
-              </label>
-              <select
+            <div className="grid gap-3">
+              <LocalePicker
                 id="locale-switcher-mobile"
-                value={locale}
-                onChange={(event) => {
-                  switchLocale(event.target.value);
-                  setMenuOpen(false);
-                }}
-                className="w-full rounded-lg border border-white/20 bg-black px-3 py-3 text-xs font-semibold uppercase tracking-wide text-white"
-              >
-                {locales.map((item) => (
-                  <option key={item} value={item}>
-                    {localeLabels[item]}
-                  </option>
-                ))}
-              </select>
+                locale={locale}
+                mobile
+                onSelect={switchLocale}
+                onAfterSelect={() => setMenuOpen(false)}
+              />
               <BookNowButton
                 label={labels.bookNow}
-                className="rounded-lg bg-accent px-4 py-3 text-xs font-bold uppercase tracking-wide text-black"
+                className="w-full rounded-lg bg-accent px-4 py-3 text-sm font-semibold uppercase tracking-wide text-black transition hover:bg-white"
                 onOpen={() => setMenuOpen(false)}
               />
             </div>

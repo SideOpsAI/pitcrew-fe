@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Exo_2, Orbitron } from "next/font/google";
+import { Orbitron, Poppins } from "next/font/google";
 
 import { getSiteUrl } from "@/lib/site";
 
@@ -11,9 +11,10 @@ const orbitron = Orbitron({
   display: "swap",
 });
 
-const exo2 = Exo_2({
+const poppins = Poppins({
   subsets: ["latin"],
-  variable: "--font-exo2",
+  variable: "--font-poppins",
+  weight: ["300", "400", "500", "600", "700"],
   display: "swap",
 });
 
@@ -38,7 +39,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${orbitron.variable} ${exo2.variable}`}>
+    <html lang="en" className={`${orbitron.variable} ${poppins.variable}`}>
       <body className="font-body antialiased">{children}</body>
     </html>
   );

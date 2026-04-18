@@ -11,7 +11,13 @@ import {
   type ReactNode,
 } from "react";
 
-import { contactLeadSchema } from "@/lib/contact";
+import {
+  buildBookingPhoneValue,
+  contactLeadSchema,
+  isValidUSAddressLine,
+  isValidUSCityArea,
+  normalizePhoneDigits,
+} from "@/lib/contact";
 import type { ContactLeadErrors, ContactFormState } from "@/lib/contact";
 import type { Locale, PlanSlug, ServiceItem, TranslationSchema } from "@/types/content";
 
@@ -41,7 +47,8 @@ type BookingFormData = {
   addressLine: string;
   cityArea: string;
   name: string;
-  phone: string;
+  phoneDialCode: string;
+  phoneNumber: string;
   email: string;
   notes: string;
   botField: string;
@@ -66,10 +73,81 @@ const initialFormData: BookingFormData = {
   addressLine: "",
   cityArea: "",
   name: "",
-  phone: "",
+  phoneDialCode: "+1",
+  phoneNumber: "",
   email: "",
   notes: "",
   botField: "",
+};
+
+const phoneDialCodeOptions = [
+  { value: "+1", label: "US (+1)" },
+  { value: "+52", label: "MX (+52)" },
+  { value: "+55", label: "BR (+55)" },
+  { value: "+57", label: "CO (+57)" },
+  { value: "+34", label: "ES (+34)" },
+] as const;
+
+const bookingFieldValidationCopy: Record<
+  Locale,
+  {
+    usAddressInvalid: string;
+    usCityStateInvalid: string;
+    usAddressPlaceholder: string;
+    phoneCodeLabel: string;
+    phoneNumberPlaceholder: string;
+    cityStatePlaceholder: string;
+  }
+> = {
+  en: {
+    usAddressInvalid: "Enter a valid US street address (example: 123 Main St).",
+    usCityStateInvalid: "Use US format: City, ST (example: Miami, FL).",
+    usAddressPlaceholder: "123 Main St",
+    phoneCodeLabel: "Code",
+    phoneNumberPlaceholder: "5551234567",
+    cityStatePlaceholder: "Miami, FL",
+  },
+  es: {
+    usAddressInvalid:
+      "Ingresa una direccion valida de EE.UU. (ejemplo: 123 Main St).",
+    usCityStateInvalid: "Usa formato de EE.UU.: Ciudad, ST (ejemplo: Miami, FL).",
+    usAddressPlaceholder: "123 Main St",
+    phoneCodeLabel: "Codigo",
+    phoneNumberPlaceholder: "5551234567",
+    cityStatePlaceholder: "Miami, FL",
+  },
+  "pt-BR": {
+    usAddressInvalid: "Informe um endereco valido dos EUA (exemplo: 123 Main St).",
+    usCityStateInvalid: "Use o formato dos EUA: Cidade, ST (exemplo: Miami, FL).",
+    usAddressPlaceholder: "123 Main St",
+    phoneCodeLabel: "Codigo",
+    phoneNumberPlaceholder: "5551234567",
+    cityStatePlaceholder: "Miami, FL",
+  },
+  it: {
+    usAddressInvalid: "Inserisci un indirizzo USA valido (esempio: 123 Main St).",
+    usCityStateInvalid: "Usa il formato USA: Citta, ST (esempio: Miami, FL).",
+    usAddressPlaceholder: "123 Main St",
+    phoneCodeLabel: "Codice",
+    phoneNumberPlaceholder: "5551234567",
+    cityStatePlaceholder: "Miami, FL",
+  },
+  "zh-CN": {
+    usAddressInvalid: "Qingshuru youxiao de meiguo jiedao dizhi (li: 123 Main St).",
+    usCityStateInvalid: "Qingyong meiguo geshi: City, ST (li: Miami, FL).",
+    usAddressPlaceholder: "123 Main St",
+    phoneCodeLabel: "Code",
+    phoneNumberPlaceholder: "5551234567",
+    cityStatePlaceholder: "Miami, FL",
+  },
+  de: {
+    usAddressInvalid: "Bitte gib eine gueltige US-Adresse ein (z. B. 123 Main St).",
+    usCityStateInvalid: "Bitte nutze US-Format: Stadt, ST (z. B. Miami, FL).",
+    usAddressPlaceholder: "123 Main St",
+    phoneCodeLabel: "Code",
+    phoneNumberPlaceholder: "5551234567",
+    cityStatePlaceholder: "Miami, FL",
+  },
 };
 
 const captchaMessages: Record<
@@ -121,13 +199,13 @@ const captchaMessages: Record<
     inputPlaceholder: "Inserisci il testo dell'immagine",
   },
   "zh-CN": {
-    label: "Security verification",
-    required: "Please enter the captcha before sending.",
-    unavailable: "Security check is not available right now.",
-    retry: "Captcha validation failed. Please try again.",
-    loading: "Loading captcha...",
-    refresh: "Refresh",
-    inputPlaceholder: "Type the captcha text",
+    label: "Anquan yanzheng",
+    required: "Qingxian shuru yanzhengma zai fasong.",
+    unavailable: "Dangqian wu fa shiyong anquan yanzheng.",
+    retry: "Yanzhengma shibai, qing chongshi.",
+    loading: "Zai jiazai yanzhengma...",
+    refresh: "Shuaxin",
+    inputPlaceholder: "Qing shuru tupian wenzi",
   },
   de: {
     label: "Sicherheitspruefung",
@@ -180,12 +258,60 @@ const bookingConfirmationMessages: Record<
   },
 };
 
+const bookingUiMessages: Record<
+  Locale,
+  {
+    stepLabel: string;
+    sendingLabel: string;
+    confirmationEyebrow: string;
+  }
+> = {
+  en: {
+    stepLabel: "Step",
+    sendingLabel: "Sending...",
+    confirmationEyebrow: "Booking",
+  },
+  es: {
+    stepLabel: "Paso",
+    sendingLabel: "Enviando...",
+    confirmationEyebrow: "Reserva",
+  },
+  "pt-BR": {
+    stepLabel: "Etapa",
+    sendingLabel: "Enviando...",
+    confirmationEyebrow: "Agendamento",
+  },
+  it: {
+    stepLabel: "Passo",
+    sendingLabel: "Invio...",
+    confirmationEyebrow: "Prenotazione",
+  },
+  "zh-CN": {
+    stepLabel: "Buzhou",
+    sendingLabel: "Fasong zhong...",
+    confirmationEyebrow: "Yuyue",
+  },
+  de: {
+    stepLabel: "Schritt",
+    sendingLabel: "Wird gesendet...",
+    confirmationEyebrow: "Buchung",
+  },
+};
+
 function getCaptchaMessages(locale: Locale) {
   return captchaMessages[locale];
 }
 
+function getBookingFieldValidationCopy(locale: Locale) {
+  return bookingFieldValidationCopy[locale];
+}
+
 function getBookingConfirmationMessages(locale: Locale) {
   return bookingConfirmationMessages[locale];
+}
+
+function getBookingUiMessages(locale: Locale) {
+  return bookingUiMessages[locale];
 }
 
 function getStepTitle(step: number, labels: TranslationSchema["bookingModal"]) {
@@ -229,6 +355,8 @@ function BookingModal({
     message: "",
   });
   const captchaCopy = getCaptchaMessages(locale);
+  const fieldValidationCopy = getBookingFieldValidationCopy(locale);
+  const uiCopy = getBookingUiMessages(locale);
 
   const isSubmitting = formState.status === "submitting";
 
@@ -383,9 +511,20 @@ function BookingModal({
   const updateField = (field: keyof BookingFormData, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
 
-    if (errors[field]) {
-      setErrors((prev) => ({ ...prev, [field]: undefined }));
-    }
+    setErrors((prev) => {
+      const nextErrors = { ...prev };
+      const errorField = field as keyof ContactLeadErrors;
+
+      if (nextErrors[errorField]) {
+        nextErrors[errorField] = undefined;
+      }
+
+      if (field === "phoneDialCode" || field === "phoneNumber") {
+        nextErrors.phone = undefined;
+      }
+
+      return nextErrors;
+    });
 
     if (formState.message) {
       setFormState((prev) => ({ ...prev, message: "", status: "idle" }));
@@ -414,17 +553,31 @@ function BookingModal({
     if (targetStep === 3) {
       if (!formData.addressLine.trim()) {
         nextErrors.addressLine = labels.validation.required;
+      } else if (!isValidUSAddressLine(formData.addressLine)) {
+        nextErrors.addressLine = fieldValidationCopy.usAddressInvalid;
       }
 
       if (!formData.cityArea.trim()) {
         nextErrors.cityArea = labels.validation.required;
+      } else if (!isValidUSCityArea(formData.cityArea)) {
+        nextErrors.cityArea = fieldValidationCopy.usCityStateInvalid;
       }
 
       if (!formData.name.trim()) {
         nextErrors.name = labels.validation.required;
       }
 
-      if (!formData.phone.trim() || formData.phone.trim().length < 6) {
+      const bookingPhone = buildBookingPhoneValue(
+        formData.phoneDialCode,
+        formData.phoneNumber,
+      );
+      const localPhoneDigits = normalizePhoneDigits(formData.phoneNumber);
+      const isNorthAmericaCode = formData.phoneDialCode === "+1";
+      const hasValidLength = isNorthAmericaCode
+        ? localPhoneDigits.length === 10
+        : localPhoneDigits.length >= 7 && localPhoneDigits.length <= 14;
+
+      if (!bookingPhone || !hasValidLength) {
         nextErrors.phone = labels.validation.phoneRequired;
       }
     }
@@ -471,10 +624,14 @@ function BookingModal({
     }
 
     const selectedService = services.find((service) => service.slug === formData.planSlug);
+    const bookingPhone = buildBookingPhoneValue(
+      formData.phoneDialCode,
+      formData.phoneNumber,
+    );
 
     const payload = {
       name: formData.name,
-      phone: formData.phone,
+      phone: bookingPhone,
       email: formData.email,
       vehicleType: formData.vehicleType,
       serviceInterest: selectedService?.name ?? formData.planSlug,
@@ -573,7 +730,7 @@ function BookingModal({
         <div className="flex items-start justify-between gap-4 border-b border-white/10 p-5 sm:p-6">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.25em] text-accent">
-              Step {step} / 3
+              {uiCopy.stepLabel} {step} / 3
             </p>
             <h2 className="mt-2 font-heading text-2xl uppercase tracking-wider text-white">
               {labels.title}
@@ -684,7 +841,8 @@ function BookingModal({
                     data-autofocus="true"
                     value={formData.addressLine}
                     onChange={(event) => updateField("addressLine", event.target.value)}
-                    placeholder={labels.placeholders.addressLine}
+                    placeholder={fieldValidationCopy.usAddressPlaceholder}
+                    autoComplete="address-line1"
                     className="w-full rounded-xl border border-white/15 bg-black/60 px-4 py-3 text-white outline-none ring-accent transition placeholder:text-white/40 focus:ring-2"
                   />
                   {errors.addressLine ? (
@@ -699,7 +857,23 @@ function BookingModal({
                   <input
                     value={formData.cityArea}
                     onChange={(event) => updateField("cityArea", event.target.value)}
-                    placeholder={labels.placeholders.cityArea}
+                    onBlur={(event) => {
+                      const normalized = event.target.value
+                        .trim()
+                        .replace(/\s*,\s*/g, ", ");
+                      const match = normalized.match(/^(.*),\s*([A-Za-z]{2})$/);
+
+                      if (!match) {
+                        updateField("cityArea", normalized);
+                        return;
+                      }
+
+                      const city = match[1].trim().replace(/\s{2,}/g, " ");
+                      const state = match[2].toUpperCase();
+                      updateField("cityArea", `${city}, ${state}`);
+                    }}
+                    placeholder={fieldValidationCopy.cityStatePlaceholder}
+                    autoComplete="address-level2"
                     className="w-full rounded-xl border border-white/15 bg-black/60 px-4 py-3 text-white outline-none ring-accent transition placeholder:text-white/40 focus:ring-2"
                   />
                   {errors.cityArea ? (
@@ -724,12 +898,34 @@ function BookingModal({
                   <span className="mb-2 block text-sm font-semibold text-white">
                     {labels.fields.phone}
                   </span>
-                  <input
-                    value={formData.phone}
-                    onChange={(event) => updateField("phone", event.target.value)}
-                    placeholder={labels.placeholders.phone}
-                    className="w-full rounded-xl border border-white/15 bg-black/60 px-4 py-3 text-white outline-none ring-accent transition placeholder:text-white/40 focus:ring-2"
-                  />
+                  <div className="grid grid-cols-[auto_1fr] gap-2">
+                    <label className="sr-only" htmlFor="booking-phone-code">
+                      {fieldValidationCopy.phoneCodeLabel}
+                    </label>
+                    <select
+                      id="booking-phone-code"
+                      value={formData.phoneDialCode}
+                      onChange={(event) => updateField("phoneDialCode", event.target.value)}
+                      className="rounded-xl border border-white/15 bg-black/60 px-3 py-3 text-white outline-none ring-accent transition focus:ring-2"
+                    >
+                      {phoneDialCodeOptions.map((option) => (
+                        <option key={option.value} value={option.value}>
+                          {option.label}
+                        </option>
+                      ))}
+                    </select>
+                    <input
+                      value={formData.phoneNumber}
+                      onChange={(event) => {
+                        const digits = normalizePhoneDigits(event.target.value).slice(0, 14);
+                        updateField("phoneNumber", digits);
+                      }}
+                      placeholder={fieldValidationCopy.phoneNumberPlaceholder}
+                      autoComplete="tel-national"
+                      inputMode="numeric"
+                      className="w-full rounded-xl border border-white/15 bg-black/60 px-4 py-3 text-white outline-none ring-accent transition placeholder:text-white/40 focus:ring-2"
+                    />
+                  </div>
                   {errors.phone ? <span className="mt-1 block text-xs text-red-300">{errors.phone}</span> : null}
                 </label>
 
@@ -837,7 +1033,7 @@ function BookingModal({
                   disabled={isSubmitting}
                   className="inline-flex items-center justify-center rounded-xl bg-accent px-6 py-3 text-sm font-bold uppercase tracking-wider text-black transition hover:bg-white disabled:opacity-60"
                 >
-                  {isSubmitting ? "..." : labels.actions.send}
+                  {isSubmitting ? uiCopy.sendingLabel : labels.actions.send}
                 </button>
               )}
             </div>
@@ -858,6 +1054,7 @@ function BookingConfirmationModal({
   onClose: () => void;
 }) {
   const copy = getBookingConfirmationMessages(locale);
+  const uiCopy = getBookingUiMessages(locale);
 
   useEffect(() => {
     if (!isOpen) {
@@ -901,7 +1098,9 @@ function BookingConfirmationModal({
         aria-label={copy.title}
         className="w-full max-w-lg rounded-2xl border border-white/15 bg-black p-6 shadow-2xl sm:p-8"
       >
-        <p className="text-xs font-semibold uppercase tracking-[0.25em] text-accent">Booking</p>
+        <p className="text-xs font-semibold uppercase tracking-[0.25em] text-accent">
+          {uiCopy.confirmationEyebrow}
+        </p>
         <h3 className="mt-3 font-heading text-3xl uppercase tracking-wider text-white">{copy.title}</h3>
         <p className="mt-4 text-sm text-white/80">{copy.body}</p>
         <div className="mt-8 flex justify-end">

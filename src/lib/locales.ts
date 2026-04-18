@@ -15,10 +15,10 @@ export const defaultLocale: Locale = "en";
 
 export const localeLabels: Record<Locale, string> = {
   en: "English",
-  es: "Español",
-  "pt-BR": "Português (Brasil)",
+  es: "Espanol",
+  "pt-BR": "Portugues (Brasil)",
   it: "Italiano",
-  "zh-CN": "简体中文",
+  "zh-CN": "Chinese (Simplified)",
   de: "Deutsch",
 };
 

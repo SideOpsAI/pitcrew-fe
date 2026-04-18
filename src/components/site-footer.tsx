@@ -29,7 +29,20 @@ export function SiteFooter({ locale, nav, footer, siteName }: SiteFooterProps) {
       </div>
 
       <div className="border-t border-white/10 py-4 text-center text-xs text-steel">
-        &copy; {year} {siteName}. {footer.rights}
+        <p>
+          &copy; {year} {siteName}. {footer.rights}
+        </p>
+        <p className="mt-1">
+          Built with love by{" "}
+          <a
+            href="https://sideops.ai/"
+            target="_blank"
+            rel="noreferrer"
+            className="text-accent transition hover:text-white"
+          >
+            SideOps.ai
+          </a>
+        </p>
       </div>
     </footer>
   );

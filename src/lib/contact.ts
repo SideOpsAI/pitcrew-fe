@@ -4,6 +4,93 @@ import { locales } from "@/lib/locales";
 import type { ContactLeadInput, FormStatus, PlanSlug } from "@/types/content";
 
 const planSlugs = ["basic", "medium", "full"] as const satisfies readonly PlanSlug[];
+const usStateCodes = new Set([
+  "AL",
+  "AK",
+  "AZ",
+  "AR",
+  "CA",
+  "CO",
+  "CT",
+  "DE",
+  "FL",
+  "GA",
+  "HI",
+  "ID",
+  "IL",
+  "IN",
+  "IA",
+  "KS",
+  "KY",
+  "LA",
+  "ME",
+  "MD",
+  "MA",
+  "MI",
+  "MN",
+  "MS",
+  "MO",
+  "MT",
+  "NE",
+  "NV",
+  "NH",
+  "NJ",
+  "NM",
+  "NY",
+  "NC",
+  "ND",
+  "OH",
+  "OK",
+  "OR",
+  "PA",
+  "RI",
+  "SC",
+  "SD",
+  "TN",
+  "TX",
+  "UT",
+  "VT",
+  "VA",
+  "WA",
+  "WV",
+  "WI",
+  "WY",
+  "DC",
+]);
+
+const usAddressPattern = /^\d+\s+[A-Za-z0-9][A-Za-z0-9\s.,'#/-]{2,}$/;
+const usCityAreaPattern = /^([A-Za-z][A-Za-z\s.'-]{1,80}),\s*([A-Za-z]{2})$/;
+const bookingPhonePattern = /^\+\d{1,3}\s\d{7,14}$/;
+
+export function normalizePhoneDigits(value: string) {
+  return value.replace(/\D/g, "");
+}
+
+export function buildBookingPhoneValue(dialCode: string, phoneNumber: string) {
+  const digits = normalizePhoneDigits(phoneNumber);
+  return `${dialCode} ${digits}`.trim();
+}
+
+export function isValidBookingPhone(phone: string) {
+  return bookingPhonePattern.test(phone.trim());
+}
+
+export function isValidUSAddressLine(addressLine: string) {
+  const normalized = addressLine.trim();
+  return usAddressPattern.test(normalized);
+}
+
+export function isValidUSCityArea(cityArea: string) {
+  const normalized = cityArea.trim();
+  const parsed = normalized.match(usCityAreaPattern);
+
+  if (!parsed) {
+    return false;
+  }
+
+  const stateCode = parsed[2].toUpperCase();
+  return usStateCodes.has(stateCode);
+}
 
 export const bookingPlanSlugSchema = z.enum(planSlugs);
 
@@ -59,6 +146,12 @@ export const contactLeadSchema = z
           path: ["addressLine"],
           message: "Address is required",
         });
+      } else if (!isValidUSAddressLine(data.addressLine)) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["addressLine"],
+          message: "Address must be a valid US street address",
+        });
       }
 
       if (!data.cityArea) {
@@ -66,6 +159,20 @@ export const contactLeadSchema = z
           code: z.ZodIssueCode.custom,
           path: ["cityArea"],
           message: "City/area is required",
+        });
+      } else if (!isValidUSCityArea(data.cityArea)) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["cityArea"],
+          message: "City/area must follow City, ST format",
+        });
+      }
+
+      if (!isValidBookingPhone(data.phone)) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["phone"],
+          message: "Phone must include country code and a valid number",
         });
       }
 

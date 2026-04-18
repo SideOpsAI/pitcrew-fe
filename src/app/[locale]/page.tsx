@@ -33,21 +33,25 @@ export default async function HomePage({ params }: HomePageProps) {
   return (
     <>
       <section className="section-shell relative overflow-hidden py-16 md:py-24">
-        <div className="pointer-events-none absolute inset-0">
-          <div className="absolute inset-y-0 right-0 w-1/2 overflow-hidden">
+        <div
+          className="pointer-events-none absolute inset-0"
+          data-scroll-fade
+          data-scroll-fade-delay={40}
+        >
+          <div className="absolute inset-0 overflow-hidden sm:inset-y-0 sm:right-0 sm:left-auto sm:w-1/2">
             <Image
               src="/hero-sportscar-black.jpg"
               alt=""
               fill
               priority
-              sizes="50vw"
-              className="object-cover object-right opacity-25"
+              sizes="(max-width: 639px) 100vw, 50vw"
+              className="object-cover object-center opacity-25 sm:object-right"
             />
           </div>
           <div className="absolute inset-0 bg-gradient-to-r from-black/72 via-black/55 to-black/76" />
         </div>
 
-        <div className="relative z-10 max-w-3xl">
+        <div className="relative z-10 max-w-3xl" data-scroll-fade data-scroll-fade-delay={180}>
           <p className="mb-4 inline-flex rounded-full border border-accent/40 bg-accent/10 px-4 py-1 text-xs font-bold uppercase tracking-[0.25em] text-accent">
             {dict.hero.eyebrow}
           </p>
@@ -84,7 +88,11 @@ export default async function HomePage({ params }: HomePageProps) {
         </div>
       </section>
 
-      <section className="section-shell py-8 md:py-12">
+      <section
+        className="section-shell py-8 md:py-12"
+        data-scroll-fade
+        data-scroll-fade-delay={80}
+      >
         <div className="panel p-6 md:p-8">
           <h2 className="font-heading text-2xl uppercase tracking-wider text-white md:text-3xl">
             {dict.about.title}
@@ -93,7 +101,11 @@ export default async function HomePage({ params }: HomePageProps) {
         </div>
       </section>
 
-      <section className="section-shell py-14 md:py-20">
+      <section
+        className="section-shell py-14 md:py-20"
+        data-scroll-fade
+        data-scroll-fade-delay={110}
+      >
         <div className="mb-8">
           <h2 className="font-heading text-3xl uppercase tracking-wider text-white">
             {dict.features.title}
@@ -102,8 +114,13 @@ export default async function HomePage({ params }: HomePageProps) {
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-          {dict.features.items.map((feature) => (
-            <article key={feature.title} className="panel p-5">
+          {dict.features.items.map((feature, index) => (
+            <article
+              key={feature.title}
+              className="panel p-5"
+              data-scroll-fade
+              data-scroll-fade-delay={160 + index * 65}
+            >
               <h3 className="font-heading text-lg uppercase tracking-wider text-accent">
                 {feature.title}
               </h3>
@@ -113,7 +130,11 @@ export default async function HomePage({ params }: HomePageProps) {
         </div>
       </section>
 
-      <section className="section-shell py-14 md:py-20">
+      <section
+        className="section-shell py-14 md:py-20"
+        data-scroll-fade
+        data-scroll-fade-delay={130}
+      >
         <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
           <div>
             <h2 className="font-heading text-3xl uppercase tracking-wider text-white">
@@ -130,67 +151,24 @@ export default async function HomePage({ params }: HomePageProps) {
         </div>
 
         <div className="grid gap-4 md:grid-cols-2">
-          {featuredServices.map((service) => (
-            <ServiceCard
+          {featuredServices.map((service, index) => (
+            <div
               key={service.slug}
-              locale={safeLocale}
-              service={service}
-              labels={dict.servicesPage}
-              detailLabel={dict.serviceDetail.viewDetails}
-            />
-          ))}
-        </div>
-      </section>
-
-      <section className="section-shell py-14 md:py-20">
-        <div className="mb-8">
-          <h2 className="font-heading text-3xl uppercase tracking-wider text-white">
-            {dict.testimonials.title}
-          </h2>
-          <p className="mt-3 text-white/75">{dict.testimonials.subtitle}</p>
-        </div>
-
-        <div className="grid gap-4 md:grid-cols-3">
-          {dict.testimonials.items.map((item) => (
-            <article key={item.name} className="panel p-6">
-              <p className="text-sm text-white/80">
-                &ldquo;{item.quote}&rdquo;
-              </p>
-              <p className="mt-4 font-heading text-sm uppercase tracking-wider text-accent">
-                {item.name}
-              </p>
-            </article>
-          ))}
-        </div>
-      </section>
-
-      <section className="section-shell py-14 md:py-20">
-        <div className="mb-8">
-          <h2 className="font-heading text-3xl uppercase tracking-wider text-white">
-            {dict.gallery.title}
-          </h2>
-          <p className="mt-3 text-white/75">{dict.gallery.subtitle}</p>
-        </div>
-
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {dict.gallery.items.map((item) => (
-            <figure key={item.src} className="panel overflow-hidden">
-              <Image
-                src={item.src}
-                alt={item.alt}
-                width={1200}
-                height={800}
-                className="h-52 w-full object-cover"
+              data-scroll-fade
+              data-scroll-fade-delay={180 + index * 75}
+            >
+              <ServiceCard
+                locale={safeLocale}
+                service={service}
+                labels={dict.servicesPage}
+                detailLabel={dict.serviceDetail.viewDetails}
               />
-              <figcaption className="px-4 py-3 text-xs uppercase tracking-wide text-white/70">
-                {item.alt}
-              </figcaption>
-            </figure>
+            </div>
           ))}
         </div>
       </section>
 
-      <section className="section-shell pb-20">
+      <section className="section-shell pb-20" data-scroll-fade data-scroll-fade-delay={160}>
         <div className="panel border-accent/30 bg-gradient-to-r from-accent/15 to-accent-deep/10 p-8 md:p-10">
           <h2 className="font-heading text-3xl uppercase tracking-wider text-white md:text-4xl">
             {dict.cta.title}

@@ -63,17 +63,19 @@ export default async function ServiceDetailPage({
   const service = getServiceBySlug(safeLocale, slug);
 
   return (
-    <section className="section-shell py-14 md:py-20">
+    <section className="section-shell py-14 md:py-20" data-scroll-fade>
       <Link
         href={`/${safeLocale}/services`}
         className="mb-6 inline-flex text-sm font-semibold uppercase tracking-wide text-accent"
+        data-scroll-fade
+        data-scroll-fade-delay={80}
       >
         {dict.serviceDetail.backToServices}
       </Link>
 
-      <article className="panel p-6 md:p-10">
+      <article className="panel p-6 md:p-10" data-scroll-fade data-scroll-fade-delay={120}>
         <div className="grid gap-8 lg:grid-cols-[1.2fr_0.8fr] lg:items-start">
-          <div>
+          <div data-scroll-fade data-scroll-fade-delay={160}>
             <h1 className="font-heading text-4xl uppercase tracking-wider text-white md:text-5xl">
               {service.name}
             </h1>
@@ -92,7 +94,11 @@ export default async function ServiceDetailPage({
             </ul>
           </div>
 
-          <aside className="rounded-2xl border border-white/15 bg-white/5 p-5">
+          <aside
+            className="rounded-2xl border border-white/15 bg-white/5 p-5"
+            data-scroll-fade
+            data-scroll-fade-delay={220}
+          >
             <dl className="space-y-4">
               <div>
                 <dt className="text-xs uppercase tracking-wider text-steel">
