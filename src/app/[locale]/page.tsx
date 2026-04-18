@@ -180,7 +180,7 @@ export default async function HomePage({ params }: HomePageProps) {
               className="inline-flex items-center justify-center rounded-xl bg-accent px-6 py-3 text-sm font-bold uppercase tracking-wider text-black transition hover:bg-white"
             />
             <a
-              href="https://wa.me/15552147788"
+              href="https://wa.me/16032051026?text=Hola%2C%20quiero%20reservar%20un%20detailing."
               target="_blank"
               rel="noreferrer"
               className="inline-flex items-center justify-center rounded-xl border border-white/25 px-6 py-3 text-sm font-bold uppercase tracking-wider text-white transition hover:border-accent hover:text-accent"

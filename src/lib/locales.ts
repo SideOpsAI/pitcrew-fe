@@ -7,7 +7,6 @@ export const locales = [
   "es",
   "pt-BR",
   "it",
-  "zh-CN",
   "de",
 ] as const satisfies readonly Locale[];
 
@@ -15,7 +14,7 @@ export const defaultLocale: Locale = "en";
 
 export const localeLabels: Record<Locale, string> = {
   en: "English",
-  es: "Espanol",
+  es: "Español",
   "pt-BR": "Portugues (Brasil)",
   it: "Italiano",
   "zh-CN": "Chinese (Simplified)",

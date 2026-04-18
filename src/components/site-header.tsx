@@ -17,7 +17,6 @@ type SiteHeaderProps = {
 type LocaleCard = {
   countryName: string;
   primaryLanguage: string;
-  secondaryLanguage?: string;
   flagSrc: string;
 };
 
@@ -33,51 +32,51 @@ const localeFlags: Record<Locale, string> = {
 const localeCardsByUiLocale: Record<Locale, Record<Locale, Omit<LocaleCard, "flagSrc">>> = {
   en: {
     en: { countryName: "United States", primaryLanguage: "English" },
-    es: { countryName: "Colombia", primaryLanguage: "Espanol", secondaryLanguage: "English" },
-    "pt-BR": { countryName: "Brazil", primaryLanguage: "Portugues", secondaryLanguage: "English" },
-    it: { countryName: "Italy", primaryLanguage: "Italiano", secondaryLanguage: "English" },
-    "zh-CN": { countryName: "China", primaryLanguage: "Chinese", secondaryLanguage: "English" },
-    de: { countryName: "Germany", primaryLanguage: "Deutsch", secondaryLanguage: "English" },
+    es: { countryName: "Colombia", primaryLanguage: "Español" },
+    "pt-BR": { countryName: "Brazil", primaryLanguage: "Portugues" },
+    it: { countryName: "Italy", primaryLanguage: "Italiano" },
+    "zh-CN": { countryName: "China", primaryLanguage: "Chinese" },
+    de: { countryName: "Germany", primaryLanguage: "Deutsch" },
   },
   es: {
     en: { countryName: "Estados Unidos", primaryLanguage: "Ingles" },
-    es: { countryName: "Colombia", primaryLanguage: "Espanol", secondaryLanguage: "Ingles" },
-    "pt-BR": { countryName: "Brasil", primaryLanguage: "Portugues", secondaryLanguage: "Ingles" },
-    it: { countryName: "Italia", primaryLanguage: "Italiano", secondaryLanguage: "Ingles" },
-    "zh-CN": { countryName: "China", primaryLanguage: "Chino", secondaryLanguage: "Ingles" },
-    de: { countryName: "Alemania", primaryLanguage: "Aleman", secondaryLanguage: "Ingles" },
+    es: { countryName: "Colombia", primaryLanguage: "Español" },
+    "pt-BR": { countryName: "Brasil", primaryLanguage: "Portugues" },
+    it: { countryName: "Italia", primaryLanguage: "Italiano" },
+    "zh-CN": { countryName: "China", primaryLanguage: "Chino" },
+    de: { countryName: "Alemania", primaryLanguage: "Aleman" },
   },
   "pt-BR": {
     en: { countryName: "Estados Unidos", primaryLanguage: "Ingles" },
-    es: { countryName: "Colombia", primaryLanguage: "Espanol", secondaryLanguage: "Ingles" },
-    "pt-BR": { countryName: "Brasil", primaryLanguage: "Portugues", secondaryLanguage: "Ingles" },
-    it: { countryName: "Italia", primaryLanguage: "Italiano", secondaryLanguage: "Ingles" },
-    "zh-CN": { countryName: "China", primaryLanguage: "Chines", secondaryLanguage: "Ingles" },
-    de: { countryName: "Alemanha", primaryLanguage: "Alemao", secondaryLanguage: "Ingles" },
+    es: { countryName: "Colombia", primaryLanguage: "Español" },
+    "pt-BR": { countryName: "Brasil", primaryLanguage: "Portugues" },
+    it: { countryName: "Italia", primaryLanguage: "Italiano" },
+    "zh-CN": { countryName: "China", primaryLanguage: "Chines" },
+    de: { countryName: "Alemanha", primaryLanguage: "Alemao" },
   },
   it: {
     en: { countryName: "Stati Uniti", primaryLanguage: "Inglese" },
-    es: { countryName: "Colombia", primaryLanguage: "Spagnolo", secondaryLanguage: "Inglese" },
-    "pt-BR": { countryName: "Brasile", primaryLanguage: "Portoghese", secondaryLanguage: "Inglese" },
-    it: { countryName: "Italia", primaryLanguage: "Italiano", secondaryLanguage: "Inglese" },
-    "zh-CN": { countryName: "Cina", primaryLanguage: "Cinese", secondaryLanguage: "Inglese" },
-    de: { countryName: "Germania", primaryLanguage: "Tedesco", secondaryLanguage: "Inglese" },
+    es: { countryName: "Colombia", primaryLanguage: "Spagnolo" },
+    "pt-BR": { countryName: "Brasile", primaryLanguage: "Portoghese" },
+    it: { countryName: "Italia", primaryLanguage: "Italiano" },
+    "zh-CN": { countryName: "Cina", primaryLanguage: "Cinese" },
+    de: { countryName: "Germania", primaryLanguage: "Tedesco" },
   },
   "zh-CN": {
     en: { countryName: "Meiguo", primaryLanguage: "Yingyu" },
-    es: { countryName: "Gelunbiya", primaryLanguage: "Xibanyayu", secondaryLanguage: "Yingyu" },
-    "pt-BR": { countryName: "Baxi", primaryLanguage: "Putaoyaoyu", secondaryLanguage: "Yingyu" },
-    it: { countryName: "Yidali", primaryLanguage: "Yidaliyu", secondaryLanguage: "Yingyu" },
-    "zh-CN": { countryName: "Zhongguo", primaryLanguage: "Zhongwen", secondaryLanguage: "Yingyu" },
-    de: { countryName: "Deguo", primaryLanguage: "Deyu", secondaryLanguage: "Yingyu" },
+    es: { countryName: "Gelunbiya", primaryLanguage: "Xibanyayu" },
+    "pt-BR": { countryName: "Baxi", primaryLanguage: "Putaoyaoyu" },
+    it: { countryName: "Yidali", primaryLanguage: "Yidaliyu" },
+    "zh-CN": { countryName: "Zhongguo", primaryLanguage: "Zhongwen" },
+    de: { countryName: "Deguo", primaryLanguage: "Deyu" },
   },
   de: {
     en: { countryName: "Vereinigte Staaten", primaryLanguage: "Englisch" },
-    es: { countryName: "Kolumbien", primaryLanguage: "Spanisch", secondaryLanguage: "Englisch" },
-    "pt-BR": { countryName: "Brasilien", primaryLanguage: "Portugiesisch", secondaryLanguage: "Englisch" },
-    it: { countryName: "Italien", primaryLanguage: "Italienisch", secondaryLanguage: "Englisch" },
-    "zh-CN": { countryName: "China", primaryLanguage: "Chinesisch", secondaryLanguage: "Englisch" },
-    de: { countryName: "Deutschland", primaryLanguage: "Deutsch", secondaryLanguage: "Englisch" },
+    es: { countryName: "Kolumbien", primaryLanguage: "Spanisch" },
+    "pt-BR": { countryName: "Brasilien", primaryLanguage: "Portugiesisch" },
+    it: { countryName: "Italien", primaryLanguage: "Italienisch" },
+    "zh-CN": { countryName: "China", primaryLanguage: "Chinesisch" },
+    de: { countryName: "Deutschland", primaryLanguage: "Deutsch" },
   },
 };
 
@@ -210,13 +209,8 @@ function LocalePicker({
                   <span className="block text-[11px] font-medium text-violet-300">
                     {option.countryName}
                   </span>
-                  <span className="mt-0.5 flex flex-wrap gap-x-3 gap-y-0.5 text-sm">
-                    <span className={`font-semibold ${active ? "text-accent" : "text-white"}`}>
-                      {option.primaryLanguage}
-                    </span>
-                    {option.secondaryLanguage ? (
-                      <span className="font-medium text-white/60">{option.secondaryLanguage}</span>
-                    ) : null}
+                  <span className={`mt-0.5 block text-sm font-semibold ${active ? "text-accent" : "text-white"}`}>
+                    {option.primaryLanguage}
                   </span>
                 </span>
               </button>

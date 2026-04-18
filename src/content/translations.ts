@@ -68,11 +68,11 @@ const baseGallery: GalleryItem[] = [
 ];
 
 const contactItems: QuickContactItem[] = [
-  { label: "Phone", value: "+1 (555) 214-7788", href: "tel:+15552147788" },
+  { label: "Phone", value: "+1 (603) 205-1026", href: "tel:+16032051026" },
   {
     label: "WhatsApp",
-    value: "+1 (555) 214-7788",
-    href: "https://wa.me/15552147788",
+    value: "+1 (603) 205-1026",
+    href: "https://wa.me/16032051026?text=Hola%2C%20quiero%20reservar%20un%20detailing.",
   },
   {
     label: "Email",
