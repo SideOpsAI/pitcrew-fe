@@ -63,6 +63,8 @@ type CaptchaApiResponse = {
   ok: boolean;
   svg?: string;
   token?: string;
+  error?: string;
+  details?: string;
 };
 
 const initialFormData: BookingFormData = {
@@ -361,21 +363,31 @@ function BookingModal({
   const isSubmitting = formState.status === "submitting";
 
   const fetchCaptchaChallenge = useCallback(async () => {
+    const controller = new AbortController();
+    const timeoutId = window.setTimeout(() => {
+      controller.abort();
+    }, 10000);
+
     setCaptchaLoading(true);
 
     try {
       const response = await fetch("/api/captcha", {
         method: "GET",
         cache: "no-store",
+        signal: controller.signal,
       });
 
+      const json = (await response.json().catch(() => null)) as CaptchaApiResponse | null;
+
       if (!response.ok) {
-        throw new Error("captcha_unavailable");
+        const reason =
+          json?.error === "captcha_not_configured"
+            ? "captcha_not_configured"
+            : "captcha_unavailable";
+        throw new Error(reason);
       }
 
-      const json = (await response.json()) as CaptchaApiResponse;
-
-      if (!json.ok || !json.svg || !json.token) {
+      if (!json?.ok || !json.svg || !json.token) {
         throw new Error("captcha_payload_invalid");
       }
 
@@ -386,6 +398,7 @@ function BookingModal({
     } catch {
       setCaptcha(null);
     } finally {
+      window.clearTimeout(timeoutId);
       setCaptchaLoading(false);
     }
   }, []);
