@@ -19,7 +19,7 @@ const config: Config = {
       },
       fontFamily: {
         heading: ["var(--font-orbitron)", "sans-serif"],
-        body: ["var(--font-exo2)", "sans-serif"],
+        body: ["var(--font-poppins)", "sans-serif"],
       },
       boxShadow: {
         glow: "0 0 30px rgba(12, 170, 255, 0.35)",

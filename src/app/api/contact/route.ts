@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 
+import { verifyCaptchaChallenge } from "@/lib/captcha";
 import { contactLeadSchema } from "@/lib/contact";
 
 export const runtime = "nodejs";
@@ -26,66 +27,8 @@ function getNetlifyFormsTargetUrl(baseUrl: string) {
   return `${baseUrl}/__forms.html`;
 }
 
-function getTurnstileSecretKey() {
-  const secret = process.env.TURNSTILE_SECRET_KEY;
-  return secret ? secret.trim() : null;
-}
-
-function getClientIp(request: Request) {
-  const forwardedFor = request.headers.get("x-forwarded-for");
-  if (forwardedFor) {
-    return forwardedFor.split(",")[0]?.trim() || null;
-  }
-
-  const realIp = request.headers.get("x-real-ip");
-  if (realIp) {
-    return realIp.trim();
-  }
-
-  const cfIp = request.headers.get("cf-connecting-ip");
-  if (cfIp) {
-    return cfIp.trim();
-  }
-
-  return null;
-}
-
-type TurnstileVerificationResponse = {
-  success: boolean;
-};
-
-async function verifyTurnstileToken({
-  secret,
-  token,
-  remoteIp,
-}: {
-  secret: string;
-  token: string;
-  remoteIp: string | null;
-}) {
-  const payload = new URLSearchParams({
-    secret,
-    response: token,
-  });
-
-  if (remoteIp) {
-    payload.set("remoteip", remoteIp);
-  }
-
-  const response = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/x-www-form-urlencoded",
-    },
-    body: payload.toString(),
-  });
-
-  if (!response.ok) {
-    return false;
-  }
-
-  const json = (await response.json()) as TurnstileVerificationResponse;
-  return json.success;
+function isMockFormDeliveryEnabled() {
+  return process.env.MOCK_FORM_DELIVERY === "true";
 }
 
 export async function POST(request: Request) {
@@ -109,25 +52,23 @@ export async function POST(request: Request) {
     }
 
     if (parsed.data.source === "booking-modal") {
-      const secret = getTurnstileSecretKey();
-      if (!secret) {
+      const captchaValidation = verifyCaptchaChallenge({
+        token: parsed.data.captchaToken,
+        value: parsed.data.captchaValue,
+      });
+
+      if (!captchaValidation.ok && captchaValidation.error === "captcha_not_configured") {
         return NextResponse.json(
           {
             ok: false,
             error: "captcha_not_configured",
-            details: "Missing TURNSTILE_SECRET_KEY",
+            details: "Missing CAPTCHA_SECRET",
           },
           { status: 500 },
         );
       }
 
-      const isCaptchaValid = await verifyTurnstileToken({
-        secret,
-        token: parsed.data.captchaToken,
-        remoteIp: getClientIp(request),
-      });
-
-      if (!isCaptchaValid) {
+      if (!captchaValidation.ok) {
         return NextResponse.json(
           {
             ok: false,
@@ -136,6 +77,10 @@ export async function POST(request: Request) {
           { status: 400 },
         );
       }
+    }
+
+    if (isMockFormDeliveryEnabled()) {
+      return NextResponse.json({ ok: true, mocked: true });
     }
 
     const netlifyBaseUrl = getNetlifyBaseUrl();
@@ -169,7 +114,7 @@ export async function POST(request: Request) {
       "bot-field": "",
     });
 
-    const formsEndpoint = `${netlifyBaseUrl}/__forms.html`;
+    const formsEndpoint = getNetlifyFormsTargetUrl(netlifyBaseUrl);
 
     const netlifyResponse = await fetch(formsEndpoint, {
       method: "POST",

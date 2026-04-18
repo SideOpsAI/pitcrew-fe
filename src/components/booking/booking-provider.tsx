@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import {
   createContext,
@@ -11,37 +11,15 @@ import {
   type ReactNode,
 } from "react";
 
-import { contactLeadSchema } from "@/lib/contact";
-import type {
-  ContactLeadErrors,
-  ContactFormState,
+import {
+  buildBookingPhoneValue,
+  contactLeadSchema,
+  isValidUSAddressLine,
+  isValidUSCityArea,
+  normalizePhoneDigits,
 } from "@/lib/contact";
-import type {
-  Locale,
-  PlanSlug,
-  ServiceItem,
-  TranslationSchema,
-} from "@/types/content";
-
-type TurnstileRenderOptions = {
-  sitekey: string;
-  callback: (token: string) => void;
-  "expired-callback"?: () => void;
-  "error-callback"?: () => void;
-  theme?: "light" | "dark";
-};
-
-type TurnstileApi = {
-  render: (container: HTMLElement, options: TurnstileRenderOptions) => string;
-  reset: (widgetId?: string) => void;
-  remove?: (widgetId: string) => void;
-};
-
-declare global {
-  interface Window {
-    turnstile?: TurnstileApi;
-  }
-}
+import type { ContactLeadErrors, ContactFormState } from "@/lib/contact";
+import type { Locale, PlanSlug, ServiceItem, TranslationSchema } from "@/types/content";
 
 type OpenBookingOptions = {
   planSlug?: PlanSlug;
@@ -69,10 +47,22 @@ type BookingFormData = {
   addressLine: string;
   cityArea: string;
   name: string;
-  phone: string;
+  phoneDialCode: string;
+  phoneNumber: string;
   email: string;
   notes: string;
   botField: string;
+};
+
+type CaptchaChallenge = {
+  svg: string;
+  token: string;
+};
+
+type CaptchaApiResponse = {
+  ok: boolean;
+  svg?: string;
+  token?: string;
 };
 
 const initialFormData: BookingFormData = {
@@ -83,66 +73,228 @@ const initialFormData: BookingFormData = {
   addressLine: "",
   cityArea: "",
   name: "",
-  phone: "",
+  phoneDialCode: "+1",
+  phoneNumber: "",
   email: "",
   notes: "",
   botField: "",
 };
 
-const turnstileScriptId = "cf-turnstile-script";
-const turnstileSiteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ?? "";
+const phoneDialCodeOptions = [
+  { value: "+1", label: "US (+1)" },
+  { value: "+52", label: "MX (+52)" },
+  { value: "+55", label: "BR (+55)" },
+  { value: "+57", label: "CO (+57)" },
+  { value: "+34", label: "ES (+34)" },
+] as const;
+
+const bookingFieldValidationCopy: Record<
+  Locale,
+  {
+    usAddressInvalid: string;
+    usCityStateInvalid: string;
+    usAddressPlaceholder: string;
+    phoneCodeLabel: string;
+    phoneNumberPlaceholder: string;
+    cityStatePlaceholder: string;
+  }
+> = {
+  en: {
+    usAddressInvalid: "Enter a valid US street address (example: 123 Main St).",
+    usCityStateInvalid: "Use US format: City, ST (example: Miami, FL).",
+    usAddressPlaceholder: "123 Main St",
+    phoneCodeLabel: "Code",
+    phoneNumberPlaceholder: "5551234567",
+    cityStatePlaceholder: "Miami, FL",
+  },
+  es: {
+    usAddressInvalid:
+      "Ingresa una direccion valida de EE.UU. (ejemplo: 123 Main St).",
+    usCityStateInvalid: "Usa formato de EE.UU.: Ciudad, ST (ejemplo: Miami, FL).",
+    usAddressPlaceholder: "123 Main St",
+    phoneCodeLabel: "Codigo",
+    phoneNumberPlaceholder: "5551234567",
+    cityStatePlaceholder: "Miami, FL",
+  },
+  "pt-BR": {
+    usAddressInvalid: "Informe um endereco valido dos EUA (exemplo: 123 Main St).",
+    usCityStateInvalid: "Use o formato dos EUA: Cidade, ST (exemplo: Miami, FL).",
+    usAddressPlaceholder: "123 Main St",
+    phoneCodeLabel: "Codigo",
+    phoneNumberPlaceholder: "5551234567",
+    cityStatePlaceholder: "Miami, FL",
+  },
+  it: {
+    usAddressInvalid: "Inserisci un indirizzo USA valido (esempio: 123 Main St).",
+    usCityStateInvalid: "Usa il formato USA: Citta, ST (esempio: Miami, FL).",
+    usAddressPlaceholder: "123 Main St",
+    phoneCodeLabel: "Codice",
+    phoneNumberPlaceholder: "5551234567",
+    cityStatePlaceholder: "Miami, FL",
+  },
+  "zh-CN": {
+    usAddressInvalid: "Qingshuru youxiao de meiguo jiedao dizhi (li: 123 Main St).",
+    usCityStateInvalid: "Qingyong meiguo geshi: City, ST (li: Miami, FL).",
+    usAddressPlaceholder: "123 Main St",
+    phoneCodeLabel: "Code",
+    phoneNumberPlaceholder: "5551234567",
+    cityStatePlaceholder: "Miami, FL",
+  },
+  de: {
+    usAddressInvalid: "Bitte gib eine gueltige US-Adresse ein (z. B. 123 Main St).",
+    usCityStateInvalid: "Bitte nutze US-Format: Stadt, ST (z. B. Miami, FL).",
+    usAddressPlaceholder: "123 Main St",
+    phoneCodeLabel: "Code",
+    phoneNumberPlaceholder: "5551234567",
+    cityStatePlaceholder: "Miami, FL",
+  },
+};
 
 const captchaMessages: Record<
   Locale,
   {
+    label: string;
     required: string;
     unavailable: string;
     retry: string;
     loading: string;
-    label: string;
+    refresh: string;
+    inputPlaceholder: string;
   }
 > = {
   en: {
-    required: "Please complete the CAPTCHA before sending your booking.",
-    unavailable: "Security check is not available right now. Please try again later.",
-    retry: "CAPTCHA validation failed. Please complete it again and retry.",
-    loading: "Loading security check...",
     label: "Security verification",
+    required: "Please enter the captcha text before sending your booking.",
+    unavailable: "Security check is not available right now. Please try again later.",
+    retry: "Captcha validation failed. Please try again.",
+    loading: "Loading captcha...",
+    refresh: "Refresh",
+    inputPlaceholder: "Type the text from the image",
   },
   es: {
-    required: "Completa el CAPTCHA antes de enviar tu reserva.",
-    unavailable: "La validación de seguridad no está disponible en este momento.",
-    retry: "No pudimos validar el CAPTCHA. Vuelve a completarlo e intenta otra vez.",
-    loading: "Cargando validación de seguridad...",
-    label: "Verificación de seguridad",
+    label: "Verificacion de seguridad",
+    required: "Escribe el captcha antes de enviar tu reserva.",
+    unavailable: "La verificacion de seguridad no esta disponible en este momento.",
+    retry: "No pudimos validar el captcha. Intenta de nuevo.",
+    loading: "Cargando captcha...",
+    refresh: "Recargar",
+    inputPlaceholder: "Escribe el texto de la imagen",
   },
   "pt-BR": {
-    required: "Complete o CAPTCHA antes de enviar seu agendamento.",
-    unavailable: "A verificacao de seguranca nao esta disponivel no momento.",
-    retry: "Nao foi possivel validar o CAPTCHA. Complete novamente e tente de novo.",
-    loading: "Carregando verificacao de seguranca...",
     label: "Verificacao de seguranca",
+    required: "Digite o captcha antes de enviar o agendamento.",
+    unavailable: "A verificacao de seguranca nao esta disponivel agora.",
+    retry: "Nao foi possivel validar o captcha. Tente novamente.",
+    loading: "Carregando captcha...",
+    refresh: "Atualizar",
+    inputPlaceholder: "Digite o texto da imagem",
   },
   it: {
-    required: "Completa il CAPTCHA prima di inviare la prenotazione.",
-    unavailable: "Il controllo di sicurezza non e disponibile in questo momento.",
-    retry: "Validazione CAPTCHA non riuscita. Completalo di nuovo e riprova.",
-    loading: "Caricamento controllo di sicurezza...",
     label: "Verifica di sicurezza",
+    required: "Inserisci il captcha prima di inviare la prenotazione.",
+    unavailable: "La verifica di sicurezza non e disponibile in questo momento.",
+    retry: "Validazione captcha non riuscita. Riprova.",
+    loading: "Caricamento captcha...",
+    refresh: "Ricarica",
+    inputPlaceholder: "Inserisci il testo dell'immagine",
   },
   "zh-CN": {
-    required: "Please complete CAPTCHA before sending.",
-    unavailable: "Security verification is unavailable right now.",
-    retry: "CAPTCHA verification failed. Please try again.",
-    loading: "Loading security verification...",
-    label: "Security verification",
+    label: "Anquan yanzheng",
+    required: "Qingxian shuru yanzhengma zai fasong.",
+    unavailable: "Dangqian wu fa shiyong anquan yanzheng.",
+    retry: "Yanzhengma shibai, qing chongshi.",
+    loading: "Zai jiazai yanzhengma...",
+    refresh: "Shuaxin",
+    inputPlaceholder: "Qing shuru tupian wenzi",
   },
   de: {
-    required: "Bitte CAPTCHA ausfullen, bevor du die Buchung sendest.",
-    unavailable: "Die Sicherheitsprufung ist derzeit nicht verfugbar.",
-    retry: "CAPTCHA-Prufung fehlgeschlagen. Bitte erneut ausfullen und versuchen.",
-    loading: "Sicherheitsprufung wird geladen...",
-    label: "Sicherheitsprufung",
+    label: "Sicherheitspruefung",
+    required: "Bitte gib das Captcha ein, bevor du die Buchung sendest.",
+    unavailable: "Die Sicherheitspruefung ist derzeit nicht verfuegbar.",
+    retry: "Captcha-Pruefung fehlgeschlagen. Bitte erneut versuchen.",
+    loading: "Captcha wird geladen...",
+    refresh: "Neu laden",
+    inputPlaceholder: "Text aus dem Bild eingeben",
+  },
+};
+
+const bookingConfirmationMessages: Record<
+  Locale,
+  {
+    title: string;
+    body: string;
+    action: string;
+  }
+> = {
+  en: {
+    title: "Booking request received",
+    body: "Thank you. We will contact you shortly to schedule your appointment.",
+    action: "Close",
+  },
+  es: {
+    title: "Solicitud de booking enviada",
+    body: "Gracias. Te contactaremos prontamente para agendar la reunion.",
+    action: "Cerrar",
+  },
+  "pt-BR": {
+    title: "Solicitacao de agendamento enviada",
+    body: "Obrigado. Vamos entrar em contato em breve para agendar a reuniao.",
+    action: "Fechar",
+  },
+  it: {
+    title: "Richiesta di prenotazione inviata",
+    body: "Grazie. Ti contatteremo a breve per programmare l'appuntamento.",
+    action: "Chiudi",
+  },
+  "zh-CN": {
+    title: "Booking request received",
+    body: "Thank you. We will contact you shortly to schedule your appointment.",
+    action: "Close",
+  },
+  de: {
+    title: "Buchungsanfrage gesendet",
+    body: "Danke. Wir melden uns in Kurze, um den Termin zu planen.",
+    action: "Schliessen",
+  },
+};
+
+const bookingUiMessages: Record<
+  Locale,
+  {
+    stepLabel: string;
+    sendingLabel: string;
+    confirmationEyebrow: string;
+  }
+> = {
+  en: {
+    stepLabel: "Step",
+    sendingLabel: "Sending...",
+    confirmationEyebrow: "Booking",
+  },
+  es: {
+    stepLabel: "Paso",
+    sendingLabel: "Enviando...",
+    confirmationEyebrow: "Reserva",
+  },
+  "pt-BR": {
+    stepLabel: "Etapa",
+    sendingLabel: "Enviando...",
+    confirmationEyebrow: "Agendamento",
+  },
+  it: {
+    stepLabel: "Passo",
+    sendingLabel: "Invio...",
+    confirmationEyebrow: "Prenotazione",
+  },
+  "zh-CN": {
+    stepLabel: "Buzhou",
+    sendingLabel: "Fasong zhong...",
+    confirmationEyebrow: "Yuyue",
+  },
+  de: {
+    stepLabel: "Schritt",
+    sendingLabel: "Wird gesendet...",
+    confirmationEyebrow: "Buchung",
   },
 };
 
@@ -150,54 +302,16 @@ function getCaptchaMessages(locale: Locale) {
   return captchaMessages[locale];
 }
 
-function loadTurnstileScript(): Promise<void> {
-  if (typeof window === "undefined") {
-    return Promise.resolve();
-  }
+function getBookingFieldValidationCopy(locale: Locale) {
+  return bookingFieldValidationCopy[locale];
+}
 
-  if (window.turnstile) {
-    return Promise.resolve();
-  }
+function getBookingConfirmationMessages(locale: Locale) {
+  return bookingConfirmationMessages[locale];
+}
 
-  return new Promise((resolve, reject) => {
-    const existingScript = document.getElementById(turnstileScriptId) as HTMLScriptElement | null;
-
-    if (existingScript) {
-      if (existingScript.dataset.loaded === "true") {
-        resolve();
-        return;
-      }
-
-      existingScript.addEventListener("load", () => resolve(), { once: true });
-      existingScript.addEventListener(
-        "error",
-        () => reject(new Error("turnstile_script_failed")),
-        { once: true },
-      );
-      return;
-    }
-
-    const script = document.createElement("script");
-    script.id = turnstileScriptId;
-    script.src = "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit";
-    script.async = true;
-    script.defer = true;
-    script.dataset.loaded = "false";
-    script.addEventListener(
-      "load",
-      () => {
-        script.dataset.loaded = "true";
-        resolve();
-      },
-      { once: true },
-    );
-    script.addEventListener(
-      "error",
-      () => reject(new Error("turnstile_script_failed")),
-      { once: true },
-    );
-    document.head.appendChild(script);
-  });
+function getBookingUiMessages(locale: Locale) {
+  return bookingUiMessages[locale];
 }
 
 function getStepTitle(step: number, labels: TranslationSchema["bookingModal"]) {
@@ -217,6 +331,7 @@ function BookingModal({
   labels,
   services,
   preselectedPlan,
+  onBooked,
 }: {
   isOpen: boolean;
   onClose: () => void;
@@ -224,31 +339,64 @@ function BookingModal({
   labels: TranslationSchema["bookingModal"];
   services: ServiceItem[];
   preselectedPlan: PlanSlug | null;
+  onBooked: () => void;
 }) {
   const dialogRef = useRef<HTMLDivElement | null>(null);
-  const captchaContainerRef = useRef<HTMLDivElement | null>(null);
-  const turnstileWidgetIdRef = useRef<string | null>(null);
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState<BookingFormData>(initialFormData);
   const [errors, setErrors] = useState<ContactLeadErrors>({});
   const [isEntering, setIsEntering] = useState(false);
-  const [captchaToken, setCaptchaToken] = useState("");
-  const [captchaReady, setCaptchaReady] = useState(false);
+  const [captcha, setCaptcha] = useState<CaptchaChallenge | null>(null);
+  const [captchaInput, setCaptchaInput] = useState("");
+  const [captchaLoading, setCaptchaLoading] = useState(false);
   const [formState, setFormState] = useState<ContactFormState>({
     status: "idle",
     errors: {},
     message: "",
   });
   const captchaCopy = getCaptchaMessages(locale);
+  const fieldValidationCopy = getBookingFieldValidationCopy(locale);
+  const uiCopy = getBookingUiMessages(locale);
 
   const isSubmitting = formState.status === "submitting";
+
+  const fetchCaptchaChallenge = useCallback(async () => {
+    setCaptchaLoading(true);
+
+    try {
+      const response = await fetch("/api/captcha", {
+        method: "GET",
+        cache: "no-store",
+      });
+
+      if (!response.ok) {
+        throw new Error("captcha_unavailable");
+      }
+
+      const json = (await response.json()) as CaptchaApiResponse;
+
+      if (!json.ok || !json.svg || !json.token) {
+        throw new Error("captcha_payload_invalid");
+      }
+
+      setCaptcha({
+        svg: json.svg,
+        token: json.token,
+      });
+    } catch {
+      setCaptcha(null);
+    } finally {
+      setCaptchaLoading(false);
+    }
+  }, []);
 
   const resetModalState = useCallback(
     (planSlug: PlanSlug | null) => {
       setStep(planSlug ? 2 : 1);
       setErrors({});
-      setCaptchaToken("");
-      setCaptchaReady(false);
+      setCaptcha(null);
+      setCaptchaInput("");
+      setCaptchaLoading(false);
       setFormState({ status: "idle", errors: {}, message: "" });
       setFormData({
         ...initialFormData,
@@ -345,86 +493,38 @@ function BookingModal({
   }, [isOpen, isSubmitting, onClose]);
 
   useEffect(() => {
-    if (isOpen) {
-      return;
+    if (!isOpen) {
+      setCaptcha(null);
+      setCaptchaInput("");
+      setCaptchaLoading(false);
     }
-
-    setCaptchaToken("");
-    setCaptchaReady(false);
-
-    if (typeof window === "undefined") {
-      turnstileWidgetIdRef.current = null;
-      return;
-    }
-
-    if (window.turnstile && turnstileWidgetIdRef.current) {
-      window.turnstile.remove?.(turnstileWidgetIdRef.current);
-    }
-
-    turnstileWidgetIdRef.current = null;
   }, [isOpen]);
 
   useEffect(() => {
-    if (!isOpen || step !== 3 || !turnstileSiteKey) {
+    if (!isOpen || step !== 3 || captcha || captchaLoading) {
       return;
     }
 
-    let cancelled = false;
-
-    const mountTurnstile = async () => {
-      try {
-        await loadTurnstileScript();
-
-        if (
-          cancelled ||
-          !captchaContainerRef.current ||
-          !window.turnstile
-        ) {
-          return;
-        }
-
-        if (turnstileWidgetIdRef.current) {
-          setCaptchaReady(true);
-          window.turnstile.reset(turnstileWidgetIdRef.current);
-          return;
-        }
-
-        const widgetId = window.turnstile.render(captchaContainerRef.current, {
-          sitekey: turnstileSiteKey,
-          callback: (token: string) => {
-            setCaptchaToken(token);
-          },
-          "expired-callback": () => {
-            setCaptchaToken("");
-          },
-          "error-callback": () => {
-            setCaptchaToken("");
-          },
-          theme: "dark",
-        });
-
-        turnstileWidgetIdRef.current = widgetId;
-        setCaptchaReady(true);
-      } catch {
-        if (!cancelled) {
-          setCaptchaReady(false);
-        }
-      }
-    };
-
-    void mountTurnstile();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [isOpen, step]);
+    void fetchCaptchaChallenge();
+  }, [captcha, captchaLoading, fetchCaptchaChallenge, isOpen, step]);
 
   const updateField = (field: keyof BookingFormData, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
 
-    if (errors[field]) {
-      setErrors((prev) => ({ ...prev, [field]: undefined }));
-    }
+    setErrors((prev) => {
+      const nextErrors = { ...prev };
+      const errorField = field as keyof ContactLeadErrors;
+
+      if (nextErrors[errorField]) {
+        nextErrors[errorField] = undefined;
+      }
+
+      if (field === "phoneDialCode" || field === "phoneNumber") {
+        nextErrors.phone = undefined;
+      }
+
+      return nextErrors;
+    });
 
     if (formState.message) {
       setFormState((prev) => ({ ...prev, message: "", status: "idle" }));
@@ -453,17 +553,31 @@ function BookingModal({
     if (targetStep === 3) {
       if (!formData.addressLine.trim()) {
         nextErrors.addressLine = labels.validation.required;
+      } else if (!isValidUSAddressLine(formData.addressLine)) {
+        nextErrors.addressLine = fieldValidationCopy.usAddressInvalid;
       }
 
       if (!formData.cityArea.trim()) {
         nextErrors.cityArea = labels.validation.required;
+      } else if (!isValidUSCityArea(formData.cityArea)) {
+        nextErrors.cityArea = fieldValidationCopy.usCityStateInvalid;
       }
 
       if (!formData.name.trim()) {
         nextErrors.name = labels.validation.required;
       }
 
-      if (!formData.phone.trim() || formData.phone.trim().length < 6) {
+      const bookingPhone = buildBookingPhoneValue(
+        formData.phoneDialCode,
+        formData.phoneNumber,
+      );
+      const localPhoneDigits = normalizePhoneDigits(formData.phoneNumber);
+      const isNorthAmericaCode = formData.phoneDialCode === "+1";
+      const hasValidLength = isNorthAmericaCode
+        ? localPhoneDigits.length === 10
+        : localPhoneDigits.length >= 7 && localPhoneDigits.length <= 14;
+
+      if (!bookingPhone || !hasValidLength) {
         nextErrors.phone = labels.validation.phoneRequired;
       }
     }
@@ -491,7 +605,7 @@ function BookingModal({
       return;
     }
 
-    if (!turnstileSiteKey) {
+    if (!captcha?.token) {
       setFormState({
         status: "error",
         errors: {},
@@ -500,7 +614,7 @@ function BookingModal({
       return;
     }
 
-    if (!captchaToken) {
+    if (!captchaInput.trim()) {
       setFormState({
         status: "error",
         errors: {},
@@ -510,10 +624,14 @@ function BookingModal({
     }
 
     const selectedService = services.find((service) => service.slug === formData.planSlug);
+    const bookingPhone = buildBookingPhoneValue(
+      formData.phoneDialCode,
+      formData.phoneNumber,
+    );
 
     const payload = {
       name: formData.name,
-      phone: formData.phone,
+      phone: bookingPhone,
       email: formData.email,
       vehicleType: formData.vehicleType,
       serviceInterest: selectedService?.name ?? formData.planSlug,
@@ -527,7 +645,8 @@ function BookingModal({
       addressLine: formData.addressLine,
       cityArea: formData.cityArea,
       notes: formData.notes,
-      captchaToken,
+      captchaToken: captcha.token,
+      captchaValue: captchaInput.trim(),
     };
 
     const parsed = contactLeadSchema.safeParse(payload);
@@ -558,10 +677,8 @@ function BookingModal({
 
       if (!response.ok) {
         if (responseBody?.error === "invalid_captcha") {
-          setCaptchaToken("");
-          if (window.turnstile && turnstileWidgetIdRef.current) {
-            window.turnstile.reset(turnstileWidgetIdRef.current);
-          }
+          setCaptchaInput("");
+          await fetchCaptchaChallenge();
 
           setFormState({
             status: "error",
@@ -574,15 +691,7 @@ function BookingModal({
         throw new Error("submit_failed");
       }
 
-      setFormState({
-        status: "success",
-        errors: {},
-        message: labels.success,
-      });
-
-      window.setTimeout(() => {
-        onClose();
-      }, 900);
+      onBooked();
     } catch {
       setFormState({
         status: "error",
@@ -612,7 +721,7 @@ function BookingModal({
         role="dialog"
         aria-modal="true"
         aria-label={labels.title}
-        className={`flex h-[100dvh] w-full max-w-2xl flex-col rounded-none border border-white/15 bg-black shadow-2xl transition-all duration-300 ease-out sm:h-auto sm:max-h-[90vh] sm:rounded-2xl ${
+        className={`flex h-[100dvh] w-full max-w-2xl flex-col overflow-hidden rounded-none border border-white/15 bg-black shadow-2xl transition-all duration-300 ease-out sm:h-[90dvh] sm:max-h-[90dvh] sm:rounded-2xl ${
           isEntering
             ? "translate-y-0 opacity-100 sm:scale-100"
             : "translate-y-6 opacity-0 sm:translate-y-3 sm:scale-95"
@@ -621,7 +730,7 @@ function BookingModal({
         <div className="flex items-start justify-between gap-4 border-b border-white/10 p-5 sm:p-6">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.25em] text-accent">
-              Step {step} / 3
+              {uiCopy.stepLabel} {step} / 3
             </p>
             <h2 className="mt-2 font-heading text-2xl uppercase tracking-wider text-white">
               {labels.title}
@@ -641,8 +750,8 @@ function BookingModal({
           </button>
         </div>
 
-        <form className="flex flex-1 flex-col" onSubmit={onSubmit}>
-          <div className="flex-1 overflow-y-auto p-5 sm:p-6">
+        <form className="flex min-h-0 flex-1 flex-col" onSubmit={onSubmit}>
+          <div className="min-h-0 flex-1 overflow-y-auto p-5 sm:p-6">
             {step === 1 ? (
               <div className="space-y-4">
                 <label className="block text-sm font-semibold text-white">
@@ -732,7 +841,8 @@ function BookingModal({
                     data-autofocus="true"
                     value={formData.addressLine}
                     onChange={(event) => updateField("addressLine", event.target.value)}
-                    placeholder={labels.placeholders.addressLine}
+                    placeholder={fieldValidationCopy.usAddressPlaceholder}
+                    autoComplete="address-line1"
                     className="w-full rounded-xl border border-white/15 bg-black/60 px-4 py-3 text-white outline-none ring-accent transition placeholder:text-white/40 focus:ring-2"
                   />
                   {errors.addressLine ? (
@@ -747,7 +857,23 @@ function BookingModal({
                   <input
                     value={formData.cityArea}
                     onChange={(event) => updateField("cityArea", event.target.value)}
-                    placeholder={labels.placeholders.cityArea}
+                    onBlur={(event) => {
+                      const normalized = event.target.value
+                        .trim()
+                        .replace(/\s*,\s*/g, ", ");
+                      const match = normalized.match(/^(.*),\s*([A-Za-z]{2})$/);
+
+                      if (!match) {
+                        updateField("cityArea", normalized);
+                        return;
+                      }
+
+                      const city = match[1].trim().replace(/\s{2,}/g, " ");
+                      const state = match[2].toUpperCase();
+                      updateField("cityArea", `${city}, ${state}`);
+                    }}
+                    placeholder={fieldValidationCopy.cityStatePlaceholder}
+                    autoComplete="address-level2"
                     className="w-full rounded-xl border border-white/15 bg-black/60 px-4 py-3 text-white outline-none ring-accent transition placeholder:text-white/40 focus:ring-2"
                   />
                   {errors.cityArea ? (
@@ -772,12 +898,34 @@ function BookingModal({
                   <span className="mb-2 block text-sm font-semibold text-white">
                     {labels.fields.phone}
                   </span>
-                  <input
-                    value={formData.phone}
-                    onChange={(event) => updateField("phone", event.target.value)}
-                    placeholder={labels.placeholders.phone}
-                    className="w-full rounded-xl border border-white/15 bg-black/60 px-4 py-3 text-white outline-none ring-accent transition placeholder:text-white/40 focus:ring-2"
-                  />
+                  <div className="grid grid-cols-[auto_1fr] gap-2">
+                    <label className="sr-only" htmlFor="booking-phone-code">
+                      {fieldValidationCopy.phoneCodeLabel}
+                    </label>
+                    <select
+                      id="booking-phone-code"
+                      value={formData.phoneDialCode}
+                      onChange={(event) => updateField("phoneDialCode", event.target.value)}
+                      className="rounded-xl border border-white/15 bg-black/60 px-3 py-3 text-white outline-none ring-accent transition focus:ring-2"
+                    >
+                      {phoneDialCodeOptions.map((option) => (
+                        <option key={option.value} value={option.value}>
+                          {option.label}
+                        </option>
+                      ))}
+                    </select>
+                    <input
+                      value={formData.phoneNumber}
+                      onChange={(event) => {
+                        const digits = normalizePhoneDigits(event.target.value).slice(0, 14);
+                        updateField("phoneNumber", digits);
+                      }}
+                      placeholder={fieldValidationCopy.phoneNumberPlaceholder}
+                      autoComplete="tel-national"
+                      inputMode="numeric"
+                      className="w-full rounded-xl border border-white/15 bg-black/60 px-4 py-3 text-white outline-none ring-accent transition placeholder:text-white/40 focus:ring-2"
+                    />
+                  </div>
                   {errors.phone ? <span className="mt-1 block text-xs text-red-300">{errors.phone}</span> : null}
                 </label>
 
@@ -808,13 +956,40 @@ function BookingModal({
 
                 <div className="rounded-xl border border-white/15 bg-black/60 p-4 sm:col-span-2">
                   <p className="text-sm font-semibold text-white">{captchaCopy.label}</p>
-                  <div ref={captchaContainerRef} className="mt-3 min-h-[65px]" />
-                  {!turnstileSiteKey ? (
-                    <p className="mt-2 text-xs text-red-300">{captchaCopy.unavailable}</p>
-                  ) : null}
-                  {turnstileSiteKey && !captchaReady ? (
-                    <p className="mt-2 text-xs text-white/60">{captchaCopy.loading}</p>
-                  ) : null}
+
+                  <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-center">
+                    <div className="overflow-hidden rounded-lg border border-white/20 bg-black/80 p-2">
+                      {captcha ? (
+                        <div
+                          className="h-[60px] w-[180px]"
+                          dangerouslySetInnerHTML={{ __html: captcha.svg }}
+                        />
+                      ) : (
+                        <div className="flex h-[60px] w-[180px] items-center justify-center text-xs text-white/60">
+                          {captchaLoading ? captchaCopy.loading : captchaCopy.unavailable}
+                        </div>
+                      )}
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        void fetchCaptchaChallenge();
+                      }}
+                      disabled={captchaLoading || isSubmitting}
+                      className="inline-flex items-center justify-center rounded-lg border border-white/20 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-white disabled:opacity-60"
+                    >
+                      {captchaCopy.refresh}
+                    </button>
+                  </div>
+
+                  <input
+                    value={captchaInput}
+                    onChange={(event) => setCaptchaInput(event.target.value)}
+                    placeholder={captchaCopy.inputPlaceholder}
+                    className="mt-3 w-full rounded-xl border border-white/15 bg-black/70 px-4 py-3 text-white outline-none ring-accent transition placeholder:text-white/40 focus:ring-2"
+                    autoComplete="off"
+                  />
                 </div>
               </div>
             ) : null}
@@ -858,12 +1033,85 @@ function BookingModal({
                   disabled={isSubmitting}
                   className="inline-flex items-center justify-center rounded-xl bg-accent px-6 py-3 text-sm font-bold uppercase tracking-wider text-black transition hover:bg-white disabled:opacity-60"
                 >
-                  {isSubmitting ? "..." : labels.actions.send}
+                  {isSubmitting ? uiCopy.sendingLabel : labels.actions.send}
                 </button>
               )}
             </div>
           </div>
         </form>
+      </div>
+    </div>
+  );
+}
+
+function BookingConfirmationModal({
+  isOpen,
+  locale,
+  onClose,
+}: {
+  isOpen: boolean;
+  locale: Locale;
+  onClose: () => void;
+}) {
+  const copy = getBookingConfirmationMessages(locale);
+  const uiCopy = getBookingUiMessages(locale);
+
+  useEffect(() => {
+    if (!isOpen) {
+      return;
+    }
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        onClose();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [isOpen, onClose]);
+
+  if (!isOpen) {
+    return null;
+  }
+
+  return (
+    <div
+      className="fixed inset-0 z-[110] flex items-center justify-center bg-black/75 p-4"
+      onMouseDown={(event) => {
+        if (event.target === event.currentTarget) {
+          onClose();
+        }
+      }}
+    >
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-label={copy.title}
+        className="w-full max-w-lg rounded-2xl border border-white/15 bg-black p-6 shadow-2xl sm:p-8"
+      >
+        <p className="text-xs font-semibold uppercase tracking-[0.25em] text-accent">
+          {uiCopy.confirmationEyebrow}
+        </p>
+        <h3 className="mt-3 font-heading text-3xl uppercase tracking-wider text-white">{copy.title}</h3>
+        <p className="mt-4 text-sm text-white/80">{copy.body}</p>
+        <div className="mt-8 flex justify-end">
+          <button
+            type="button"
+            onClick={onClose}
+            className="inline-flex items-center justify-center rounded-xl bg-accent px-6 py-3 text-sm font-bold uppercase tracking-wider text-black transition hover:bg-white"
+          >
+            {copy.action}
+          </button>
+        </div>
       </div>
     </div>
   );
@@ -876,12 +1124,14 @@ export function BookingProvider({
   services,
 }: BookingProviderProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const [isConfirmationOpen, setIsConfirmationOpen] = useState(false);
   const [preselectedPlan, setPreselectedPlan] = useState<PlanSlug | null>(null);
   const triggerRef = useRef<HTMLElement | null>(null);
 
   const openBooking = useCallback((options?: OpenBookingOptions) => {
     const activeElement = document.activeElement;
     triggerRef.current = activeElement instanceof HTMLElement ? activeElement : null;
+    setIsConfirmationOpen(false);
     setPreselectedPlan(options?.planSlug ?? null);
     setIsOpen(true);
   }, []);
@@ -894,6 +1144,21 @@ export function BookingProvider({
       triggerRef.current?.focus();
       triggerRef.current = null;
     }, 0);
+  }, []);
+
+  const closeConfirmation = useCallback(() => {
+    setIsConfirmationOpen(false);
+
+    window.setTimeout(() => {
+      triggerRef.current?.focus();
+      triggerRef.current = null;
+    }, 0);
+  }, []);
+
+  const handleBookingCompleted = useCallback(() => {
+    setIsOpen(false);
+    setPreselectedPlan(null);
+    setIsConfirmationOpen(true);
   }, []);
 
   const value = useMemo(
@@ -914,6 +1179,12 @@ export function BookingProvider({
         labels={labels}
         services={services}
         preselectedPlan={preselectedPlan}
+        onBooked={handleBookingCompleted}
+      />
+      <BookingConfirmationModal
+        isOpen={isConfirmationOpen}
+        locale={locale}
+        onClose={closeConfirmation}
       />
     </BookingContext.Provider>
   );
@@ -928,4 +1199,3 @@ export function useBooking() {
 
   return context;
 }
-

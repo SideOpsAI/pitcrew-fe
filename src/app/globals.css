@@ -16,7 +16,7 @@ body {
   min-height: 100vh;
   background-color: #121417;
   color: #f8fafc;
-  font-family: var(--font-exo2), sans-serif;
+  font-family: var(--font-poppins), sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -36,4 +36,31 @@ a {
 
 .panel {
   @apply rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm;
+}
+
+[data-scroll-fade] {
+  opacity: 1;
+  transform: translateY(0);
+  transition:
+    opacity 0.7s ease,
+    transform 0.7s ease;
+  will-change: opacity, transform;
+}
+
+.has-scroll-fade [data-scroll-fade] {
+  opacity: 0;
+  transform: translateY(22px);
+}
+
+.has-scroll-fade [data-scroll-fade].is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-scroll-fade] {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
 }

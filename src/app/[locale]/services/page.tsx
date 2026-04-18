@@ -30,8 +30,8 @@ export default async function ServicesPage({ params }: ServicesPageProps) {
   const dict = getDictionary(safeLocale);
 
   return (
-    <section className="section-shell py-14 md:py-20">
-      <header className="mb-10">
+    <section className="section-shell py-14 md:py-20" data-scroll-fade>
+      <header className="mb-10" data-scroll-fade data-scroll-fade-delay={80}>
         <h1 className="font-heading text-4xl uppercase tracking-wider text-white md:text-5xl">
           {dict.servicesPage.title}
         </h1>
@@ -39,18 +39,23 @@ export default async function ServicesPage({ params }: ServicesPageProps) {
       </header>
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-        {dict.services.map((service) => (
-          <ServiceCard
-            key={service.slug}
-            locale={safeLocale}
-            service={service}
-            labels={dict.servicesPage}
-            detailLabel={dict.serviceDetail.viewDetails}
-          />
+        {dict.services.map((service, index) => (
+          <div key={service.slug} data-scroll-fade data-scroll-fade-delay={130 + index * 60}>
+            <ServiceCard
+              locale={safeLocale}
+              service={service}
+              labels={dict.servicesPage}
+              detailLabel={dict.serviceDetail.viewDetails}
+            />
+          </div>
         ))}
       </div>
 
-      <div className="panel mt-10 border-accent/25 bg-accent/10 p-6 md:p-8">
+      <div
+        className="panel mt-10 border-accent/25 bg-accent/10 p-6 md:p-8"
+        data-scroll-fade
+        data-scroll-fade-delay={180}
+      >
         <h2 className="font-heading text-2xl uppercase tracking-wider text-white">
           {dict.servicesPage.ctaTitle}
         </h2>
