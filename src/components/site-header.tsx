@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
@@ -54,16 +55,15 @@ export function SiteHeader({ locale, labels }: SiteHeaderProps) {
   return (
     <header className="sticky top-0 z-50 border-b border-white/10 bg-black/75 backdrop-blur-lg">
       <div className="section-shell flex h-20 items-center justify-between gap-4">
-        <Link href={`/${locale}`} className="flex items-center gap-3" prefetch>
-          <div className="h-10 w-10 rounded-xl border border-white/20 bg-accent/15 shadow-glow" />
-          <div>
-            <p className="font-heading text-lg uppercase tracking-widest text-white">
-              Pit Crew
-            </p>
-            <p className="text-xs uppercase tracking-[0.3em] text-steel">
-              Mobile Detail
-            </p>
-          </div>
+        <Link href={`/${locale}`} className="flex items-center" prefetch>
+          <Image
+            src="/pitcrew-logo.jpeg"
+            alt="Pit Crew Mobile Auto Detailing"
+            width={260}
+            height={68}
+            priority
+            className="h-11 w-auto md:h-12"
+          />
         </Link>
 
         <nav className="hidden items-center gap-8 lg:flex">

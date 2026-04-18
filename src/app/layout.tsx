@@ -25,6 +25,11 @@ export const metadata: Metadata = {
   },
   description:
     "Premium mobile auto detailing with transparent service packages, multilingual support, and easy booking.",
+  icons: {
+    icon: "/pitcrew-logo.jpeg",
+    shortcut: "/pitcrew-logo.jpeg",
+    apple: "/pitcrew-logo.jpeg",
+  },
 };
 
 export default function RootLayout({

@@ -18,6 +18,7 @@ export const contactLeadSchema = z
     locale: z.enum(locales),
     botField: z.string().optional().default(""),
     captchaToken: z.string().trim().optional().default(""),
+    captchaValue: z.string().trim().optional().default(""),
     source: z.enum(["contact-form", "booking-modal"]).optional().default("contact-form"),
     planSlug: bookingPlanSlugSchema.optional(),
     vehicleMakeModel: z.string().trim().max(120).optional().or(z.literal("")),
@@ -73,6 +74,14 @@ export const contactLeadSchema = z
           code: z.ZodIssueCode.custom,
           path: ["captchaToken"],
           message: "Captcha token is required",
+        });
+      }
+
+      if (!data.captchaValue) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["captchaValue"],
+          message: "Captcha value is required",
         });
       }
 

@@ -207,5 +207,6 @@ export interface ContactLeadInput {
   notes?: string;
   botField?: string;
   captchaToken?: string;
+  captchaValue?: string;
 }
 
