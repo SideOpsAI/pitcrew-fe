@@ -110,6 +110,7 @@ type VehiclePlanOption = {
   name: string;
   description: string;
   price: string;
+  duration: string;
   includes: string[];
 };
 
@@ -118,6 +119,7 @@ type BookingFlowCopy = {
   vehicleStepDescription: string;
   planStepDescription: string;
   planIncludesLabel: string;
+  planDurationLabel: string;
   vehicleTypes: Record<VehicleTypeKey, string>;
   planTitles: Record<PlanSlug, string>;
   planDescriptions: Record<PlanSlug, string>;
@@ -145,24 +147,47 @@ const bookingPlanOrder = ["basic", "medium", "full"] as const satisfies readonly
 
 const bookingPlanPricing: Record<VehicleTypeKey, Record<PlanSlug, string>> = {
   sedan: {
-    basic: "$129+",
-    medium: "$119+",
-    full: "$229+",
+    basic: "$150 USD",
+    medium: "$100 USD",
+    full: "$210 USD",
   },
   "small-suv": {
-    basic: "$149+",
-    medium: "$139+",
-    full: "$259+",
+    basic: "$175 USD",
+    medium: "$120 USD",
+    full: "$230 USD",
   },
   "big-suv-minivan": {
-    basic: "$179+",
-    medium: "$169+",
-    full: "$299+",
+    basic: "$190 USD",
+    medium: "$130 USD",
+    full: "$250 USD",
   },
   "pickup-plus": {
-    basic: "$189+",
-    medium: "$179+",
-    full: "$319+",
+    basic: "$210 USD",
+    medium: "$150 USD",
+    full: "$270 USD",
+  },
+};
+
+const bookingPlanDurations: Record<VehicleTypeKey, Record<PlanSlug, string>> = {
+  sedan: {
+    basic: "2 hours",
+    medium: "1 hour",
+    full: "3.5 hours",
+  },
+  "small-suv": {
+    basic: "2 hours",
+    medium: "1 hour",
+    full: "3.5 hours",
+  },
+  "big-suv-minivan": {
+    basic: "2.5 hours",
+    medium: "1.5 hours",
+    full: "3.5 hours",
+  },
+  "pickup-plus": {
+    basic: "2.5 hours",
+    medium: "1.5 hours",
+    full: "4 hours",
   },
 };
 
@@ -173,6 +198,7 @@ const bookingFlowCopyEn: BookingFlowCopy = {
   planStepDescription:
     "Choose one detailing plan. Prices and scope adjust to your selected vehicle type.",
   planIncludesLabel: "What's included",
+  planDurationLabel: "Estimated duration",
   vehicleTypes: {
     sedan: "Sedan",
     "small-suv": "Small SUV",
@@ -185,25 +211,33 @@ const bookingFlowCopyEn: BookingFlowCopy = {
     full: "FULL DETAIL",
   },
   planDescriptions: {
-    basic: "Deep interior-focused detailing for cabins that need a full reset.",
-    medium: "Exterior-focused detailing to restore gloss and protect painted surfaces.",
-    full: "Complete interior + exterior detailing package with maximum finish quality.",
+    basic: "Interior-focused detailing for cabins that need a full reset.",
+    medium: "Exterior-focused detailing to refresh paint and finish quality.",
+    full: "Complete interior + exterior detailing package.",
   },
   planIncludes: {
     basic: [
-      "Deep vacuum plus compressed-air crevice cleanup",
-      "Dashboard, console, and door-panel detailing",
-      "Interior surfaces finished with UV protectant",
+      "Vacuum floors, mats cloth seats and trunk areas",
+      "Clean dash, console, door panels, seats, and rubber floor mats",
+      "Apply protective products to dash, console, door panels, seats, and rubber floor mats",
+      "Clean door jambs",
+      "Clean glass outside",
     ],
     medium: [
-      "Foam pre-wash and contact hand wash",
-      "Wheel, tire, and fender-well cleaning",
-      "Gloss sealant for water beading and shine",
+      "Hand wash wheels and tires",
+      "Decontaminate paint to remove bugs, tar, grime and any kind of dirt",
+      "Apply tire dressing after cleaning the tires",
+      "Clean glass inside",
     ],
     full: [
-      "Full interior and exterior detailing workflow",
-      "Paint decontamination and trim refresh",
-      "Final quality control pass and touch-up review",
+      "Vacuum floors, mats cloth seats and trunk areas",
+      "Clean dash, console, door panels, seats, and rubber floor mats",
+      "Apply protective products to dash, console, door panels, seats, and rubber floor mats",
+      "Clean door jambs",
+      "Hand wash wheels and tires",
+      "Decontaminate paint to remove bugs, tar, grime and any kind of dirt",
+      "Apply tire dressing after cleaning the tires",
+      "Clean glass out and inside",
     ],
   },
 };
@@ -217,6 +251,7 @@ const bookingFlowCopy: Record<Locale, BookingFlowCopy> = {
     planStepDescription:
       "Elige un plan de detailing. Precio y alcance cambian segun el tipo de vehiculo.",
     planIncludesLabel: "Que incluye",
+    planDurationLabel: "Duracion estimada",
     vehicleTypes: {
       sedan: "Sedan",
       "small-suv": "Small SUV",
@@ -229,25 +264,33 @@ const bookingFlowCopy: Record<Locale, BookingFlowCopy> = {
       full: "FULL DETAIL",
     },
     planDescriptions: {
-      basic: "Detailing interior profundo para cabinas que necesitan un reset total.",
-      medium: "Detailing exterior para recuperar brillo y proteger superficies pintadas.",
-      full: "Paquete completo interior + exterior con el mayor nivel de acabado.",
+      basic: "Detailing enfocado en interior para cabinas que necesitan un reset.",
+      medium: "Detailing enfocado en exterior para recuperar acabado y brillo.",
+      full: "Paquete completo de detailing interior + exterior.",
     },
     planIncludes: {
       basic: [
-        "Aspirado profundo y limpieza de ranuras con aire",
-        "Detalle de tablero, consola y paneles de puerta",
-        "Acabado protector UV en superficies interiores",
+        "Vacuum floors, mats cloth seats and trunk areas",
+        "Clean dash, console, door panels, seats, and rubber floor mats",
+        "Apply protective products to dash, console, door panels, seats, and rubber floor mats",
+        "Clean door jambs",
+        "Clean glass outside",
       ],
       medium: [
-        "Prelavado con espuma y lavado a mano",
-        "Limpieza de rines, llantas y guardafangos",
-        "Sellado de brillo para repelencia al agua",
+        "Hand wash wheels and tires",
+        "Decontaminate paint to remove bugs, tar, grime and any kind of dirt",
+        "Apply tire dressing after cleaning the tires",
+        "Clean glass inside",
       ],
       full: [
-        "Flujo completo de detailing interior y exterior",
-        "Descontaminacion de pintura y detalle de molduras",
-        "Revision final de calidad con retoques finales",
+        "Vacuum floors, mats cloth seats and trunk areas",
+        "Clean dash, console, door panels, seats, and rubber floor mats",
+        "Apply protective products to dash, console, door panels, seats, and rubber floor mats",
+        "Clean door jambs",
+        "Hand wash wheels and tires",
+        "Decontaminate paint to remove bugs, tar, grime and any kind of dirt",
+        "Apply tire dressing after cleaning the tires",
+        "Clean glass out and inside",
       ],
     },
   },
@@ -342,12 +385,14 @@ function buildVehiclePlanOptions(
 ): VehiclePlanOption[] {
   const copy = getBookingFlowCopy(locale);
   const pricing = bookingPlanPricing[vehicleTypeKey];
+  const durations = bookingPlanDurations[vehicleTypeKey];
 
   return bookingPlanOrder.map((slug) => ({
     slug,
     name: copy.planTitles[slug],
     description: copy.planDescriptions[slug],
     price: pricing[slug],
+    duration: durations[slug],
     includes: copy.planIncludes[slug],
   }));
 }
@@ -562,6 +607,15 @@ const bookingUiMessages: Record<
   },
 };
 
+const bookingCloseGuardMessages: Record<Locale, string> = {
+  en: "If you close now, the entered data will be lost. Do you want to continue?",
+  es: "Si cierras ahora, se perderan los datos ingresados. Quieres continuar?",
+  "pt-BR": "Se fechar agora, os dados inseridos serao perdidos. Deseja continuar?",
+  it: "Se chiudi ora, i dati inseriti andranno persi. Vuoi continuare?",
+  "zh-CN": "Ruguo xianzai guanbi, yitian de shuju hui diu shi. Yao jixu ma?",
+  de: "Wenn du jetzt schliesst, gehen die eingegebenen Daten verloren. Fortfahren?",
+};
+
 function getCaptchaMessages(locale: Locale) {
   return captchaMessages[locale];
 }
@@ -606,6 +660,7 @@ function BookingModal({
   onBooked: () => void;
 }) {
   const dialogRef = useRef<HTMLDivElement | null>(null);
+  const initialPlanSlugRef = useRef<"" | PlanSlug>("");
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState<BookingFormData>(initialFormData);
   const [errors, setErrors] = useState<ContactLeadErrors>({});
@@ -633,6 +688,44 @@ function BookingModal({
   );
 
   const isSubmitting = formState.status === "submitting";
+  const isFormDirty = useMemo(() => {
+    if (formData.planSlug && formData.planSlug !== initialPlanSlugRef.current) {
+      return true;
+    }
+
+    return (
+      Boolean(formData.vehicleTypeKey) ||
+      Boolean(formData.vehicleType.trim()) ||
+      Boolean(formData.vehicleMakeModel.trim()) ||
+      Boolean(formData.vehicleYear.trim()) ||
+      Boolean(formData.addressLine.trim()) ||
+      Boolean(formData.cityArea.trim()) ||
+      Boolean(formData.name.trim()) ||
+      Boolean(formData.phoneNumber.trim()) ||
+      Boolean(formData.email.trim()) ||
+      Boolean(formData.notes.trim()) ||
+      Boolean(formData.botField.trim()) ||
+      Boolean(formData.vehiclePhotoFront) ||
+      Boolean(formData.vehiclePhotoSide) ||
+      Boolean(formData.vehiclePhotoExtra) ||
+      Boolean(captchaInput.trim())
+    );
+  }, [captchaInput, formData]);
+
+  const tryCloseModal = useCallback(() => {
+    if (isSubmitting) {
+      return;
+    }
+
+    if (isFormDirty) {
+      const confirmed = window.confirm(bookingCloseGuardMessages[locale]);
+      if (!confirmed) {
+        return;
+      }
+    }
+
+    onClose();
+  }, [isFormDirty, isSubmitting, locale, onClose]);
 
   const fetchCaptchaChallenge = useCallback(async () => {
     const controller = new AbortController();
@@ -677,6 +770,7 @@ function BookingModal({
 
   const resetModalState = useCallback(
     (planSlug: PlanSlug | null) => {
+      initialPlanSlugRef.current = planSlug ?? "";
       setStep(1);
       setErrors({});
       setCaptcha(null);
@@ -730,9 +824,7 @@ function BookingModal({
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
         event.preventDefault();
-        if (!isSubmitting) {
-          onClose();
-        }
+        tryCloseModal();
         return;
       }
 
@@ -775,7 +867,7 @@ function BookingModal({
       window.removeEventListener("keydown", handleKeyDown);
       document.body.style.overflow = previousOverflow;
     };
-  }, [isOpen, isSubmitting, onClose]);
+  }, [isOpen, tryCloseModal]);
 
   useEffect(() => {
     if (!isOpen) {
@@ -1066,11 +1158,6 @@ function BookingModal({
       className={`fixed inset-0 z-[100] flex items-end justify-center bg-black/75 p-0 transition-opacity duration-300 sm:items-center sm:p-4 ${
         isEntering ? "opacity-100" : "opacity-0"
       }`}
-      onMouseDown={(event) => {
-        if (event.target === event.currentTarget && !isSubmitting) {
-          onClose();
-        }
-      }}
     >
       <div
         ref={dialogRef}
@@ -1095,11 +1182,7 @@ function BookingModal({
           </div>
           <button
             type="button"
-            onClick={() => {
-              if (!isSubmitting) {
-                onClose();
-              }
-            }}
+            onClick={tryCloseModal}
             className="rounded-lg border border-white/20 px-3 py-2 text-xs font-semibold uppercase tracking-wide text-white"
           >
             {labels.actions.close}
@@ -1201,9 +1284,14 @@ function BookingModal({
                         <p className="font-heading text-xl uppercase tracking-wider text-white">
                           {planOption.name}
                         </p>
-                        <p className="text-xs font-semibold uppercase tracking-wide text-accent">
-                          {planOption.price}
-                        </p>
+                        <div className="text-right">
+                          <p className="text-xs font-semibold uppercase tracking-wide text-accent">
+                            {planOption.price}
+                          </p>
+                          <p className="mt-1 text-[11px] uppercase tracking-wide text-white/55">
+                            {flowCopy.planDurationLabel}: {planOption.duration}
+                          </p>
+                        </div>
                       </div>
                       <p className="mt-2 text-sm text-white/75">{planOption.description}</p>
                       <p className="mt-3 text-xs font-semibold uppercase tracking-wide text-white/65">

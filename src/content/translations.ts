@@ -89,8 +89,8 @@ const servicesByLocale: Record<Locale, ServiceItem[]> = {
       shortDescription: "Maintenance wash with quick interior refresh.",
       longDescription:
         "Great for weekly or bi-weekly maintenance. Exterior hand wash, tire dressing, and a fast cabin reset so your vehicle stays clean between deeper sessions.",
-      price: "$89+",
-      duration: "60 - 90 min",
+      price: "$150 - $210 USD",
+      duration: "2 - 2.5 hours",
       highlights: [
         "Foam wash and hand dry",
         "Wheel face and tire dressing",
@@ -104,8 +104,8 @@ const servicesByLocale: Record<Locale, ServiceItem[]> = {
       shortDescription: "Deep clean for interior + enhanced exterior finish.",
       longDescription:
         "Balanced package for drivers who want visible transformation. Includes deeper interior cleaning, decontamination touchpoints, and longer-lasting shine.",
-      price: "$149+",
-      duration: "2 - 3.5 hours",
+      price: "$100 - $150 USD",
+      duration: "1 - 1.5 hours",
       highlights: [
         "Interior deep vacuum and plastics detail",
         "Carpet and mat treatment",
@@ -119,8 +119,8 @@ const servicesByLocale: Record<Locale, ServiceItem[]> = {
       shortDescription: "Complete premium detail with maximum finish quality.",
       longDescription:
         "Our most complete package for vehicles needing a full reset. Deep interior detailing, exterior decontamination, gloss enhancement, and protection from top to bottom.",
-      price: "$229+",
-      duration: "3.5 - 5.5 hours",
+      price: "$210 - $270 USD",
+      duration: "3.5 - 4 hours",
       highlights: [
         "Full interior detailing workflow",
         "Exterior decontamination and polish enhancement",
@@ -136,8 +136,8 @@ const servicesByLocale: Record<Locale, ServiceItem[]> = {
       shortDescription: "Lavado de mantenimiento y refresh interior rápido.",
       longDescription:
         "Ideal para mantenimiento semanal o quincenal. Lavado exterior a mano, brillo en llantas y limpieza ligera de cabina.",
-      price: "$89+",
-      duration: "60 - 90 min",
+      price: "$150 - $210 USD",
+      duration: "2 - 2.5 horas",
       highlights: [
         "Lavado con espuma y secado a mano",
         "Limpieza de rines y llantas",
@@ -151,8 +151,8 @@ const servicesByLocale: Record<Locale, ServiceItem[]> = {
       shortDescription: "Limpieza profunda interior + mejor acabado exterior.",
       longDescription:
         "Paquete balanceado para lograr cambio visible. Incluye limpieza interior profunda y mejor protección exterior.",
-      price: "$149+",
-      duration: "2 - 3.5 horas",
+      price: "$100 - $150 USD",
+      duration: "1 - 1.5 horas",
       highlights: [
         "Aspirado profundo y detalle de plásticos",
         "Tratamiento de tapetes y alfombras",
@@ -166,8 +166,8 @@ const servicesByLocale: Record<Locale, ServiceItem[]> = {
       shortDescription: "Detailing premium completo con máximo nivel de acabado.",
       longDescription:
         "Nuestro paquete más completo para reset total del vehículo. Interior y exterior con procesos detallados y protección duradera.",
-      price: "$229+",
-      duration: "3.5 - 5.5 horas",
+      price: "$210 - $270 USD",
+      duration: "3.5 - 4 horas",
       highlights: [
         "Flujo completo de detalle interior",
         "Descontaminación exterior y mejora de brillo",
@@ -183,8 +183,8 @@ const servicesByLocale: Record<Locale, ServiceItem[]> = {
       shortDescription: "Lavagem de manutenção com limpeza interna rápida.",
       longDescription:
         "Ideal para manutenção semanal. Lavagem externa, acabamento dos pneus e organização rápida da cabine.",
-      price: "$89+",
-      duration: "60 - 90 min",
+      price: "$150 - $210 USD",
+      duration: "2 - 2.5 horas",
       highlights: [
         "Lavagem com espuma e secagem manual",
         "Limpeza de rodas e pneus",
@@ -198,8 +198,8 @@ const servicesByLocale: Record<Locale, ServiceItem[]> = {
       shortDescription: "Limpeza interna profunda e acabamento externo superior.",
       longDescription:
         "Pacote equilibrado para quem quer transformação visível com mais cuidado em interior e proteção externa.",
-      price: "$149+",
-      duration: "2 - 3.5 horas",
+      price: "$100 - $150 USD",
+      duration: "1 - 1.5 horas",
       highlights: [
         "Aspiração profunda e detalhes internos",
         "Tratamento de tapetes",
@@ -213,8 +213,8 @@ const servicesByLocale: Record<Locale, ServiceItem[]> = {
       shortDescription: "Detalhamento premium completo com acabamento máximo.",
       longDescription:
         "Nosso pacote mais completo para reset total. Processo completo de interior e exterior com proteção duradoura.",
-      price: "$229+",
-      duration: "3.5 - 5.5 horas",
+      price: "$210 - $270 USD",
+      duration: "3.5 - 4 horas",
       highlights: [
         "Detalhamento interno completo",
         "Melhoria de brilho externo",
@@ -230,8 +230,8 @@ const servicesByLocale: Record<Locale, ServiceItem[]> = {
       shortDescription: "Lavaggio di mantenimento con refresh interno rapido.",
       longDescription:
         "Perfetto per mantenere l'auto pulita ogni settimana con lavaggio esterno e riordino rapido dell'abitacolo.",
-      price: "$89+",
-      duration: "60 - 90 min",
+      price: "$150 - $210 USD",
+      duration: "2 - 2.5 ore",
       highlights: [
         "Lavaggio esterno a mano",
         "Pulizia ruote e gomme",
@@ -245,8 +245,8 @@ const servicesByLocale: Record<Locale, ServiceItem[]> = {
       shortDescription: "Pulizia interna profonda + finitura esterna migliorata.",
       longDescription:
         "Pacchetto bilanciato per ottenere un miglioramento evidente con cura più approfondita di interni ed esterni.",
-      price: "$149+",
-      duration: "2 - 3.5 ore",
+      price: "$100 - $150 USD",
+      duration: "1 - 1.5 ore",
       highlights: [
         "Pulizia interna dettagliata",
         "Trattamento tappetini",
@@ -260,8 +260,8 @@ const servicesByLocale: Record<Locale, ServiceItem[]> = {
       shortDescription: "Detailing premium completo con finitura massima.",
       longDescription:
         "Il pacchetto più completo per un reset totale del veicolo con workflow completo interno/esterno.",
-      price: "$229+",
-      duration: "3.5 - 5.5 ore",
+      price: "$210 - $270 USD",
+      duration: "3.5 - 4 ore",
       highlights: [
         "Workflow completo interno",
         "Miglioria brillantezza esterna",
@@ -277,8 +277,8 @@ const servicesByLocale: Record<Locale, ServiceItem[]> = {
       shortDescription: "??????,????????",
       longDescription:
         "?????????????????????????????",
-      price: "$89+",
-      duration: "60 - 90 ??",
+      price: "$150 - $210 USD",
+      duration: "2 - 2.5 ??",
       highlights: [
         "?????????",
         "?????????",
@@ -292,8 +292,8 @@ const servicesByLocale: Record<Locale, ServiceItem[]> = {
       shortDescription: "?????? + ???????",
       longDescription:
         "?????,?????????????,????????????",
-      price: "$149+",
-      duration: "2 - 3.5 ??",
+      price: "$100 - $150 USD",
+      duration: "1 - 1.5 ??",
       highlights: [
         "???????????",
         "???????",
@@ -307,8 +307,8 @@ const servicesByLocale: Record<Locale, ServiceItem[]> = {
       shortDescription: "??????,?????????",
       longDescription:
         "??????????,????????????????????",
-      price: "$229+",
-      duration: "3.5 - 5.5 ??",
+      price: "$210 - $270 USD",
+      duration: "3.5 - 4 ??",
       highlights: [
         "????????",
         "?????????",
@@ -324,8 +324,8 @@ const servicesByLocale: Record<Locale, ServiceItem[]> = {
       shortDescription: "Pflegewäsche mit schnellem Innenraum-Refresh.",
       longDescription:
         "Ideal für regelmäßige Pflege. Außenwäsche, Reifenfinish und schnelle Innenraumreinigung.",
-      price: "$89+",
-      duration: "60 - 90 Min",
+      price: "$150 - $210 USD",
+      duration: "2 - 2.5 Std",
       highlights: [
         "Handwäsche mit Schaum",
         "Felgen- und Reifenpflege",
@@ -339,8 +339,8 @@ const servicesByLocale: Record<Locale, ServiceItem[]> = {
       shortDescription: "Tiefenreinigung innen + verbessertes Außenfinish.",
       longDescription:
         "Ausgewogenes Paket für sichtbare Verbesserung mit stärkerem Fokus auf Innenraum und Lackbild.",
-      price: "$149+",
-      duration: "2 - 3.5 Std",
+      price: "$100 - $150 USD",
+      duration: "1 - 1.5 Std",
       highlights: [
         "Innenraum-Tiefenreinigung",
         "Matten- und Teppichbehandlung",
@@ -354,8 +354,8 @@ const servicesByLocale: Record<Locale, ServiceItem[]> = {
       shortDescription: "Komplettes Premium-Detailing mit maximalem Finish.",
       longDescription:
         "Unser umfassendstes Paket für den kompletten Fahrzeug-Reset mit Premium-Schutz.",
-      price: "$229+",
-      duration: "3.5 - 5.5 Std",
+      price: "$210 - $270 USD",
+      duration: "3.5 - 4 Std",
       highlights: [
         "Kompletter Innenraum-Workflow",
         "Glanzverbesserung außen",
