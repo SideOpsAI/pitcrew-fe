@@ -39,8 +39,11 @@ type BookingProviderProps = {
   services: ServiceItem[];
 };
 
+type VehicleTypeKey = "sedan" | "small-suv" | "big-suv-minivan" | "pickup-plus";
+
 type BookingFormData = {
   planSlug: "" | PlanSlug;
+  vehicleTypeKey: "" | VehicleTypeKey;
   vehicleType: string;
   vehicleMakeModel: string;
   vehicleYear: string;
@@ -52,7 +55,15 @@ type BookingFormData = {
   email: string;
   notes: string;
   botField: string;
+  vehiclePhotoFront: File | null;
+  vehiclePhotoSide: File | null;
+  vehiclePhotoExtra: File | null;
 };
+
+type BookingTextField = Exclude<
+  keyof BookingFormData,
+  "vehiclePhotoFront" | "vehiclePhotoSide" | "vehiclePhotoExtra"
+>;
 
 type CaptchaChallenge = {
   svg: string;
@@ -69,6 +80,7 @@ type CaptchaApiResponse = {
 
 const initialFormData: BookingFormData = {
   planSlug: "",
+  vehicleTypeKey: "",
   vehicleType: "",
   vehicleMakeModel: "",
   vehicleYear: "",
@@ -80,6 +92,9 @@ const initialFormData: BookingFormData = {
   email: "",
   notes: "",
   botField: "",
+  vehiclePhotoFront: null,
+  vehiclePhotoSide: null,
+  vehiclePhotoExtra: null,
 };
 
 const phoneDialCodeOptions = [
@@ -89,6 +104,253 @@ const phoneDialCodeOptions = [
   { value: "+57", label: "CO (+57)" },
   { value: "+34", label: "ES (+34)" },
 ] as const;
+
+type VehiclePlanOption = {
+  slug: PlanSlug;
+  name: string;
+  description: string;
+  price: string;
+  includes: string[];
+};
+
+type BookingFlowCopy = {
+  vehicleTypeRequired: string;
+  vehicleStepDescription: string;
+  planStepDescription: string;
+  planIncludesLabel: string;
+  vehicleTypes: Record<VehicleTypeKey, string>;
+  planTitles: Record<PlanSlug, string>;
+  planDescriptions: Record<PlanSlug, string>;
+  planIncludes: Record<PlanSlug, string[]>;
+};
+
+type BookingPhotoCopy = {
+  title: string;
+  subtitle: string;
+  frontLabel: string;
+  sideLabel: string;
+  extraLabel: string;
+  hint: string;
+  remove: string;
+};
+
+const vehicleTypeOrder = [
+  "sedan",
+  "small-suv",
+  "big-suv-minivan",
+  "pickup-plus",
+] as const satisfies readonly VehicleTypeKey[];
+
+const bookingPlanOrder = ["basic", "medium", "full"] as const satisfies readonly PlanSlug[];
+
+const bookingPlanPricing: Record<VehicleTypeKey, Record<PlanSlug, string>> = {
+  sedan: {
+    basic: "$129+",
+    medium: "$119+",
+    full: "$229+",
+  },
+  "small-suv": {
+    basic: "$149+",
+    medium: "$139+",
+    full: "$259+",
+  },
+  "big-suv-minivan": {
+    basic: "$179+",
+    medium: "$169+",
+    full: "$299+",
+  },
+  "pickup-plus": {
+    basic: "$189+",
+    medium: "$179+",
+    full: "$319+",
+  },
+};
+
+const bookingFlowCopyEn: BookingFlowCopy = {
+  vehicleTypeRequired: "Please choose an allowed vehicle type.",
+  vehicleStepDescription:
+    "Select your vehicle type and add your vehicle details before choosing a plan.",
+  planStepDescription:
+    "Choose one detailing plan. Prices and scope adjust to your selected vehicle type.",
+  planIncludesLabel: "What's included",
+  vehicleTypes: {
+    sedan: "Sedan",
+    "small-suv": "Small SUV",
+    "big-suv-minivan": "Big SUV / Mini van",
+    "pickup-plus": "Pickup trucks & plus",
+  },
+  planTitles: {
+    basic: "INTERIOR",
+    medium: "EXTERIOR",
+    full: "FULL DETAIL",
+  },
+  planDescriptions: {
+    basic: "Deep interior-focused detailing for cabins that need a full reset.",
+    medium: "Exterior-focused detailing to restore gloss and protect painted surfaces.",
+    full: "Complete interior + exterior detailing package with maximum finish quality.",
+  },
+  planIncludes: {
+    basic: [
+      "Deep vacuum plus compressed-air crevice cleanup",
+      "Dashboard, console, and door-panel detailing",
+      "Interior surfaces finished with UV protectant",
+    ],
+    medium: [
+      "Foam pre-wash and contact hand wash",
+      "Wheel, tire, and fender-well cleaning",
+      "Gloss sealant for water beading and shine",
+    ],
+    full: [
+      "Full interior and exterior detailing workflow",
+      "Paint decontamination and trim refresh",
+      "Final quality control pass and touch-up review",
+    ],
+  },
+};
+
+const bookingFlowCopy: Record<Locale, BookingFlowCopy> = {
+  en: bookingFlowCopyEn,
+  es: {
+    vehicleTypeRequired: "Selecciona un tipo de vehiculo permitido.",
+    vehicleStepDescription:
+      "Selecciona el tipo de vehiculo y completa los datos antes de elegir el plan.",
+    planStepDescription:
+      "Elige un plan de detailing. Precio y alcance cambian segun el tipo de vehiculo.",
+    planIncludesLabel: "Que incluye",
+    vehicleTypes: {
+      sedan: "Sedan",
+      "small-suv": "Small SUV",
+      "big-suv-minivan": "Big SUV / Mini van",
+      "pickup-plus": "Pickup trucks & plus",
+    },
+    planTitles: {
+      basic: "INTERIOR",
+      medium: "EXTERIOR",
+      full: "FULL DETAIL",
+    },
+    planDescriptions: {
+      basic: "Detailing interior profundo para cabinas que necesitan un reset total.",
+      medium: "Detailing exterior para recuperar brillo y proteger superficies pintadas.",
+      full: "Paquete completo interior + exterior con el mayor nivel de acabado.",
+    },
+    planIncludes: {
+      basic: [
+        "Aspirado profundo y limpieza de ranuras con aire",
+        "Detalle de tablero, consola y paneles de puerta",
+        "Acabado protector UV en superficies interiores",
+      ],
+      medium: [
+        "Prelavado con espuma y lavado a mano",
+        "Limpieza de rines, llantas y guardafangos",
+        "Sellado de brillo para repelencia al agua",
+      ],
+      full: [
+        "Flujo completo de detailing interior y exterior",
+        "Descontaminacion de pintura y detalle de molduras",
+        "Revision final de calidad con retoques finales",
+      ],
+    },
+  },
+  "pt-BR": {
+    ...bookingFlowCopyEn,
+    vehicleStepDescription:
+      "Selecione o tipo de veiculo e preencha os dados antes de escolher o plano.",
+    planStepDescription:
+      "Escolha um plano de detailing. Preco e escopo mudam pelo tipo de veiculo.",
+  },
+  it: {
+    ...bookingFlowCopyEn,
+    vehicleStepDescription:
+      "Seleziona il tipo di veicolo e completa i dettagli prima di scegliere il piano.",
+    planStepDescription:
+      "Scegli un piano. Prezzo e servizi cambiano in base al tipo di veicolo.",
+  },
+  "zh-CN": {
+    ...bookingFlowCopyEn,
+    vehicleStepDescription:
+      "Xian xuanze chexing, zai buquan cheliang xinxi, ranhou zai xuan taocan.",
+    planStepDescription:
+      "Xuanze taocan. Jiage he fanwei hui genju chexing bianhua.",
+  },
+  de: {
+    ...bookingFlowCopyEn,
+    vehicleStepDescription:
+      "Wahle zuerst den Fahrzeugtyp und erfasse danach die Fahrzeugdetails.",
+    planStepDescription:
+      "Wahle einen Plan. Preis und Umfang richten sich nach dem Fahrzeugtyp.",
+  },
+};
+
+const bookingPhotoCopyEn: BookingPhotoCopy = {
+  title: "Vehicle photos (optional)",
+  subtitle: "Upload up to 3 photos so we can better estimate your detailing service.",
+  frontLabel: "Front view",
+  sideLabel: "Side view",
+  extraLabel: "Extra / damage area",
+  hint: "JPG, PNG, or WEBP. Better lighting gives better estimates.",
+  remove: "Remove",
+};
+
+const bookingPhotoCopy: Record<Locale, BookingPhotoCopy> = {
+  en: bookingPhotoCopyEn,
+  es: {
+    title: "Fotos del vehiculo (opcional)",
+    subtitle: "Sube hasta 3 fotos para estimar mejor tu servicio de detailing.",
+    frontLabel: "Vista frontal",
+    sideLabel: "Vista lateral",
+    extraLabel: "Extra / zona de dano",
+    hint: "JPG, PNG o WEBP. Mejor iluminacion = mejor estimacion.",
+    remove: "Quitar",
+  },
+  "pt-BR": {
+    ...bookingPhotoCopyEn,
+    title: "Fotos do veiculo (opcional)",
+    subtitle: "Envie ate 3 fotos para estimarmos melhor o servico.",
+    remove: "Remover",
+  },
+  it: {
+    ...bookingPhotoCopyEn,
+    title: "Foto del veicolo (opzionale)",
+    subtitle: "Carica fino a 3 foto per stimare meglio il servizio.",
+    remove: "Rimuovi",
+  },
+  "zh-CN": {
+    ...bookingPhotoCopyEn,
+    title: "Cheliang tupian (kexuan)",
+    subtitle: "Shangchuan zui duo 3 zhang tupian, bangzhu women gengtunjun gujia.",
+    remove: "Yichu",
+  },
+  de: {
+    ...bookingPhotoCopyEn,
+    title: "Fahrzeugfotos (optional)",
+    subtitle: "Lade bis zu 3 Fotos hoch, damit wir besser einschatzen konnen.",
+    remove: "Entfernen",
+  },
+};
+
+function getBookingFlowCopy(locale: Locale) {
+  return bookingFlowCopy[locale];
+}
+
+function getBookingPhotoCopy(locale: Locale) {
+  return bookingPhotoCopy[locale];
+}
+
+function buildVehiclePlanOptions(
+  locale: Locale,
+  vehicleTypeKey: VehicleTypeKey,
+): VehiclePlanOption[] {
+  const copy = getBookingFlowCopy(locale);
+  const pricing = bookingPlanPricing[vehicleTypeKey];
+
+  return bookingPlanOrder.map((slug) => ({
+    slug,
+    name: copy.planTitles[slug],
+    description: copy.planDescriptions[slug],
+    price: pricing[slug],
+    includes: copy.planIncludes[slug],
+  }));
+}
 
 const bookingFieldValidationCopy: Record<
   Locale,
@@ -317,8 +579,8 @@ function getBookingUiMessages(locale: Locale) {
 }
 
 function getStepTitle(step: number, labels: TranslationSchema["bookingModal"]) {
-  if (step === 1) return labels.steps.choosePlan;
-  if (step === 2) return labels.steps.vehicleInfo;
+  if (step === 1) return labels.steps.vehicleInfo;
+  if (step === 2) return labels.steps.choosePlan;
   return labels.steps.locationContact;
 }
 
@@ -359,6 +621,16 @@ function BookingModal({
   const captchaCopy = getCaptchaMessages(locale);
   const fieldValidationCopy = getBookingFieldValidationCopy(locale);
   const uiCopy = getBookingUiMessages(locale);
+  const flowCopy = getBookingFlowCopy(locale);
+  const photoCopy = getBookingPhotoCopy(locale);
+
+  const selectedVehiclePlanOptions = useMemo(
+    () =>
+      formData.vehicleTypeKey
+        ? buildVehiclePlanOptions(locale, formData.vehicleTypeKey)
+        : [],
+    [formData.vehicleTypeKey, locale],
+  );
 
   const isSubmitting = formState.status === "submitting";
 
@@ -405,7 +677,7 @@ function BookingModal({
 
   const resetModalState = useCallback(
     (planSlug: PlanSlug | null) => {
-      setStep(planSlug ? 2 : 1);
+      setStep(1);
       setErrors({});
       setCaptcha(null);
       setCaptchaInput("");
@@ -521,7 +793,7 @@ function BookingModal({
     void fetchCaptchaChallenge();
   }, [captcha, captchaLoading, fetchCaptchaChallenge, isOpen, step]);
 
-  const updateField = (field: keyof BookingFormData, value: string) => {
+  const updateField = (field: BookingTextField, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
 
     setErrors((prev) => {
@@ -544,22 +816,57 @@ function BookingModal({
     }
   };
 
+  const updatePhoto = (
+    field: "vehiclePhotoFront" | "vehiclePhotoSide" | "vehiclePhotoExtra",
+    file: File | null,
+  ) => {
+    setFormData((prev) => ({ ...prev, [field]: file }));
+
+    if (formState.message) {
+      setFormState((prev) => ({ ...prev, message: "", status: "idle" }));
+    }
+  };
+
+  const selectVehicleType = (vehicleTypeKey: VehicleTypeKey) => {
+    const selectedVehicleType = flowCopy.vehicleTypes[vehicleTypeKey];
+
+    setFormData((prev) => ({
+      ...prev,
+      vehicleTypeKey,
+      vehicleType: selectedVehicleType,
+      planSlug:
+        prev.vehicleTypeKey && prev.vehicleTypeKey !== vehicleTypeKey
+          ? ""
+          : prev.planSlug,
+    }));
+
+    setErrors((prev) => ({
+      ...prev,
+      vehicleType: undefined,
+      planSlug: undefined,
+    }));
+
+    if (formState.message) {
+      setFormState((prev) => ({ ...prev, message: "", status: "idle" }));
+    }
+  };
+
   const validateStep = (targetStep: number) => {
     const nextErrors: ContactLeadErrors = {};
 
     if (targetStep === 1) {
-      if (!formData.planSlug) {
-        nextErrors.planSlug = labels.validation.planRequired;
-      }
-    }
-
-    if (targetStep === 2) {
-      if (!formData.vehicleType.trim()) {
-        nextErrors.vehicleType = labels.validation.required;
+      if (!formData.vehicleTypeKey) {
+        nextErrors.vehicleType = flowCopy.vehicleTypeRequired;
       }
 
       if (!formData.vehicleMakeModel.trim()) {
         nextErrors.vehicleMakeModel = labels.validation.required;
+      }
+    }
+
+    if (targetStep === 2) {
+      if (!formData.planSlug) {
+        nextErrors.planSlug = labels.validation.planRequired;
       }
     }
 
@@ -636,7 +943,10 @@ function BookingModal({
       return;
     }
 
-    const selectedService = services.find((service) => service.slug === formData.planSlug);
+    const selectedVehiclePlan = selectedVehiclePlanOptions.find(
+      (option) => option.slug === formData.planSlug,
+    );
+    const fallbackService = services.find((service) => service.slug === formData.planSlug);
     const bookingPhone = buildBookingPhoneValue(
       formData.phoneDialCode,
       formData.phoneNumber,
@@ -646,8 +956,12 @@ function BookingModal({
       name: formData.name,
       phone: bookingPhone,
       email: formData.email,
-      vehicleType: formData.vehicleType,
-      serviceInterest: selectedService?.name ?? formData.planSlug,
+      vehicleType:
+        formData.vehicleType ||
+        (formData.vehicleTypeKey ? flowCopy.vehicleTypes[formData.vehicleTypeKey] : ""),
+      serviceInterest: selectedVehiclePlan
+        ? `${selectedVehiclePlan.name} - ${formData.vehicleType}`
+        : fallbackService?.name ?? formData.planSlug,
       message: formData.notes || "Booking modal request",
       locale,
       botField: formData.botField,
@@ -676,12 +990,41 @@ function BookingModal({
     setFormState({ status: "submitting", errors: {}, message: "" });
 
     try {
+      const body = new FormData();
+      body.append("form-name", "pitcrew-contact");
+      body.append("name", parsed.data.name);
+      body.append("phone", parsed.data.phone);
+      body.append("email", parsed.data.email ?? "");
+      body.append("vehicleType", parsed.data.vehicleType ?? "");
+      body.append("serviceInterest", parsed.data.serviceInterest ?? "");
+      body.append("message", parsed.data.message ?? "");
+      body.append("locale", parsed.data.locale);
+      body.append("source", parsed.data.source);
+      body.append("planSlug", parsed.data.planSlug ?? "");
+      body.append("vehicleMakeModel", parsed.data.vehicleMakeModel ?? "");
+      body.append("vehicleYear", parsed.data.vehicleYear ?? "");
+      body.append("addressLine", parsed.data.addressLine ?? "");
+      body.append("cityArea", parsed.data.cityArea ?? "");
+      body.append("notes", parsed.data.notes ?? "");
+      body.append("bot-field", "");
+      body.append("captchaToken", parsed.data.captchaToken ?? "");
+      body.append("captchaValue", parsed.data.captchaValue ?? "");
+
+      if (formData.vehiclePhotoFront) {
+        body.append("vehiclePhotoFront", formData.vehiclePhotoFront);
+      }
+
+      if (formData.vehiclePhotoSide) {
+        body.append("vehiclePhotoSide", formData.vehiclePhotoSide);
+      }
+
+      if (formData.vehiclePhotoExtra) {
+        body.append("vehiclePhotoExtra", formData.vehiclePhotoExtra);
+      }
+
       const response = await fetch("/api/contact", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(parsed.data),
+        body,
       });
 
       const responseBody = (await response.json().catch(() => null)) as
@@ -767,80 +1110,116 @@ function BookingModal({
           <div className="min-h-0 flex-1 overflow-y-auto p-5 sm:p-6">
             {step === 1 ? (
               <div className="space-y-4">
-                <label className="block text-sm font-semibold text-white">
-                  {labels.fields.plan}
-                </label>
-                <div className="grid gap-3">
-                  {services.map((service, index) => (
+                <div>
+                  <label className="block text-sm font-semibold text-white">
+                    {labels.fields.vehicleType}
+                  </label>
+                  <p className="mt-1 text-sm text-white/70">{flowCopy.vehicleStepDescription}</p>
+                </div>
+
+                <div className="grid gap-3 sm:grid-cols-2">
+                  {vehicleTypeOrder.map((vehicleTypeKey, index) => (
                     <button
-                      key={service.slug}
+                      key={vehicleTypeKey}
                       type="button"
                       data-autofocus={index === 0 ? "true" : undefined}
-                      onClick={() => updateField("planSlug", service.slug)}
+                      onClick={() => selectVehicleType(vehicleTypeKey)}
                       className={`rounded-xl border px-4 py-4 text-left transition ${
-                        formData.planSlug === service.slug
+                        formData.vehicleTypeKey === vehicleTypeKey
                           ? "border-accent bg-accent/15"
                           : "border-white/15 bg-white/5 hover:border-white/30"
                       }`}
                     >
-                      <p className="font-heading text-xl uppercase tracking-wider text-white">
-                        {service.name}
-                      </p>
-                      <p className="mt-1 text-sm text-white/75">{service.shortDescription}</p>
-                      <p className="mt-2 text-xs font-semibold uppercase tracking-wide text-accent">
-                        {service.price}
+                      <p className="font-heading text-lg uppercase tracking-wider text-white">
+                        {flowCopy.vehicleTypes[vehicleTypeKey]}
                       </p>
                     </button>
                   ))}
                 </div>
-                {errors.planSlug ? <p className="text-sm text-red-300">{errors.planSlug}</p> : null}
+
+                {errors.vehicleType ? (
+                  <p className="text-sm text-red-300">{errors.vehicleType}</p>
+                ) : null}
+
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <label className="block sm:col-span-1">
+                    <span className="mb-2 block text-sm font-semibold text-white">
+                      {labels.fields.vehicleYear}
+                    </span>
+                    <input
+                      value={formData.vehicleYear}
+                      onChange={(event) => updateField("vehicleYear", event.target.value)}
+                      placeholder={labels.placeholders.vehicleYear}
+                      className="w-full rounded-xl border border-white/15 bg-black/60 px-4 py-3 text-white outline-none ring-accent transition placeholder:text-white/40 focus:ring-2"
+                    />
+                  </label>
+
+                  <label className="block sm:col-span-1">
+                    <span className="mb-2 block text-sm font-semibold text-white">
+                      {labels.fields.vehicleMakeModel}
+                    </span>
+                    <input
+                      value={formData.vehicleMakeModel}
+                      onChange={(event) => updateField("vehicleMakeModel", event.target.value)}
+                      placeholder={labels.placeholders.vehicleMakeModel}
+                      className="w-full rounded-xl border border-white/15 bg-black/60 px-4 py-3 text-white outline-none ring-accent transition placeholder:text-white/40 focus:ring-2"
+                    />
+                    {errors.vehicleMakeModel ? (
+                      <span className="mt-1 block text-xs text-red-300">{errors.vehicleMakeModel}</span>
+                    ) : null}
+                  </label>
+                </div>
               </div>
             ) : null}
 
             {step === 2 ? (
-              <div className="grid gap-4 sm:grid-cols-2">
-                <label className="block sm:col-span-1">
-                  <span className="mb-2 block text-sm font-semibold text-white">
-                    {labels.fields.vehicleType}
-                  </span>
-                  <input
-                    data-autofocus="true"
-                    value={formData.vehicleType}
-                    onChange={(event) => updateField("vehicleType", event.target.value)}
-                    placeholder={labels.placeholders.vehicleType}
-                    className="w-full rounded-xl border border-white/15 bg-black/60 px-4 py-3 text-white outline-none ring-accent transition placeholder:text-white/40 focus:ring-2"
-                  />
-                  {errors.vehicleType ? (
-                    <span className="mt-1 block text-xs text-red-300">{errors.vehicleType}</span>
-                  ) : null}
-                </label>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-semibold text-white">
+                    {labels.fields.plan}
+                  </label>
+                  <p className="mt-1 text-sm text-white/70">{flowCopy.planStepDescription}</p>
+                  <p className="mt-2 text-xs font-semibold uppercase tracking-wide text-accent">
+                    {formData.vehicleType}
+                  </p>
+                </div>
 
-                <label className="block sm:col-span-1">
-                  <span className="mb-2 block text-sm font-semibold text-white">
-                    {labels.fields.vehicleYear}
-                  </span>
-                  <input
-                    value={formData.vehicleYear}
-                    onChange={(event) => updateField("vehicleYear", event.target.value)}
-                    placeholder={labels.placeholders.vehicleYear}
-                    className="w-full rounded-xl border border-white/15 bg-black/60 px-4 py-3 text-white outline-none ring-accent transition placeholder:text-white/40 focus:ring-2"
-                  />
-                </label>
-
-                <label className="block sm:col-span-2">
-                  <span className="mb-2 block text-sm font-semibold text-white">
-                    {labels.fields.vehicleMakeModel}
-                  </span>
-                  <input
-                    value={formData.vehicleMakeModel}
-                    onChange={(event) => updateField("vehicleMakeModel", event.target.value)}
-                    placeholder={labels.placeholders.vehicleMakeModel}
-                    className="w-full rounded-xl border border-white/15 bg-black/60 px-4 py-3 text-white outline-none ring-accent transition placeholder:text-white/40 focus:ring-2"
-                  />
-                  {errors.vehicleMakeModel ? (
-                    <span className="mt-1 block text-xs text-red-300">{errors.vehicleMakeModel}</span>
-                  ) : null}
-                </label>
+                <div className="grid gap-3">
+                  {selectedVehiclePlanOptions.map((planOption, index) => (
+                    <button
+                      key={planOption.slug}
+                      type="button"
+                      data-autofocus={index === 0 ? "true" : undefined}
+                      onClick={() => updateField("planSlug", planOption.slug)}
+                      className={`rounded-xl border px-4 py-4 text-left transition ${
+                        formData.planSlug === planOption.slug
+                          ? "border-accent bg-accent/15"
+                          : "border-white/15 bg-white/5 hover:border-white/30"
+                      }`}
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <p className="font-heading text-xl uppercase tracking-wider text-white">
+                          {planOption.name}
+                        </p>
+                        <p className="text-xs font-semibold uppercase tracking-wide text-accent">
+                          {planOption.price}
+                        </p>
+                      </div>
+                      <p className="mt-2 text-sm text-white/75">{planOption.description}</p>
+                      <p className="mt-3 text-xs font-semibold uppercase tracking-wide text-white/65">
+                        {flowCopy.planIncludesLabel}
+                      </p>
+                      <ul className="mt-2 space-y-1 text-sm text-white/75">
+                        {planOption.includes.map((item) => (
+                          <li key={`${planOption.slug}-${item}`}>- {item}</li>
+                        ))}
+                      </ul>
+                    </button>
+                  ))}
+                </div>
+                {errors.planSlug ? (
+                  <p className="text-sm text-red-300">{errors.planSlug}</p>
+                ) : null}
               </div>
             ) : null}
 
@@ -966,6 +1345,83 @@ function BookingModal({
                     className="min-h-28 w-full rounded-xl border border-white/15 bg-black/60 px-4 py-3 text-white outline-none ring-accent transition placeholder:text-white/40 focus:ring-2"
                   />
                 </label>
+
+                <div className="rounded-xl border border-white/15 bg-black/60 p-4 sm:col-span-2">
+                  <p className="text-sm font-semibold text-white">{photoCopy.title}</p>
+                  <p className="mt-1 text-xs text-white/65">{photoCopy.subtitle}</p>
+                  <p className="mt-1 text-[11px] text-white/45">{photoCopy.hint}</p>
+
+                  <div className="mt-3 grid gap-3 sm:grid-cols-3">
+                    <div className="rounded-lg border border-white/10 p-3">
+                      <p className="text-xs font-semibold uppercase tracking-wide text-white/75">
+                        {photoCopy.frontLabel}
+                      </p>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={(event) => {
+                          updatePhoto("vehiclePhotoFront", event.target.files?.[0] ?? null);
+                        }}
+                        className="mt-2 block w-full text-xs text-white/70 file:mr-3 file:rounded-lg file:border-0 file:bg-accent file:px-3 file:py-2 file:text-xs file:font-semibold file:text-black"
+                      />
+                      {formData.vehiclePhotoFront ? (
+                        <button
+                          type="button"
+                          onClick={() => updatePhoto("vehiclePhotoFront", null)}
+                          className="mt-2 text-xs font-semibold text-accent"
+                        >
+                          {photoCopy.remove}: {formData.vehiclePhotoFront.name}
+                        </button>
+                      ) : null}
+                    </div>
+
+                    <div className="rounded-lg border border-white/10 p-3">
+                      <p className="text-xs font-semibold uppercase tracking-wide text-white/75">
+                        {photoCopy.sideLabel}
+                      </p>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={(event) => {
+                          updatePhoto("vehiclePhotoSide", event.target.files?.[0] ?? null);
+                        }}
+                        className="mt-2 block w-full text-xs text-white/70 file:mr-3 file:rounded-lg file:border-0 file:bg-accent file:px-3 file:py-2 file:text-xs file:font-semibold file:text-black"
+                      />
+                      {formData.vehiclePhotoSide ? (
+                        <button
+                          type="button"
+                          onClick={() => updatePhoto("vehiclePhotoSide", null)}
+                          className="mt-2 text-xs font-semibold text-accent"
+                        >
+                          {photoCopy.remove}: {formData.vehiclePhotoSide.name}
+                        </button>
+                      ) : null}
+                    </div>
+
+                    <div className="rounded-lg border border-white/10 p-3">
+                      <p className="text-xs font-semibold uppercase tracking-wide text-white/75">
+                        {photoCopy.extraLabel}
+                      </p>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={(event) => {
+                          updatePhoto("vehiclePhotoExtra", event.target.files?.[0] ?? null);
+                        }}
+                        className="mt-2 block w-full text-xs text-white/70 file:mr-3 file:rounded-lg file:border-0 file:bg-accent file:px-3 file:py-2 file:text-xs file:font-semibold file:text-black"
+                      />
+                      {formData.vehiclePhotoExtra ? (
+                        <button
+                          type="button"
+                          onClick={() => updatePhoto("vehiclePhotoExtra", null)}
+                          className="mt-2 text-xs font-semibold text-accent"
+                        >
+                          {photoCopy.remove}: {formData.vehiclePhotoExtra.name}
+                        </button>
+                      ) : null}
+                    </div>
+                  </div>
+                </div>
 
                 <div className="rounded-xl border border-white/15 bg-black/60 p-4 sm:col-span-2">
                   <p className="text-sm font-semibold text-white">{captchaCopy.label}</p>

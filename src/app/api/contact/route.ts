@@ -1,9 +1,18 @@
 import { NextResponse } from "next/server";
 
 import { verifyCaptchaChallenge } from "@/lib/captcha";
-import { contactLeadSchema } from "@/lib/contact";
+import { contactLeadSchema, type ContactLeadPayload } from "@/lib/contact";
 
 export const runtime = "nodejs";
+
+const uploadFieldNames = [
+  "vehiclePhotoFront",
+  "vehiclePhotoSide",
+  "vehiclePhotoExtra",
+] as const;
+
+type UploadFieldName = (typeof uploadFieldNames)[number];
+type UploadFileMap = Partial<Record<UploadFieldName, File>>;
 
 function getNetlifyBaseUrl() {
   const value =
@@ -31,10 +40,102 @@ function isMockFormDeliveryEnabled() {
   return process.env.MOCK_FORM_DELIVERY === "true";
 }
 
+function isFile(value: FormDataEntryValue | null): value is File {
+  return value instanceof File && value.size > 0;
+}
+
+function buildPayloadFromFormData(formData: FormData) {
+  const getString = (name: string) => {
+    const value = formData.get(name);
+    return typeof value === "string" ? value : "";
+  };
+
+  const payload = {
+    name: getString("name"),
+    phone: getString("phone"),
+    email: getString("email"),
+    vehicleType: getString("vehicleType"),
+    serviceInterest: getString("serviceInterest"),
+    message: getString("message"),
+    locale: getString("locale"),
+    botField: getString("bot-field") || getString("botField"),
+    captchaToken: getString("captchaToken"),
+    captchaValue: getString("captchaValue"),
+    source: getString("source"),
+    planSlug: getString("planSlug"),
+    vehicleMakeModel: getString("vehicleMakeModel"),
+    vehicleYear: getString("vehicleYear"),
+    addressLine: getString("addressLine"),
+    cityArea: getString("cityArea"),
+    notes: getString("notes"),
+  };
+
+  const files: UploadFileMap = {};
+
+  for (const fieldName of uploadFieldNames) {
+    const fileCandidate = formData.get(fieldName);
+
+    if (isFile(fileCandidate)) {
+      files[fieldName] = fileCandidate;
+    }
+  }
+
+  return { payload, files };
+}
+
+async function readIncomingRequest(request: Request) {
+  const contentType = request.headers.get("content-type") ?? "";
+
+  if (contentType.includes("application/json")) {
+    const payload = (await request.json()) as unknown;
+    return { payload, files: {} as UploadFileMap };
+  }
+
+  const formData = await request.formData();
+  return buildPayloadFromFormData(formData);
+}
+
+function buildNetlifyFormData({
+  parsed,
+  files,
+}: {
+  parsed: ContactLeadPayload;
+  files: UploadFileMap;
+}) {
+  const body = new FormData();
+
+  body.append("form-name", "pitcrew-contact");
+  body.append("name", parsed.name);
+  body.append("phone", parsed.phone);
+  body.append("email", parsed.email ?? "");
+  body.append("vehicleType", parsed.vehicleType ?? "");
+  body.append("serviceInterest", parsed.serviceInterest ?? "");
+  body.append("message", parsed.message ?? "");
+  body.append("locale", parsed.locale);
+  body.append("source", parsed.source);
+  body.append("planSlug", parsed.planSlug ?? "");
+  body.append("vehicleMakeModel", parsed.vehicleMakeModel ?? "");
+  body.append("vehicleYear", parsed.vehicleYear ?? "");
+  body.append("addressLine", parsed.addressLine ?? "");
+  body.append("cityArea", parsed.cityArea ?? "");
+  body.append("notes", parsed.notes ?? "");
+  body.append("bot-field", "");
+
+  for (const fieldName of uploadFieldNames) {
+    const file = files[fieldName];
+
+    if (file) {
+      body.append(fieldName, file);
+    }
+  }
+
+  return body;
+}
+
 export async function POST(request: Request) {
   try {
-    const json = (await request.json()) as unknown;
-    const parsed = contactLeadSchema.safeParse(json);
+    const incoming = await readIncomingRequest(request);
+    const parsed = contactLeadSchema.safeParse(incoming.payload);
 
     if (!parsed.success) {
       return NextResponse.json(
@@ -62,7 +163,7 @@ export async function POST(request: Request) {
           {
             ok: false,
             error: "captcha_not_configured",
-            details: "Missing CAPTCHA_SECRET",
+            details: "Missing CAPTCHA_SECRET or BOOKING_CAPTCHA_SECRET",
           },
           { status: 500 },
         );
@@ -95,33 +196,15 @@ export async function POST(request: Request) {
       );
     }
 
-    const encoded = new URLSearchParams({
-      "form-name": "pitcrew-contact",
-      name: parsed.data.name,
-      phone: parsed.data.phone,
-      email: parsed.data.email ?? "",
-      vehicleType: parsed.data.vehicleType ?? "",
-      serviceInterest: parsed.data.serviceInterest ?? "",
-      message: parsed.data.message ?? "",
-      locale: parsed.data.locale,
-      source: parsed.data.source,
-      planSlug: parsed.data.planSlug ?? "",
-      vehicleMakeModel: parsed.data.vehicleMakeModel ?? "",
-      vehicleYear: parsed.data.vehicleYear ?? "",
-      addressLine: parsed.data.addressLine ?? "",
-      cityArea: parsed.data.cityArea ?? "",
-      notes: parsed.data.notes ?? "",
-      "bot-field": "",
-    });
-
     const formsEndpoint = getNetlifyFormsTargetUrl(netlifyBaseUrl);
+    const body = buildNetlifyFormData({
+      parsed: parsed.data,
+      files: incoming.files,
+    });
 
     const netlifyResponse = await fetch(formsEndpoint, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
-      },
-      body: encoded.toString(),
+      body,
     });
 
     if (!netlifyResponse.ok) {
