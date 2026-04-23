@@ -47,7 +47,7 @@ type BookingProviderProps = {
 
 type BookingFormData = {
   planSlug: "" | PlanSlug;
-  extraServiceKey: "" | ExtraServiceKey;
+  extraServiceKeys: ExtraServiceKey[];
   vehicleTypeKey: "" | VehicleTypeKey;
   vehicleType: string;
   vehicleMakeModel: string;
@@ -67,7 +67,7 @@ type BookingFormData = {
 
 type BookingTextField = Exclude<
   keyof BookingFormData,
-  "vehiclePhotoFront" | "vehiclePhotoSide" | "vehiclePhotoExtra"
+  "vehiclePhotoFront" | "vehiclePhotoSide" | "vehiclePhotoExtra" | "extraServiceKeys"
 >;
 type BookingPhotoField = "vehiclePhotoFront" | "vehiclePhotoSide" | "vehiclePhotoExtra";
 
@@ -86,7 +86,7 @@ type CaptchaApiResponse = {
 
 const initialFormData: BookingFormData = {
   planSlug: "",
-  extraServiceKey: "",
+  extraServiceKeys: [],
   vehicleTypeKey: "",
   vehicleType: "",
   vehicleMakeModel: "",
@@ -203,42 +203,42 @@ const bookingExtraServiceOptions: readonly BookingExtraServiceOption[] = [
 const bookingExtraServiceCopy: Record<Locale, BookingExtraServiceCopy> = {
   en: {
     title: "Extra service (optional)",
-    subtitle: "Add one extra service to your booking request.",
+    subtitle: "Add one or more extra services to your booking request.",
     optionalTag: "Optional",
     noneLabel: "No extra service",
     includesLabel: "Includes",
   },
   es: {
     title: "Servicio extra (opcional)",
-    subtitle: "Agrega un servicio extra a tu solicitud de reserva.",
+    subtitle: "Agrega uno o mas servicios extra a tu solicitud de reserva.",
     optionalTag: "Opcional",
     noneLabel: "Sin servicio extra",
     includesLabel: "Incluye",
   },
   "pt-BR": {
     title: "Servico extra (opcional)",
-    subtitle: "Adicione um servico extra ao pedido de agendamento.",
+    subtitle: "Adicione um ou mais servicos extras ao pedido de agendamento.",
     optionalTag: "Opcional",
     noneLabel: "Sem servico extra",
     includesLabel: "Inclui",
   },
   it: {
     title: "Servizio extra (opzionale)",
-    subtitle: "Aggiungi un servizio extra alla richiesta di prenotazione.",
+    subtitle: "Aggiungi uno o piu servizi extra alla richiesta di prenotazione.",
     optionalTag: "Opzionale",
     noneLabel: "Nessun servizio extra",
     includesLabel: "Include",
   },
   "zh-CN": {
     title: "Extra service (optional)",
-    subtitle: "Add one extra service to your booking request.",
+    subtitle: "Add one or more extra services to your booking request.",
     optionalTag: "Optional",
     noneLabel: "No extra service",
     includesLabel: "Includes",
   },
   de: {
     title: "Extra-Service (optional)",
-    subtitle: "Fuege deiner Buchungsanfrage einen Extra-Service hinzu.",
+    subtitle: "Fuege deiner Buchungsanfrage einen oder mehrere Extra-Services hinzu.",
     optionalTag: "Optional",
     noneLabel: "Kein Extra-Service",
     includesLabel: "Enthaelt",
@@ -685,13 +685,58 @@ const bookingUiMessages: Record<
   },
 };
 
-const bookingCloseGuardMessages: Record<Locale, string> = {
-  en: "If you close now, the entered data will be lost. Do you want to continue?",
-  es: "Si cierras ahora, se perderan los datos ingresados. Quieres continuar?",
-  "pt-BR": "Se fechar agora, os dados inseridos serao perdidos. Deseja continuar?",
-  it: "Se chiudi ora, i dati inseriti andranno persi. Vuoi continuare?",
-  "zh-CN": "Ruguo xianzai guanbi, yitian de shuju hui diu shi. Yao jixu ma?",
-  de: "Wenn du jetzt schliesst, gehen die eingegebenen Daten verloren. Fortfahren?",
+const bookingCloseGuardCopy: Record<
+  Locale,
+  {
+    eyebrow: string;
+    title: string;
+    body: string;
+    cancel: string;
+    confirm: string;
+  }
+> = {
+  en: {
+    eyebrow: "Unsaved Booking",
+    title: "Close booking form?",
+    body: "If you close now, the entered data will be lost.",
+    cancel: "Keep editing",
+    confirm: "Close anyway",
+  },
+  es: {
+    eyebrow: "Reserva Sin Guardar",
+    title: "Cerrar formulario de reserva?",
+    body: "Si cierras ahora, se perderan los datos ingresados.",
+    cancel: "Seguir editando",
+    confirm: "Cerrar de todos modos",
+  },
+  "pt-BR": {
+    eyebrow: "Agendamento Nao Salvo",
+    title: "Fechar formulario de agendamento?",
+    body: "Se fechar agora, os dados inseridos serao perdidos.",
+    cancel: "Continuar editando",
+    confirm: "Fechar mesmo assim",
+  },
+  it: {
+    eyebrow: "Prenotazione Non Salvata",
+    title: "Chiudere il modulo di prenotazione?",
+    body: "Se chiudi ora, i dati inseriti andranno persi.",
+    cancel: "Continua a modificare",
+    confirm: "Chiudi comunque",
+  },
+  "zh-CN": {
+    eyebrow: "Unsaved Booking",
+    title: "Close booking form?",
+    body: "If you close now, the entered data will be lost.",
+    cancel: "Keep editing",
+    confirm: "Close anyway",
+  },
+  de: {
+    eyebrow: "Ungespeicherte Buchung",
+    title: "Buchungsformular schliessen?",
+    body: "Wenn du jetzt schliesst, gehen die eingegebenen Daten verloren.",
+    cancel: "Weiter bearbeiten",
+    confirm: "Trotzdem schliessen",
+  },
 };
 
 function getCaptchaMessages(locale: Locale) {
@@ -746,6 +791,7 @@ function BookingModal({
   const [captcha, setCaptcha] = useState<CaptchaChallenge | null>(null);
   const [captchaInput, setCaptchaInput] = useState("");
   const [captchaLoading, setCaptchaLoading] = useState(false);
+  const [isCloseGuardOpen, setIsCloseGuardOpen] = useState(false);
   const [formState, setFormState] = useState<ContactFormState>({
     status: "idle",
     errors: {},
@@ -757,6 +803,7 @@ function BookingModal({
   const flowCopy = getBookingFlowCopy(locale);
   const photoCopy = getBookingPhotoCopy(locale);
   const extraServiceCopy = getBookingExtraServiceCopy(locale);
+  const closeGuardCopy = bookingCloseGuardCopy[locale];
 
   const selectedVehiclePlanOptions = useMemo(
     () =>
@@ -780,12 +827,12 @@ function BookingModal({
     [maxPhotoCount, photoCopy.extraLabel, photoCopy.frontLabel, photoCopy.sideLabel],
   );
   const photoLimitHint = useMemo(() => getPhotoLimitHint(locale, formData.planSlug), [locale, formData.planSlug]);
-  const selectedExtraService = useMemo(
+  const selectedExtraServices = useMemo(
     () =>
-      formData.extraServiceKey
-        ? bookingExtraServiceOptions.find((option) => option.key === formData.extraServiceKey) ?? null
-        : null,
-    [formData.extraServiceKey],
+      bookingExtraServiceOptions.filter((option) =>
+        formData.extraServiceKeys.includes(option.key),
+      ),
+    [formData.extraServiceKeys],
   );
 
   useEffect(() => {
@@ -815,7 +862,7 @@ function BookingModal({
 
     return (
       Boolean(formData.vehicleTypeKey) ||
-      Boolean(formData.extraServiceKey) ||
+      formData.extraServiceKeys.length > 0 ||
       Boolean(formData.vehicleType.trim()) ||
       Boolean(formData.vehicleMakeModel.trim()) ||
       Boolean(formData.vehicleYear.trim()) ||
@@ -839,14 +886,21 @@ function BookingModal({
     }
 
     if (isFormDirty) {
-      const confirmed = window.confirm(bookingCloseGuardMessages[locale]);
-      if (!confirmed) {
-        return;
-      }
+      setIsCloseGuardOpen(true);
+      return;
     }
 
     onClose();
-  }, [isFormDirty, isSubmitting, locale, onClose]);
+  }, [isFormDirty, isSubmitting, onClose]);
+
+  const keepEditingBooking = useCallback(() => {
+    setIsCloseGuardOpen(false);
+  }, []);
+
+  const confirmCloseBooking = useCallback(() => {
+    setIsCloseGuardOpen(false);
+    onClose();
+  }, [onClose]);
 
   const fetchCaptchaChallenge = useCallback(async () => {
     const controller = new AbortController();
@@ -897,6 +951,7 @@ function BookingModal({
       setCaptcha(null);
       setCaptchaInput("");
       setCaptchaLoading(false);
+      setIsCloseGuardOpen(false);
       setFormState({ status: "idle", errors: {}, message: "" });
       setFormData({
         ...initialFormData,
@@ -945,6 +1000,10 @@ function BookingModal({
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
         event.preventDefault();
+        if (isCloseGuardOpen) {
+          setIsCloseGuardOpen(false);
+          return;
+        }
         tryCloseModal();
         return;
       }
@@ -988,7 +1047,7 @@ function BookingModal({
       window.removeEventListener("keydown", handleKeyDown);
       document.body.style.overflow = previousOverflow;
     };
-  }, [isOpen, tryCloseModal]);
+  }, [isCloseGuardOpen, isOpen, tryCloseModal]);
 
   useEffect(() => {
     if (!isOpen) {
@@ -1034,6 +1093,35 @@ function BookingModal({
     file: File | null,
   ) => {
     setFormData((prev) => ({ ...prev, [field]: file }));
+
+    if (formState.message) {
+      setFormState((prev) => ({ ...prev, message: "", status: "idle" }));
+    }
+  };
+
+  const toggleExtraService = (serviceKey: ExtraServiceKey) => {
+    setFormData((prev) => {
+      const isSelected = prev.extraServiceKeys.includes(serviceKey);
+      const nextExtraServiceKeys = isSelected
+        ? prev.extraServiceKeys.filter((key) => key !== serviceKey)
+        : [...prev.extraServiceKeys, serviceKey];
+
+      return {
+        ...prev,
+        extraServiceKeys: nextExtraServiceKeys,
+      };
+    });
+
+    if (formState.message) {
+      setFormState((prev) => ({ ...prev, message: "", status: "idle" }));
+    }
+  };
+
+  const clearExtraServices = () => {
+    setFormData((prev) => ({
+      ...prev,
+      extraServiceKeys: [],
+    }));
 
     if (formState.message) {
       setFormState((prev) => ({ ...prev, message: "", status: "idle" }));
@@ -1164,6 +1252,16 @@ function BookingModal({
       formData.phoneDialCode,
       formData.phoneNumber,
     );
+    const extraServiceLabel = selectedExtraServices.map((service) => service.name).join(", ");
+    const extraServiceKeysValue = selectedExtraServices.map((service) => service.key).join(",");
+    const extraServiceNamesValue = selectedExtraServices.map((service) => service.name).join(", ");
+    const extraServicePricesValue = selectedExtraServices.map((service) => service.price).join(", ");
+    const extraServiceDurationsValue = selectedExtraServices
+      .map((service) => service.duration)
+      .join(", ");
+    const extraServiceDetailsValue = selectedExtraServices
+      .flatMap((service) => service.details.map((detail) => `${service.name}: ${detail}`))
+      .join(" | ");
 
     const payload = {
       name: formData.name,
@@ -1174,7 +1272,7 @@ function BookingModal({
         (formData.vehicleTypeKey ? flowCopy.vehicleTypes[formData.vehicleTypeKey] : ""),
       serviceInterest: selectedVehiclePlan
         ? `${selectedVehiclePlan.name} - ${formData.vehicleType}${
-            selectedExtraService ? ` + ${selectedExtraService.name}` : ""
+            extraServiceLabel ? ` + Extras: ${extraServiceLabel}` : ""
           }`
         : fallbackService?.name ?? formData.planSlug,
       message: formData.notes || "Booking modal request",
@@ -1182,11 +1280,11 @@ function BookingModal({
       botField: formData.botField,
       source: "booking-modal" as const,
       planSlug: formData.planSlug || undefined,
-      extraServiceKey: selectedExtraService?.key || "",
-      extraServiceName: selectedExtraService?.name || "",
-      extraServicePrice: selectedExtraService?.price || "",
-      extraServiceDuration: selectedExtraService?.duration || "",
-      extraServiceDetails: selectedExtraService ? selectedExtraService.details.join(" | ") : "",
+      extraServiceKey: extraServiceKeysValue,
+      extraServiceName: extraServiceNamesValue,
+      extraServicePrice: extraServicePricesValue,
+      extraServiceDuration: extraServiceDurationsValue,
+      extraServiceDetails: extraServiceDetailsValue,
       vehicleMakeModel: formData.vehicleMakeModel,
       vehicleYear: formData.vehicleYear,
       addressLine: formData.addressLine,
@@ -1292,7 +1390,7 @@ function BookingModal({
         role="dialog"
         aria-modal="true"
         aria-label={labels.title}
-        className={`flex h-[100dvh] w-full max-w-2xl flex-col overflow-hidden rounded-none border border-white/15 bg-black shadow-2xl transition-all duration-300 ease-out sm:h-[90dvh] sm:max-h-[90dvh] sm:rounded-2xl ${
+        className={`relative flex h-[100dvh] w-full max-w-2xl flex-col overflow-hidden rounded-none border border-white/15 bg-black shadow-2xl transition-all duration-300 ease-out sm:h-[90dvh] sm:max-h-[90dvh] sm:rounded-2xl ${
           isEntering
             ? "translate-y-0 opacity-100 sm:scale-100"
             : "translate-y-6 opacity-0 sm:translate-y-3 sm:scale-95"
@@ -1451,9 +1549,9 @@ function BookingModal({
                   <div className="grid gap-3">
                     <button
                       type="button"
-                      onClick={() => updateField("extraServiceKey", "")}
+                      onClick={clearExtraServices}
                       className={`rounded-xl border px-4 py-3 text-left transition ${
-                        !formData.extraServiceKey
+                        formData.extraServiceKeys.length === 0
                           ? "border-accent bg-accent/15"
                           : "border-white/15 bg-white/5 hover:border-white/30"
                       }`}
@@ -1467,9 +1565,9 @@ function BookingModal({
                       <button
                         key={extraService.key}
                         type="button"
-                        onClick={() => updateField("extraServiceKey", extraService.key)}
+                        onClick={() => toggleExtraService(extraService.key)}
                         className={`rounded-xl border px-4 py-4 text-left transition ${
-                          formData.extraServiceKey === extraService.key
+                          formData.extraServiceKeys.includes(extraService.key)
                             ? "border-accent bg-accent/15"
                             : "border-white/15 bg-white/5 hover:border-white/30"
                         }`}
@@ -1756,6 +1854,37 @@ function BookingModal({
             </div>
           </div>
         </form>
+
+        {isCloseGuardOpen ? (
+          <div className="absolute inset-0 z-20 flex items-center justify-center bg-black/80 p-4 sm:p-6">
+            <div className="w-full max-w-lg rounded-2xl border border-white/15 bg-black p-6 shadow-2xl sm:p-8">
+              <p className="text-xs font-semibold uppercase tracking-[0.25em] text-accent">
+                {closeGuardCopy.eyebrow}
+              </p>
+              <h3 className="mt-3 font-heading text-2xl uppercase tracking-wider text-white sm:text-3xl">
+                {closeGuardCopy.title}
+              </h3>
+              <p className="mt-4 text-sm text-white/80">{closeGuardCopy.body}</p>
+
+              <div className="mt-8 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+                <button
+                  type="button"
+                  onClick={keepEditingBooking}
+                  className="inline-flex items-center justify-center rounded-xl border border-white/25 px-5 py-3 text-sm font-semibold uppercase tracking-wide text-white transition hover:border-accent hover:text-accent"
+                >
+                  {closeGuardCopy.cancel}
+                </button>
+                <button
+                  type="button"
+                  onClick={confirmCloseBooking}
+                  className="inline-flex items-center justify-center rounded-xl bg-accent px-6 py-3 text-sm font-bold uppercase tracking-wider text-black transition hover:bg-white"
+                >
+                  {closeGuardCopy.confirm}
+                </button>
+              </div>
+            </div>
+          </div>
+        ) : null}
       </div>
     </div>
   );

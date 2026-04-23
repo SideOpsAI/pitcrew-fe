@@ -64,14 +64,9 @@ function buildBookingSummaryTable({
     ["WhatsApp Link", whatsappLink],
     ["Email", formatValue(parsed.email)],
     ["Plan", getPlanLabel(parsed.planSlug)],
-    [
-      "Extra Service",
-      parsed.extraServiceName
-        ? `${parsed.extraServiceName} (${formatValue(parsed.extraServicePrice)} - ${formatValue(
-            parsed.extraServiceDuration,
-          )})`
-        : "N/A",
-    ],
+    ["Extra Services", formatValue(parsed.extraServiceName)],
+    ["Extra Services Pricing", formatValue(parsed.extraServicePrice)],
+    ["Extra Services Duration", formatValue(parsed.extraServiceDuration)],
     ["Extra Service Details", formatValue(parsed.extraServiceDetails)],
     ["Vehicle Type", formatValue(parsed.vehicleType)],
     ["Vehicle Make/Model", formatValue(parsed.vehicleMakeModel)],
