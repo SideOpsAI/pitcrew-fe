@@ -18,6 +18,12 @@ import {
   isValidUSCityArea,
   normalizePhoneDigits,
 } from "@/lib/contact";
+import {
+  bookingPlanDurations,
+  bookingPlanPricing,
+  vehicleTypeOrder,
+  type VehicleTypeKey,
+} from "@/lib/vehicle-plans";
 import type { ContactLeadErrors, ContactFormState } from "@/lib/contact";
 import type { Locale, PlanSlug, ServiceItem, TranslationSchema } from "@/types/content";
 
@@ -38,8 +44,6 @@ type BookingProviderProps = {
   labels: TranslationSchema["bookingModal"];
   services: ServiceItem[];
 };
-
-type VehicleTypeKey = "sedan" | "small-suv" | "big-suv-minivan" | "pickup-plus";
 
 type BookingFormData = {
   planSlug: "" | PlanSlug;
@@ -137,13 +141,6 @@ type BookingPhotoCopy = {
   remove: string;
 };
 
-const vehicleTypeOrder = [
-  "sedan",
-  "small-suv",
-  "big-suv-minivan",
-  "pickup-plus",
-] as const satisfies readonly VehicleTypeKey[];
-
 const bookingPlanOrder = ["basic", "medium", "full"] as const satisfies readonly PlanSlug[];
 const bookingPhotoFields = [
   "vehiclePhotoFront",
@@ -154,52 +151,6 @@ const bookingPhotoLimitByPlan: Record<PlanSlug, number> = {
   basic: 1,
   medium: 2,
   full: 3,
-};
-
-const bookingPlanPricing: Record<VehicleTypeKey, Record<PlanSlug, string>> = {
-  sedan: {
-    basic: "$150 USD",
-    medium: "$100 USD",
-    full: "$210 USD",
-  },
-  "small-suv": {
-    basic: "$175 USD",
-    medium: "$120 USD",
-    full: "$230 USD",
-  },
-  "big-suv-minivan": {
-    basic: "$190 USD",
-    medium: "$130 USD",
-    full: "$250 USD",
-  },
-  "pickup-plus": {
-    basic: "$210 USD",
-    medium: "$150 USD",
-    full: "$270 USD",
-  },
-};
-
-const bookingPlanDurations: Record<VehicleTypeKey, Record<PlanSlug, string>> = {
-  sedan: {
-    basic: "2 hours",
-    medium: "1 hour",
-    full: "3.5 hours",
-  },
-  "small-suv": {
-    basic: "2 hours",
-    medium: "1 hour",
-    full: "3.5 hours",
-  },
-  "big-suv-minivan": {
-    basic: "2.5 hours",
-    medium: "1.5 hours",
-    full: "3.5 hours",
-  },
-  "pickup-plus": {
-    basic: "2.5 hours",
-    medium: "1.5 hours",
-    full: "4 hours",
-  },
 };
 
 const bookingFlowCopyEn: BookingFlowCopy = {
