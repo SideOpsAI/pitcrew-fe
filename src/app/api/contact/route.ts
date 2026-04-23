@@ -14,6 +14,74 @@ const uploadFieldNames = [
 type UploadFieldName = (typeof uploadFieldNames)[number];
 type UploadFileMap = Partial<Record<UploadFieldName, File>>;
 
+function formatValue(value: string | undefined) {
+  const normalized = (value ?? "").trim();
+  return normalized.length > 0 ? normalized : "N/A";
+}
+
+function sanitizePhoneForLink(phone: string) {
+  const normalized = phone.trim();
+  const plusPrefix = normalized.startsWith("+") ? "+" : "";
+  const digitsOnly = normalized.replace(/\D/g, "");
+  return `${plusPrefix}${digitsOnly}`;
+}
+
+function getPlanLabel(planSlug: ContactLeadPayload["planSlug"]) {
+  if (planSlug === "basic") return "Interior";
+  if (planSlug === "medium") return "Exterior";
+  if (planSlug === "full") return "Full Detail";
+  return "N/A";
+}
+
+function escapeMarkdownCell(value: string) {
+  return value.replace(/\|/g, "\\|").replace(/\r?\n/g, "<br/>");
+}
+
+function buildBookingSummaryTable({
+  parsed,
+  files,
+}: {
+  parsed: ContactLeadPayload;
+  files: UploadFileMap;
+}) {
+  const cleanPhone = sanitizePhoneForLink(parsed.phone);
+  const callLink = cleanPhone ? `tel:${cleanPhone}` : "N/A";
+  const whatsappLink = cleanPhone
+    ? `https://wa.me/${cleanPhone.replace(/^\+/, "")}?text=${encodeURIComponent(
+        "Hola, quiero reservar un detailing.",
+      )}`
+    : "N/A";
+  const uploadedFiles = uploadFieldNames
+    .map((fieldName) => files[fieldName]?.name)
+    .filter((fileName): fileName is string => Boolean(fileName))
+    .join(", ");
+
+  const rows: Array<[string, string]> = [
+    ["Lead Type", parsed.source === "booking-modal" ? "Booking Request" : "Contact Request"],
+    ["Name", formatValue(parsed.name)],
+    ["Phone", formatValue(parsed.phone)],
+    ["Call Link", callLink],
+    ["WhatsApp Link", whatsappLink],
+    ["Email", formatValue(parsed.email)],
+    ["Plan", getPlanLabel(parsed.planSlug)],
+    ["Vehicle Type", formatValue(parsed.vehicleType)],
+    ["Vehicle Make/Model", formatValue(parsed.vehicleMakeModel)],
+    ["Vehicle Year", formatValue(parsed.vehicleYear)],
+    ["Address", formatValue(parsed.addressLine)],
+    ["City/State", formatValue(parsed.cityArea)],
+    ["Notes", formatValue(parsed.notes || parsed.message)],
+    ["Uploaded Photos", uploadedFiles || "N/A"],
+    ["Locale", formatValue(parsed.locale)],
+  ];
+
+  const tableHeader = "| Field | Value |\n| --- | --- |";
+  const tableRows = rows
+    .map(([field, value]) => `| ${escapeMarkdownCell(field)} | ${escapeMarkdownCell(value)} |`)
+    .join("\n");
+
+  return `${tableHeader}\n${tableRows}`;
+}
+
 function getNetlifyBaseUrl() {
   const value =
     process.env.NETLIFY_FORMS_URL ??
@@ -120,6 +188,11 @@ function buildNetlifyFormData({
   body.append("cityArea", parsed.cityArea ?? "");
   body.append("notes", parsed.notes ?? "");
   body.append("bot-field", "");
+
+  if (parsed.source === "booking-modal") {
+    const summaryTable = buildBookingSummaryTable({ parsed, files });
+    body.append("bookingSummary", summaryTable);
+  }
 
   for (const fieldName of uploadFieldNames) {
     const file = files[fieldName];
