@@ -85,7 +85,7 @@ const servicesByLocale: Record<Locale, ServiceItem[]> = {
   en: [
     {
       slug: "basic",
-      name: "Basic Plan",
+      name: "INTERIOR",
       shortDescription: "Maintenance wash with quick interior refresh.",
       longDescription:
         "Great for weekly or bi-weekly maintenance. Exterior hand wash, tire dressing, and a fast cabin reset so your vehicle stays clean between deeper sessions.",
@@ -100,7 +100,7 @@ const servicesByLocale: Record<Locale, ServiceItem[]> = {
     },
     {
       slug: "medium",
-      name: "Medium Plan",
+      name: "EXTERIOR",
       shortDescription: "Deep clean for interior + enhanced exterior finish.",
       longDescription:
         "Balanced package for drivers who want visible transformation. Includes deeper interior cleaning, decontamination touchpoints, and longer-lasting shine.",
@@ -115,7 +115,7 @@ const servicesByLocale: Record<Locale, ServiceItem[]> = {
     },
     {
       slug: "full",
-      name: "Full Plan",
+      name: "FULL DETAIL",
       shortDescription: "Complete premium detail with maximum finish quality.",
       longDescription:
         "Our most complete package for vehicles needing a full reset. Deep interior detailing, exterior decontamination, gloss enhancement, and protection from top to bottom.",
@@ -132,7 +132,7 @@ const servicesByLocale: Record<Locale, ServiceItem[]> = {
   es: [
     {
       slug: "basic",
-      name: "Plan Básico",
+      name: "PLAN INTERIOR",
       shortDescription: "Lavado de mantenimiento y refresh interior rápido.",
       longDescription:
         "Ideal para mantenimiento semanal o quincenal. Lavado exterior a mano, brillo en llantas y limpieza ligera de cabina.",
@@ -147,7 +147,7 @@ const servicesByLocale: Record<Locale, ServiceItem[]> = {
     },
     {
       slug: "medium",
-      name: "Plan Medio",
+      name: "PLAN EXTERIOR",
       shortDescription: "Limpieza profunda interior + mejor acabado exterior.",
       longDescription:
         "Paquete balanceado para lograr cambio visible. Incluye limpieza interior profunda y mejor protección exterior.",
@@ -162,7 +162,7 @@ const servicesByLocale: Record<Locale, ServiceItem[]> = {
     },
     {
       slug: "full",
-      name: "Plan Full",
+      name: "FULL DETAIL",
       shortDescription: "Detailing premium completo con máximo nivel de acabado.",
       longDescription:
         "Nuestro paquete más completo para reset total del vehículo. Interior y exterior con procesos detallados y protección duradera.",
@@ -179,7 +179,7 @@ const servicesByLocale: Record<Locale, ServiceItem[]> = {
   "pt-BR": [
     {
       slug: "basic",
-      name: "Plano Básico",
+      name: "PLANO INTERIOR",
       shortDescription: "Lavagem de manutenção com limpeza interna rápida.",
       longDescription:
         "Ideal para manutenção semanal. Lavagem externa, acabamento dos pneus e organização rápida da cabine.",
@@ -194,7 +194,7 @@ const servicesByLocale: Record<Locale, ServiceItem[]> = {
     },
     {
       slug: "medium",
-      name: "Plano Médio",
+      name: "PLANO EXTERIOR",
       shortDescription: "Limpeza interna profunda e acabamento externo superior.",
       longDescription:
         "Pacote equilibrado para quem quer transformação visível com mais cuidado em interior e proteção externa.",
@@ -209,7 +209,7 @@ const servicesByLocale: Record<Locale, ServiceItem[]> = {
     },
     {
       slug: "full",
-      name: "Plano Full",
+      name: "FULL DETAIL",
       shortDescription: "Detalhamento premium completo com acabamento máximo.",
       longDescription:
         "Nosso pacote mais completo para reset total. Processo completo de interior e exterior com proteção duradoura.",
@@ -226,7 +226,7 @@ const servicesByLocale: Record<Locale, ServiceItem[]> = {
   it: [
     {
       slug: "basic",
-      name: "Piano Basic",
+      name: "PIANO INTERIOR",
       shortDescription: "Lavaggio di mantenimento con refresh interno rapido.",
       longDescription:
         "Perfetto per mantenere l'auto pulita ogni settimana con lavaggio esterno e riordino rapido dell'abitacolo.",
@@ -241,7 +241,7 @@ const servicesByLocale: Record<Locale, ServiceItem[]> = {
     },
     {
       slug: "medium",
-      name: "Piano Medium",
+      name: "PIANO EXTERIOR",
       shortDescription: "Pulizia interna profonda + finitura esterna migliorata.",
       longDescription:
         "Pacchetto bilanciato per ottenere un miglioramento evidente con cura più approfondita di interni ed esterni.",
@@ -256,7 +256,7 @@ const servicesByLocale: Record<Locale, ServiceItem[]> = {
     },
     {
       slug: "full",
-      name: "Piano Full",
+      name: "FULL DETAIL",
       shortDescription: "Detailing premium completo con finitura massima.",
       longDescription:
         "Il pacchetto più completo per un reset totale del veicolo con workflow completo interno/esterno.",
@@ -273,7 +273,7 @@ const servicesByLocale: Record<Locale, ServiceItem[]> = {
   "zh-CN": [
     {
       slug: "basic",
-      name: "????",
+      name: "INTERIOR",
       shortDescription: "??????,????????",
       longDescription:
         "?????????????????????????????",
@@ -288,7 +288,7 @@ const servicesByLocale: Record<Locale, ServiceItem[]> = {
     },
     {
       slug: "medium",
-      name: "????",
+      name: "EXTERIOR",
       shortDescription: "?????? + ???????",
       longDescription:
         "?????,?????????????,????????????",
@@ -303,7 +303,7 @@ const servicesByLocale: Record<Locale, ServiceItem[]> = {
     },
     {
       slug: "full",
-      name: "????",
+      name: "FULL DETAIL",
       shortDescription: "??????,?????????",
       longDescription:
         "??????????,????????????????????",
@@ -320,7 +320,7 @@ const servicesByLocale: Record<Locale, ServiceItem[]> = {
   de: [
     {
       slug: "basic",
-      name: "Basic Paket",
+      name: "INTERIOR",
       shortDescription: "Pflegewäsche mit schnellem Innenraum-Refresh.",
       longDescription:
         "Ideal für regelmäßige Pflege. Außenwäsche, Reifenfinish und schnelle Innenraumreinigung.",
@@ -335,7 +335,7 @@ const servicesByLocale: Record<Locale, ServiceItem[]> = {
     },
     {
       slug: "medium",
-      name: "Medium Paket",
+      name: "EXTERIOR",
       shortDescription: "Tiefenreinigung innen + verbessertes Außenfinish.",
       longDescription:
         "Ausgewogenes Paket für sichtbare Verbesserung mit stärkerem Fokus auf Innenraum und Lackbild.",
@@ -350,7 +350,7 @@ const servicesByLocale: Record<Locale, ServiceItem[]> = {
     },
     {
       slug: "full",
-      name: "Full Paket",
+      name: "FULL DETAIL",
       shortDescription: "Komplettes Premium-Detailing mit maximalem Finish.",
       longDescription:
         "Unser umfassendstes Paket für den kompletten Fahrzeug-Reset mit Premium-Schutz.",
