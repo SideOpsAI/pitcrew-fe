@@ -12,7 +12,7 @@ export async function GET() {
       {
         ok: false,
         error: "captcha_not_configured",
-        details: "Missing CAPTCHA_SECRET",
+        details: "Missing CAPTCHA_SECRET or BOOKING_CAPTCHA_SECRET",
       },
       {
         status: 500,
