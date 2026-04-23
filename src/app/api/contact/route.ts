@@ -10,6 +10,8 @@ const uploadFieldNames = [
   "vehiclePhotoSide",
   "vehiclePhotoExtra",
 ] as const;
+const MAX_SINGLE_UPLOAD_BYTES = 3 * 1024 * 1024;
+const MAX_TOTAL_UPLOAD_BYTES = 5 * 1024 * 1024;
 
 type UploadFieldName = (typeof uploadFieldNames)[number];
 type UploadFileMap = Partial<Record<UploadFieldName, File>>;
@@ -33,11 +35,14 @@ function getPlanLabel(planSlug: ContactLeadPayload["planSlug"]) {
   return "N/A";
 }
 
-function escapeMarkdownCell(value: string) {
-  return value.replace(/\|/g, "\\|").replace(/\r?\n/g, "<br/>");
+function splitList(value: string | undefined, separator: RegExp) {
+  return (value ?? "")
+    .split(separator)
+    .map((entry) => entry.trim())
+    .filter((entry) => entry.length > 0);
 }
 
-function buildBookingSummaryTable({
+function buildBookingSummaryText({
   parsed,
   files,
 }: {
@@ -53,37 +58,68 @@ function buildBookingSummaryTable({
     : "N/A";
   const uploadedFiles = uploadFieldNames
     .map((fieldName) => files[fieldName]?.name)
-    .filter((fileName): fileName is string => Boolean(fileName))
-    .join(", ");
-
-  const rows: Array<[string, string]> = [
-    ["Lead Type", parsed.source === "booking-modal" ? "Booking Request" : "Contact Request"],
-    ["Name", formatValue(parsed.name)],
-    ["Phone", formatValue(parsed.phone)],
-    ["Call Link", callLink],
-    ["WhatsApp Link", whatsappLink],
-    ["Email", formatValue(parsed.email)],
-    ["Plan", getPlanLabel(parsed.planSlug)],
-    ["Extra Services", formatValue(parsed.extraServiceName)],
-    ["Extra Services Pricing", formatValue(parsed.extraServicePrice)],
-    ["Extra Services Duration", formatValue(parsed.extraServiceDuration)],
-    ["Extra Service Details", formatValue(parsed.extraServiceDetails)],
-    ["Vehicle Type", formatValue(parsed.vehicleType)],
-    ["Vehicle Make/Model", formatValue(parsed.vehicleMakeModel)],
-    ["Vehicle Year", formatValue(parsed.vehicleYear)],
-    ["Address", formatValue(parsed.addressLine)],
-    ["City/State", formatValue(parsed.cityArea)],
-    ["Notes", formatValue(parsed.notes || parsed.message)],
-    ["Uploaded Photos", uploadedFiles || "N/A"],
-    ["Locale", formatValue(parsed.locale)],
+    .filter((fileName): fileName is string => Boolean(fileName));
+  const extraServiceNames = splitList(parsed.extraServiceName, /\s*,\s*/);
+  const extraServicePrices = splitList(parsed.extraServicePrice, /\s*,\s*/);
+  const extraServiceDurations = splitList(parsed.extraServiceDuration, /\s*,\s*/);
+  const extraServiceDetails = splitList(parsed.extraServiceDetails, /\s*\|\s*/);
+  const lines: string[] = [
+    "BOOKING SUMMARY",
+    "",
+    "Contact:",
+    `- Name: ${formatValue(parsed.name)}`,
+    `- Phone: ${formatValue(parsed.phone)}`,
+    `- Call Link: ${callLink}`,
+    `- WhatsApp Link: ${whatsappLink}`,
+    `- Email: ${formatValue(parsed.email)}`,
+    "",
+    "Service Request:",
+    `- Lead Type: ${parsed.source === "booking-modal" ? "Booking Request" : "Contact Request"}`,
+    `- Plan: ${getPlanLabel(parsed.planSlug)}`,
   ];
 
-  const tableHeader = "| Field | Value |\n| --- | --- |";
-  const tableRows = rows
-    .map(([field, value]) => `| ${escapeMarkdownCell(field)} | ${escapeMarkdownCell(value)} |`)
-    .join("\n");
+  if (extraServiceNames.length > 0) {
+    lines.push("- Extra Services:");
 
-  return `${tableHeader}\n${tableRows}`;
+    for (let index = 0; index < extraServiceNames.length; index += 1) {
+      const name = extraServiceNames[index];
+      const price = extraServicePrices[index];
+      const duration = extraServiceDurations[index];
+      const metadata = [price, duration].filter((value) => Boolean(value)).join(" | ");
+      lines.push(`  - ${name}${metadata ? ` (${metadata})` : ""}`);
+    }
+  } else {
+    lines.push("- Extra Services: N/A");
+  }
+
+  if (extraServiceDetails.length > 0) {
+    lines.push("- Extra Service Details:");
+    extraServiceDetails.forEach((detail) => lines.push(`  - ${detail}`));
+  } else {
+    lines.push("- Extra Service Details: N/A");
+  }
+
+  lines.push(
+    "",
+    "Vehicle & Location:",
+    `- Vehicle Type: ${formatValue(parsed.vehicleType)}`,
+    `- Vehicle Make/Model: ${formatValue(parsed.vehicleMakeModel)}`,
+    `- Vehicle Year: ${formatValue(parsed.vehicleYear)}`,
+    `- Address: ${formatValue(parsed.addressLine)}`,
+    `- City/State: ${formatValue(parsed.cityArea)}`,
+    `- Notes: ${formatValue(parsed.notes || parsed.message)}`,
+  );
+
+  if (uploadedFiles.length > 0) {
+    lines.push("- Uploaded Photos:");
+    uploadedFiles.forEach((fileName) => lines.push(`  - ${fileName}`));
+  } else {
+    lines.push("- Uploaded Photos: N/A");
+  }
+
+  lines.push(`- Locale: ${formatValue(parsed.locale)}`);
+
+  return lines.join("\n");
 }
 
 function getNetlifyBaseUrl() {
@@ -114,6 +150,32 @@ function isMockFormDeliveryEnabled() {
 
 function isFile(value: FormDataEntryValue | null): value is File {
   return value instanceof File && value.size > 0;
+}
+
+function validateUploadFiles(files: UploadFileMap) {
+  const selectedFiles = uploadFieldNames
+    .map((fieldName) => files[fieldName])
+    .filter((file): file is File => Boolean(file));
+
+  const oversizeFile = selectedFiles.find((file) => file.size > MAX_SINGLE_UPLOAD_BYTES);
+  if (oversizeFile) {
+    return {
+      ok: false as const,
+      details: `File "${oversizeFile.name}" is larger than ${MAX_SINGLE_UPLOAD_BYTES / (1024 * 1024)} MB.`,
+    };
+  }
+
+  const totalSize = selectedFiles.reduce((sum, file) => sum + file.size, 0);
+  if (totalSize > MAX_TOTAL_UPLOAD_BYTES) {
+    return {
+      ok: false as const,
+      details: `Total photo size exceeds ${MAX_TOTAL_UPLOAD_BYTES / (1024 * 1024)} MB.`,
+    };
+  }
+
+  return {
+    ok: true as const,
+  };
 }
 
 function buildPayloadFromFormData(formData: FormData) {
@@ -204,8 +266,8 @@ function buildNetlifyFormData({
   body.append("bot-field", "");
 
   if (parsed.source === "booking-modal") {
-    const summaryTable = buildBookingSummaryTable({ parsed, files });
-    body.append("bookingSummary", summaryTable);
+    const summaryText = buildBookingSummaryText({ parsed, files });
+    body.append("bookingSummary", summaryText);
   }
 
   for (const fieldName of uploadFieldNames) {
@@ -237,6 +299,18 @@ export async function POST(request: Request) {
 
     if (parsed.data.botField) {
       return NextResponse.json({ ok: true });
+    }
+
+    const uploadValidation = validateUploadFiles(incoming.files);
+    if (!uploadValidation.ok) {
+      return NextResponse.json(
+        {
+          ok: false,
+          error: "payload_too_large",
+          details: uploadValidation.details,
+        },
+        { status: 413 },
+      );
     }
 
     if (parsed.data.source === "booking-modal") {
@@ -295,6 +369,17 @@ export async function POST(request: Request) {
     });
 
     if (!netlifyResponse.ok) {
+      if (netlifyResponse.status === 413) {
+        return NextResponse.json(
+          {
+            ok: false,
+            error: "payload_too_large",
+            details: "Netlify rejected the upload size. Try lighter images.",
+          },
+          { status: 413 },
+        );
+      }
+
       return NextResponse.json(
         {
           ok: false,
@@ -306,7 +391,27 @@ export async function POST(request: Request) {
     }
 
     return NextResponse.json({ ok: true });
-  } catch {
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "";
+    const normalizedMessage = message.toLowerCase();
+
+    if (
+      normalizedMessage.includes("body exceeded") ||
+      normalizedMessage.includes("body size") ||
+      normalizedMessage.includes("request entity too large")
+    ) {
+      return NextResponse.json(
+        {
+          ok: false,
+          error: "payload_too_large",
+          details: "Uploaded photos are too large. Please upload lighter images.",
+        },
+        { status: 413 },
+      );
+    }
+
+    console.error("[api/contact] Unexpected error", error);
+
     return NextResponse.json(
       {
         ok: false,

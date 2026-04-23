@@ -685,6 +685,51 @@ const bookingUiMessages: Record<
   },
 };
 
+const bookingPhotoValidationCopy: Record<
+  Locale,
+  {
+    fileTooLarge: (fileName: string, maxMb: number) => string;
+    totalTooLarge: (maxMb: number) => string;
+  }
+> = {
+  en: {
+    fileTooLarge: (fileName, maxMb) =>
+      `The file "${fileName}" is too large. Max size per photo: ${maxMb} MB.`,
+    totalTooLarge: (maxMb) =>
+      `The total photo size is too large. Upload lighter images (max total: ${maxMb} MB).`,
+  },
+  es: {
+    fileTooLarge: (fileName, maxMb) =>
+      `El archivo "${fileName}" es muy grande. Tamano maximo por foto: ${maxMb} MB.`,
+    totalTooLarge: (maxMb) =>
+      `El tamano total de fotos es muy grande. Sube imagenes mas livianas (maximo total: ${maxMb} MB).`,
+  },
+  "pt-BR": {
+    fileTooLarge: (fileName, maxMb) =>
+      `O arquivo "${fileName}" e muito grande. Tamanho maximo por foto: ${maxMb} MB.`,
+    totalTooLarge: (maxMb) =>
+      `O tamanho total das fotos e muito grande. Envie imagens menores (maximo total: ${maxMb} MB).`,
+  },
+  it: {
+    fileTooLarge: (fileName, maxMb) =>
+      `Il file "${fileName}" e troppo grande. Dimensione massima per foto: ${maxMb} MB.`,
+    totalTooLarge: (maxMb) =>
+      `La dimensione totale delle foto e troppo grande. Carica immagini piu leggere (totale massimo: ${maxMb} MB).`,
+  },
+  "zh-CN": {
+    fileTooLarge: (fileName, maxMb) =>
+      `The file "${fileName}" is too large. Max size per photo: ${maxMb} MB.`,
+    totalTooLarge: (maxMb) =>
+      `The total photo size is too large. Upload lighter images (max total: ${maxMb} MB).`,
+  },
+  de: {
+    fileTooLarge: (fileName, maxMb) =>
+      `Die Datei "${fileName}" ist zu gross. Maximale Groesse pro Foto: ${maxMb} MB.`,
+    totalTooLarge: (maxMb) =>
+      `Die Gesamtgroesse der Fotos ist zu hoch. Bitte kleinere Bilder hochladen (maximal gesamt: ${maxMb} MB).`,
+  },
+};
+
 const bookingCloseGuardCopy: Record<
   Locale,
   {
@@ -755,6 +800,10 @@ function getBookingUiMessages(locale: Locale) {
   return bookingUiMessages[locale];
 }
 
+function getBookingPhotoValidationCopy(locale: Locale) {
+  return bookingPhotoValidationCopy[locale];
+}
+
 function getStepTitle(step: number, labels: TranslationSchema["bookingModal"]) {
   if (step === 1) return labels.steps.vehicleInfo;
   if (step === 2) return labels.steps.choosePlan;
@@ -782,6 +831,11 @@ function BookingModal({
   preselectedPlan: PlanSlug | null;
   onBooked: () => void;
 }) {
+  const MAX_SINGLE_PHOTO_SIZE_BYTES = 3 * 1024 * 1024;
+  const MAX_TOTAL_PHOTO_SIZE_BYTES = 5 * 1024 * 1024;
+  const MAX_SINGLE_PHOTO_SIZE_MB = 3;
+  const MAX_TOTAL_PHOTO_SIZE_MB = 5;
+
   const dialogRef = useRef<HTMLDivElement | null>(null);
   const initialPlanSlugRef = useRef<"" | PlanSlug>("");
   const [step, setStep] = useState(1);
@@ -803,6 +857,7 @@ function BookingModal({
   const flowCopy = getBookingFlowCopy(locale);
   const photoCopy = getBookingPhotoCopy(locale);
   const extraServiceCopy = getBookingExtraServiceCopy(locale);
+  const photoValidationCopy = getBookingPhotoValidationCopy(locale);
   const closeGuardCopy = bookingCloseGuardCopy[locale];
 
   const selectedVehiclePlanOptions = useMemo(
@@ -1262,6 +1317,34 @@ function BookingModal({
     const extraServiceDetailsValue = selectedExtraServices
       .flatMap((service) => service.details.map((detail) => `${service.name}: ${detail}`))
       .join(" | ");
+    const selectedPhotoFiles = allowedPhotoFields
+      .map((photoField) => formData[photoField])
+      .filter((file): file is File => Boolean(file));
+    const oversizePhoto = selectedPhotoFiles.find(
+      (file) => file.size > MAX_SINGLE_PHOTO_SIZE_BYTES,
+    );
+
+    if (oversizePhoto) {
+      setFormState({
+        status: "error",
+        errors: {},
+        message: photoValidationCopy.fileTooLarge(
+          oversizePhoto.name,
+          MAX_SINGLE_PHOTO_SIZE_MB,
+        ),
+      });
+      return;
+    }
+
+    const totalPhotoSize = selectedPhotoFiles.reduce((sum, file) => sum + file.size, 0);
+    if (totalPhotoSize > MAX_TOTAL_PHOTO_SIZE_BYTES) {
+      setFormState({
+        status: "error",
+        errors: {},
+        message: photoValidationCopy.totalTooLarge(MAX_TOTAL_PHOTO_SIZE_MB),
+      });
+      return;
+    }
 
     const payload = {
       name: formData.name,
@@ -1346,7 +1429,7 @@ function BookingModal({
       });
 
       const responseBody = (await response.json().catch(() => null)) as
-        | { error?: string }
+        | { error?: string; details?: string }
         | null;
 
       if (!response.ok) {
@@ -1358,6 +1441,17 @@ function BookingModal({
             status: "error",
             errors: {},
             message: captchaCopy.retry,
+          });
+          return;
+        }
+
+        if (responseBody?.error === "payload_too_large") {
+          setFormState({
+            status: "error",
+            errors: {},
+            message:
+              responseBody.details ??
+              photoValidationCopy.totalTooLarge(MAX_TOTAL_PHOTO_SIZE_MB),
           });
           return;
         }
