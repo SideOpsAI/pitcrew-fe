@@ -200,6 +200,7 @@ export interface ContactLeadInput {
   locale: Locale;
   source?: "contact-form" | "booking-modal";
   planSlug?: PlanSlug;
+  vehicleTypeKey?: "sedan" | "small-suv" | "big-suv-minivan" | "pickup-plus";
   extraServiceKey?: string;
   extraServiceName?: string;
   extraServicePrice?: string;

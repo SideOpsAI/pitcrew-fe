@@ -1,7 +1,13 @@
 import { NextResponse } from "next/server";
 
+import {
+  BOOKING_MAX_PHOTO_BYTES,
+  BOOKING_MAX_TOTAL_UPLOAD_BYTES,
+  bytesToRoundedMb,
+} from "@/lib/booking-upload";
 import { verifyCaptchaChallenge } from "@/lib/captcha";
 import { contactLeadSchema, type ContactLeadPayload } from "@/lib/contact";
+import { bookingPlanPricing, type VehicleTypeKey } from "@/lib/vehicle-plans";
 
 export const runtime = "nodejs";
 
@@ -10,8 +16,6 @@ const uploadFieldNames = [
   "vehiclePhotoSide",
   "vehiclePhotoExtra",
 ] as const;
-const MAX_SINGLE_UPLOAD_BYTES = 3 * 1024 * 1024;
-const MAX_TOTAL_UPLOAD_BYTES = 5 * 1024 * 1024;
 
 type UploadFieldName = (typeof uploadFieldNames)[number];
 type UploadFileMap = Partial<Record<UploadFieldName, File>>;
@@ -42,6 +46,66 @@ function splitList(value: string | undefined, separator: RegExp) {
     .filter((entry) => entry.length > 0);
 }
 
+function parseUsdAmount(value: string) {
+  const normalized = value.replace(/[^0-9.,]/g, "").replace(/,/g, "");
+  const parsed = Number.parseFloat(normalized);
+  return Number.isFinite(parsed) ? parsed : 0;
+}
+
+function formatUsdAmount(value: number) {
+  return `$${value.toFixed(2)} USD`;
+}
+
+function normalizeVehicleTypeLabel(value: string) {
+  return value
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, "")
+    .trim();
+}
+
+function resolveVehicleTypeKey(parsed: ContactLeadPayload): VehicleTypeKey | null {
+  if (parsed.vehicleTypeKey) {
+    return parsed.vehicleTypeKey;
+  }
+
+  const normalized = normalizeVehicleTypeLabel(parsed.vehicleType ?? "");
+  if (!normalized) {
+    return null;
+  }
+
+  const aliases: Record<string, VehicleTypeKey> = {
+    sedan: "sedan",
+    smallsuv: "small-suv",
+    bigsuvminivan: "big-suv-minivan",
+    bigsuvminiban: "big-suv-minivan",
+    pickuptrucksplus: "pickup-plus",
+    pickupplus: "pickup-plus",
+  };
+
+  return aliases[normalized] ?? null;
+}
+
+function calculateBookingTotal(parsed: ContactLeadPayload) {
+  const vehicleTypeKey = resolveVehicleTypeKey(parsed);
+  const planSlug = parsed.planSlug;
+  const basePrice =
+    vehicleTypeKey && planSlug ? parseUsdAmount(bookingPlanPricing[vehicleTypeKey][planSlug]) : 0;
+  const extrasTotal = splitList(parsed.extraServicePrice, /\s*,\s*/).reduce(
+    (sum, entry) => sum + parseUsdAmount(entry),
+    0,
+  );
+  const total = basePrice + extrasTotal;
+
+  return {
+    basePrice,
+    extrasTotal,
+    total,
+    formattedBasePrice: basePrice > 0 ? formatUsdAmount(basePrice) : "N/A",
+    formattedExtrasTotal: extrasTotal > 0 ? formatUsdAmount(extrasTotal) : "N/A",
+    formattedTotal: total > 0 ? formatUsdAmount(total) : "N/A",
+  };
+}
+
 function buildBookingSummaryText({
   parsed,
   files,
@@ -60,64 +124,46 @@ function buildBookingSummaryText({
     .map((fieldName) => files[fieldName]?.name)
     .filter((fileName): fileName is string => Boolean(fileName));
   const extraServiceNames = splitList(parsed.extraServiceName, /\s*,\s*/);
-  const extraServicePrices = splitList(parsed.extraServicePrice, /\s*,\s*/);
-  const extraServiceDurations = splitList(parsed.extraServiceDuration, /\s*,\s*/);
-  const extraServiceDetails = splitList(parsed.extraServiceDetails, /\s*\|\s*/);
+  const pricing = calculateBookingTotal(parsed);
+  const planLabel = getPlanLabel(parsed.planSlug);
   const lines: string[] = [
-    "BOOKING SUMMARY",
+    "BOOKING REQUEST",
     "",
-    "Contact:",
+    "Client:",
     `- Name: ${formatValue(parsed.name)}`,
     `- Phone: ${formatValue(parsed.phone)}`,
-    `- Call Link: ${callLink}`,
-    `- WhatsApp Link: ${whatsappLink}`,
     `- Email: ${formatValue(parsed.email)}`,
     "",
-    "Service Request:",
-    `- Lead Type: ${parsed.source === "booking-modal" ? "Booking Request" : "Contact Request"}`,
-    `- Plan: ${getPlanLabel(parsed.planSlug)}`,
-  ];
-
-  if (extraServiceNames.length > 0) {
-    lines.push("- Extra Services:");
-
-    for (let index = 0; index < extraServiceNames.length; index += 1) {
-      const name = extraServiceNames[index];
-      const price = extraServicePrices[index];
-      const duration = extraServiceDurations[index];
-      const metadata = [price, duration].filter((value) => Boolean(value)).join(" | ");
-      lines.push(`  - ${name}${metadata ? ` (${metadata})` : ""}`);
-    }
-  } else {
-    lines.push("- Extra Services: N/A");
-  }
-
-  if (extraServiceDetails.length > 0) {
-    lines.push("- Extra Service Details:");
-    extraServiceDetails.forEach((detail) => lines.push(`  - ${detail}`));
-  } else {
-    lines.push("- Extra Service Details: N/A");
-  }
-
-  lines.push(
+    "Vehicle:",
+    `- Type: ${formatValue(parsed.vehicleType)}`,
+    `- Make/Model: ${formatValue(parsed.vehicleMakeModel)}`,
+    `- Year: ${formatValue(parsed.vehicleYear)}`,
     "",
-    "Vehicle & Location:",
-    `- Vehicle Type: ${formatValue(parsed.vehicleType)}`,
-    `- Vehicle Make/Model: ${formatValue(parsed.vehicleMakeModel)}`,
-    `- Vehicle Year: ${formatValue(parsed.vehicleYear)}`,
+    "Reservation:",
+    `- Plan: ${planLabel}`,
+    `- Extras: ${extraServiceNames.length > 0 ? extraServiceNames.join(", ") : "N/A"}`,
+    `- Base Price: ${pricing.formattedBasePrice}`,
+    `- Extras Total: ${pricing.formattedExtrasTotal}`,
+    `- Total Price: ${pricing.formattedTotal}`,
+    "",
+    "Location:",
     `- Address: ${formatValue(parsed.addressLine)}`,
     `- City/State: ${formatValue(parsed.cityArea)}`,
     `- Notes: ${formatValue(parsed.notes || parsed.message)}`,
-  );
+    "",
+    "Quick Actions:",
+    `- Call: ${callLink}`,
+    `- WhatsApp: ${whatsappLink}`,
+  ];
 
   if (uploadedFiles.length > 0) {
-    lines.push("- Uploaded Photos:");
+    lines.push("", "Photos:");
     uploadedFiles.forEach((fileName) => lines.push(`  - ${fileName}`));
   } else {
-    lines.push("- Uploaded Photos: N/A");
+    lines.push("", "Photos:", "  - N/A");
   }
 
-  lines.push(`- Locale: ${formatValue(parsed.locale)}`);
+  lines.push("", `Locale: ${formatValue(parsed.locale)}`);
 
   return lines.join("\n");
 }
@@ -157,19 +203,19 @@ function validateUploadFiles(files: UploadFileMap) {
     .map((fieldName) => files[fieldName])
     .filter((file): file is File => Boolean(file));
 
-  const oversizeFile = selectedFiles.find((file) => file.size > MAX_SINGLE_UPLOAD_BYTES);
+  const oversizeFile = selectedFiles.find((file) => file.size > BOOKING_MAX_PHOTO_BYTES);
   if (oversizeFile) {
     return {
       ok: false as const,
-      details: `File "${oversizeFile.name}" is larger than ${MAX_SINGLE_UPLOAD_BYTES / (1024 * 1024)} MB.`,
+      details: `File "${oversizeFile.name}" is larger than ${bytesToRoundedMb(BOOKING_MAX_PHOTO_BYTES)} MB.`,
     };
   }
 
   const totalSize = selectedFiles.reduce((sum, file) => sum + file.size, 0);
-  if (totalSize > MAX_TOTAL_UPLOAD_BYTES) {
+  if (totalSize > BOOKING_MAX_TOTAL_UPLOAD_BYTES) {
     return {
       ok: false as const,
-      details: `Total photo size exceeds ${MAX_TOTAL_UPLOAD_BYTES / (1024 * 1024)} MB.`,
+      details: `Total photo size exceeds ${bytesToRoundedMb(BOOKING_MAX_TOTAL_UPLOAD_BYTES)} MB.`,
     };
   }
 
@@ -197,6 +243,7 @@ function buildPayloadFromFormData(formData: FormData) {
     captchaValue: getString("captchaValue"),
     source: getString("source"),
     planSlug: getString("planSlug"),
+    vehicleTypeKey: getString("vehicleTypeKey"),
     extraServiceKey: getString("extraServiceKey"),
     extraServiceName: getString("extraServiceName"),
     extraServicePrice: getString("extraServicePrice"),
@@ -242,32 +289,39 @@ function buildNetlifyFormData({
   files: UploadFileMap;
 }) {
   const body = new FormData();
+  const cleanPhone = sanitizePhoneForLink(parsed.phone);
+  const callLink = cleanPhone ? `tel:${cleanPhone}` : "";
+  const whatsappLink = cleanPhone
+    ? `https://wa.me/${cleanPhone.replace(/^\+/, "")}?text=${encodeURIComponent(
+        "Hola, quiero reservar un detailing.",
+      )}`
+    : "";
+  const pricing = calculateBookingTotal(parsed);
+  const summaryText = buildBookingSummaryText({ parsed, files });
 
   body.append("form-name", "pitcrew-contact");
+  body.append("bot-field", "");
   body.append("name", parsed.name);
   body.append("phone", parsed.phone);
   body.append("email", parsed.email ?? "");
-  body.append("vehicleType", parsed.vehicleType ?? "");
-  body.append("serviceInterest", parsed.serviceInterest ?? "");
-  body.append("message", parsed.message ?? "");
   body.append("locale", parsed.locale);
   body.append("source", parsed.source);
-  body.append("planSlug", parsed.planSlug ?? "");
-  body.append("extraServiceKey", parsed.extraServiceKey ?? "");
-  body.append("extraServiceName", parsed.extraServiceName ?? "");
-  body.append("extraServicePrice", parsed.extraServicePrice ?? "");
-  body.append("extraServiceDuration", parsed.extraServiceDuration ?? "");
-  body.append("extraServiceDetails", parsed.extraServiceDetails ?? "");
-  body.append("vehicleMakeModel", parsed.vehicleMakeModel ?? "");
-  body.append("vehicleYear", parsed.vehicleYear ?? "");
-  body.append("addressLine", parsed.addressLine ?? "");
-  body.append("cityArea", parsed.cityArea ?? "");
-  body.append("notes", parsed.notes ?? "");
-  body.append("bot-field", "");
 
   if (parsed.source === "booking-modal") {
-    const summaryText = buildBookingSummaryText({ parsed, files });
+    body.append("plan", getPlanLabel(parsed.planSlug));
+    body.append("vehicleType", parsed.vehicleType ?? "");
+    body.append("vehicle", [parsed.vehicleMakeModel, parsed.vehicleYear].filter(Boolean).join(" | "));
+    body.append("address", parsed.addressLine ?? "");
+    body.append("cityState", parsed.cityArea ?? "");
+    body.append("extraServices", parsed.extraServiceName ?? "");
+    body.append("bookingTotalPrice", pricing.formattedTotal);
+    body.append("callLink", callLink);
+    body.append("whatsAppLink", whatsappLink);
     body.append("bookingSummary", summaryText);
+  } else {
+    body.append("vehicleType", parsed.vehicleType ?? "");
+    body.append("serviceInterest", parsed.serviceInterest ?? "");
+    body.append("message", parsed.message ?? "");
   }
 
   for (const fieldName of uploadFieldNames) {
@@ -374,7 +428,7 @@ export async function POST(request: Request) {
           {
             ok: false,
             error: "payload_too_large",
-            details: "Netlify rejected the upload size. Try lighter images.",
+            details: `Netlify rejected the upload size. Maximum request size is about 8 MB; keep photos under ${bytesToRoundedMb(BOOKING_MAX_TOTAL_UPLOAD_BYTES)} MB total.`,
           },
           { status: 413 },
         );
@@ -404,7 +458,7 @@ export async function POST(request: Request) {
         {
           ok: false,
           error: "payload_too_large",
-          details: "Uploaded photos are too large. Please upload lighter images.",
+          details: `Uploaded photos are too large. Keep them under ${bytesToRoundedMb(BOOKING_MAX_TOTAL_UPLOAD_BYTES)} MB total.`,
         },
         { status: 413 },
       );
