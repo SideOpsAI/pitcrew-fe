@@ -64,6 +64,7 @@ type BookingTextField = Exclude<
   keyof BookingFormData,
   "vehiclePhotoFront" | "vehiclePhotoSide" | "vehiclePhotoExtra"
 >;
+type BookingPhotoField = "vehiclePhotoFront" | "vehiclePhotoSide" | "vehiclePhotoExtra";
 
 type CaptchaChallenge = {
   svg: string;
@@ -144,6 +145,16 @@ const vehicleTypeOrder = [
 ] as const satisfies readonly VehicleTypeKey[];
 
 const bookingPlanOrder = ["basic", "medium", "full"] as const satisfies readonly PlanSlug[];
+const bookingPhotoFields = [
+  "vehiclePhotoFront",
+  "vehiclePhotoSide",
+  "vehiclePhotoExtra",
+] as const satisfies readonly BookingPhotoField[];
+const bookingPhotoLimitByPlan: Record<PlanSlug, number> = {
+  basic: 1,
+  medium: 2,
+  full: 3,
+};
 
 const bookingPlanPricing: Record<VehicleTypeKey, Record<PlanSlug, string>> = {
   sedan: {
@@ -326,7 +337,7 @@ const bookingFlowCopy: Record<Locale, BookingFlowCopy> = {
 
 const bookingPhotoCopyEn: BookingPhotoCopy = {
   title: "Vehicle photos (optional)",
-  subtitle: "Upload up to 3 photos so we can better estimate your detailing service.",
+  subtitle: "Upload photos so we can better estimate your detailing service.",
   frontLabel: "Front view",
   sideLabel: "Side view",
   extraLabel: "Extra / damage area",
@@ -338,7 +349,7 @@ const bookingPhotoCopy: Record<Locale, BookingPhotoCopy> = {
   en: bookingPhotoCopyEn,
   es: {
     title: "Fotos del vehiculo (opcional)",
-    subtitle: "Sube hasta 3 fotos para estimar mejor tu servicio de detailing.",
+    subtitle: "Sube fotos para estimar mejor tu servicio de detailing.",
     frontLabel: "Vista frontal",
     sideLabel: "Vista lateral",
     extraLabel: "Extra / zona de dano",
@@ -348,25 +359,25 @@ const bookingPhotoCopy: Record<Locale, BookingPhotoCopy> = {
   "pt-BR": {
     ...bookingPhotoCopyEn,
     title: "Fotos do veiculo (opcional)",
-    subtitle: "Envie ate 3 fotos para estimarmos melhor o servico.",
+    subtitle: "Envie fotos para estimarmos melhor o servico.",
     remove: "Remover",
   },
   it: {
     ...bookingPhotoCopyEn,
     title: "Foto del veicolo (opzionale)",
-    subtitle: "Carica fino a 3 foto per stimare meglio il servizio.",
+    subtitle: "Carica foto per stimare meglio il servizio.",
     remove: "Rimuovi",
   },
   "zh-CN": {
     ...bookingPhotoCopyEn,
     title: "Cheliang tupian (kexuan)",
-    subtitle: "Shangchuan zui duo 3 zhang tupian, bangzhu women gengtunjun gujia.",
+    subtitle: "Shangchuan tupian, bangzhu women gengtunjun gujia.",
     remove: "Yichu",
   },
   de: {
     ...bookingPhotoCopyEn,
     title: "Fahrzeugfotos (optional)",
-    subtitle: "Lade bis zu 3 Fotos hoch, damit wir besser einschatzen konnen.",
+    subtitle: "Lade Fotos hoch, damit wir besser einschatzen konnen.",
     remove: "Entfernen",
   },
 };
@@ -377,6 +388,26 @@ function getBookingFlowCopy(locale: Locale) {
 
 function getBookingPhotoCopy(locale: Locale) {
   return bookingPhotoCopy[locale];
+}
+
+function getPhotoLimitHint(locale: Locale, planSlug: "" | PlanSlug) {
+  if (!planSlug) {
+    if (locale === "es") {
+      return "Selecciona un plan para definir el limite de fotos.";
+    }
+
+    return "Choose a plan to define the photo upload limit.";
+  }
+
+  const maxPhotos = bookingPhotoLimitByPlan[planSlug];
+  const planLabel =
+    planSlug === "basic" ? "Interior" : planSlug === "medium" ? "Exterior" : "Full Detail";
+
+  if (locale === "es") {
+    return `${planLabel}: hasta ${maxPhotos} ${maxPhotos === 1 ? "foto" : "fotos"}.`;
+  }
+
+  return `${planLabel}: up to ${maxPhotos} ${maxPhotos === 1 ? "photo" : "photos"}.`;
 }
 
 function buildVehiclePlanOptions(
@@ -686,6 +717,40 @@ function BookingModal({
         : [],
     [formData.vehicleTypeKey, locale],
   );
+  const maxPhotoCount = formData.planSlug ? bookingPhotoLimitByPlan[formData.planSlug] : 3;
+  const allowedPhotoFields = bookingPhotoFields.slice(
+    0,
+    maxPhotoCount,
+  ) as readonly BookingPhotoField[];
+  const photoSlots = useMemo(
+    () =>
+      [
+        { field: "vehiclePhotoFront" as const, label: photoCopy.frontLabel },
+        { field: "vehiclePhotoSide" as const, label: photoCopy.sideLabel },
+        { field: "vehiclePhotoExtra" as const, label: photoCopy.extraLabel },
+      ].slice(0, maxPhotoCount),
+    [maxPhotoCount, photoCopy.extraLabel, photoCopy.frontLabel, photoCopy.sideLabel],
+  );
+  const photoLimitHint = useMemo(() => getPhotoLimitHint(locale, formData.planSlug), [locale, formData.planSlug]);
+
+  useEffect(() => {
+    setFormData((prev) => {
+      const next = { ...prev };
+      let changed = false;
+
+      if (maxPhotoCount < 2 && next.vehiclePhotoSide) {
+        next.vehiclePhotoSide = null;
+        changed = true;
+      }
+
+      if (maxPhotoCount < 3 && next.vehiclePhotoExtra) {
+        next.vehiclePhotoExtra = null;
+        changed = true;
+      }
+
+      return changed ? next : prev;
+    });
+  }, [maxPhotoCount]);
 
   const isSubmitting = formState.status === "submitting";
   const isFormDirty = useMemo(() => {
@@ -1102,16 +1167,11 @@ function BookingModal({
       body.append("captchaToken", parsed.data.captchaToken ?? "");
       body.append("captchaValue", parsed.data.captchaValue ?? "");
 
-      if (formData.vehiclePhotoFront) {
-        body.append("vehiclePhotoFront", formData.vehiclePhotoFront);
-      }
-
-      if (formData.vehiclePhotoSide) {
-        body.append("vehiclePhotoSide", formData.vehiclePhotoSide);
-      }
-
-      if (formData.vehiclePhotoExtra) {
-        body.append("vehiclePhotoExtra", formData.vehiclePhotoExtra);
+      for (const photoField of allowedPhotoFields) {
+        const photoFile = formData[photoField];
+        if (photoFile) {
+          body.append(photoField, photoFile);
+        }
       }
 
       const response = await fetch("/api/contact", {
@@ -1437,77 +1497,46 @@ function BookingModal({
                 <div className="rounded-xl border border-white/15 bg-black/60 p-4 sm:col-span-2">
                   <p className="text-sm font-semibold text-white">{photoCopy.title}</p>
                   <p className="mt-1 text-xs text-white/65">{photoCopy.subtitle}</p>
+                  <p className="mt-1 text-xs font-semibold text-accent">{photoLimitHint}</p>
                   <p className="mt-1 text-[11px] text-white/45">{photoCopy.hint}</p>
 
-                  <div className="mt-3 grid gap-3 sm:grid-cols-3">
-                    <div className="rounded-lg border border-white/10 p-3">
-                      <p className="text-xs font-semibold uppercase tracking-wide text-white/75">
-                        {photoCopy.frontLabel}
-                      </p>
-                      <input
-                        type="file"
-                        accept="image/*"
-                        onChange={(event) => {
-                          updatePhoto("vehiclePhotoFront", event.target.files?.[0] ?? null);
-                        }}
-                        className="mt-2 block w-full text-xs text-white/70 file:mr-3 file:rounded-lg file:border-0 file:bg-accent file:px-3 file:py-2 file:text-xs file:font-semibold file:text-black"
-                      />
-                      {formData.vehiclePhotoFront ? (
-                        <button
-                          type="button"
-                          onClick={() => updatePhoto("vehiclePhotoFront", null)}
-                          className="mt-2 text-xs font-semibold text-accent"
-                        >
-                          {photoCopy.remove}: {formData.vehiclePhotoFront.name}
-                        </button>
-                      ) : null}
-                    </div>
+                  <div
+                    className={`mt-3 grid gap-3 ${
+                      maxPhotoCount === 1
+                        ? "sm:grid-cols-1"
+                        : maxPhotoCount === 2
+                          ? "sm:grid-cols-2"
+                          : "sm:grid-cols-3"
+                    }`}
+                  >
+                    {photoSlots.map((slot) => {
+                      const selectedPhoto = formData[slot.field];
 
-                    <div className="rounded-lg border border-white/10 p-3">
-                      <p className="text-xs font-semibold uppercase tracking-wide text-white/75">
-                        {photoCopy.sideLabel}
-                      </p>
-                      <input
-                        type="file"
-                        accept="image/*"
-                        onChange={(event) => {
-                          updatePhoto("vehiclePhotoSide", event.target.files?.[0] ?? null);
-                        }}
-                        className="mt-2 block w-full text-xs text-white/70 file:mr-3 file:rounded-lg file:border-0 file:bg-accent file:px-3 file:py-2 file:text-xs file:font-semibold file:text-black"
-                      />
-                      {formData.vehiclePhotoSide ? (
-                        <button
-                          type="button"
-                          onClick={() => updatePhoto("vehiclePhotoSide", null)}
-                          className="mt-2 text-xs font-semibold text-accent"
-                        >
-                          {photoCopy.remove}: {formData.vehiclePhotoSide.name}
-                        </button>
-                      ) : null}
-                    </div>
-
-                    <div className="rounded-lg border border-white/10 p-3">
-                      <p className="text-xs font-semibold uppercase tracking-wide text-white/75">
-                        {photoCopy.extraLabel}
-                      </p>
-                      <input
-                        type="file"
-                        accept="image/*"
-                        onChange={(event) => {
-                          updatePhoto("vehiclePhotoExtra", event.target.files?.[0] ?? null);
-                        }}
-                        className="mt-2 block w-full text-xs text-white/70 file:mr-3 file:rounded-lg file:border-0 file:bg-accent file:px-3 file:py-2 file:text-xs file:font-semibold file:text-black"
-                      />
-                      {formData.vehiclePhotoExtra ? (
-                        <button
-                          type="button"
-                          onClick={() => updatePhoto("vehiclePhotoExtra", null)}
-                          className="mt-2 text-xs font-semibold text-accent"
-                        >
-                          {photoCopy.remove}: {formData.vehiclePhotoExtra.name}
-                        </button>
-                      ) : null}
-                    </div>
+                      return (
+                        <div key={slot.field} className="rounded-lg border border-white/10 p-3">
+                          <p className="text-xs font-semibold uppercase tracking-wide text-white/75">
+                            {slot.label}
+                          </p>
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={(event) => {
+                              updatePhoto(slot.field, event.target.files?.[0] ?? null);
+                            }}
+                            className="mt-2 block w-full text-xs text-white/70 file:mr-3 file:rounded-lg file:border-0 file:bg-accent file:px-3 file:py-2 file:text-xs file:font-semibold file:text-black"
+                          />
+                          {selectedPhoto ? (
+                            <button
+                              type="button"
+                              onClick={() => updatePhoto(slot.field, null)}
+                              className="mt-2 text-xs font-semibold text-accent"
+                            >
+                              {photoCopy.remove}: {selectedPhoto.name}
+                            </button>
+                          ) : null}
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
 
