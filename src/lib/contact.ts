@@ -1,6 +1,7 @@
-﻿import { z } from "zod";
+import { z } from "zod";
 
 import { locales } from "@/lib/locales";
+import { vehicleTypeOrder } from "@/lib/vehicle-plans";
 import type { ContactLeadInput, FormStatus, PlanSlug } from "@/types/content";
 
 const planSlugs = ["basic", "medium", "full"] as const satisfies readonly PlanSlug[];
@@ -108,6 +109,7 @@ export const contactLeadSchema = z
     captchaValue: z.string().trim().optional().default(""),
     source: z.enum(["contact-form", "booking-modal"]).optional().default("contact-form"),
     planSlug: bookingPlanSlugSchema.optional(),
+    vehicleTypeKey: z.enum(vehicleTypeOrder).optional().or(z.literal("")),
     extraServiceKey: z.string().trim().max(80).optional().or(z.literal("")),
     extraServiceName: z.string().trim().max(120).optional().or(z.literal("")),
     extraServicePrice: z.string().trim().max(40).optional().or(z.literal("")),

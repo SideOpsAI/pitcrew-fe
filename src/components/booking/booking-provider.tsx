@@ -19,6 +19,11 @@ import {
   normalizePhoneDigits,
 } from "@/lib/contact";
 import {
+  BOOKING_MAX_PHOTO_BYTES,
+  BOOKING_MAX_TOTAL_UPLOAD_BYTES,
+  bytesToRoundedMb,
+} from "@/lib/booking-upload";
+import {
   bookingPlanDurations,
   bookingPlanPricing,
   vehicleTypeOrder,
@@ -384,7 +389,7 @@ const bookingPhotoCopyEn: BookingPhotoCopy = {
   frontLabel: "Front view",
   sideLabel: "Side view",
   extraLabel: "Extra / damage area",
-  hint: "JPG, PNG, or WEBP. Better lighting gives better estimates.",
+  hint: "JPG, PNG, or WEBP. Photos are auto-optimized before upload when needed.",
   remove: "Remove",
 };
 
@@ -396,7 +401,7 @@ const bookingPhotoCopy: Record<Locale, BookingPhotoCopy> = {
     frontLabel: "Vista frontal",
     sideLabel: "Vista lateral",
     extraLabel: "Extra / zona de dano",
-    hint: "JPG, PNG o WEBP. Mejor iluminacion = mejor estimacion.",
+    hint: "JPG, PNG o WEBP. Las fotos se optimizan automaticamente antes de enviar cuando es necesario.",
     remove: "Quitar",
   },
   "pt-BR": {
@@ -690,6 +695,7 @@ const bookingPhotoValidationCopy: Record<
   {
     fileTooLarge: (fileName: string, maxMb: number) => string;
     totalTooLarge: (maxMb: number) => string;
+    optimizeFailed: string;
   }
 > = {
   en: {
@@ -697,36 +703,42 @@ const bookingPhotoValidationCopy: Record<
       `The file "${fileName}" is too large. Max size per photo: ${maxMb} MB.`,
     totalTooLarge: (maxMb) =>
       `The total photo size is too large. Upload lighter images (max total: ${maxMb} MB).`,
+    optimizeFailed: "We could not optimize your photos. Please retry with lighter images.",
   },
   es: {
     fileTooLarge: (fileName, maxMb) =>
       `El archivo "${fileName}" es muy grande. Tamano maximo por foto: ${maxMb} MB.`,
     totalTooLarge: (maxMb) =>
       `El tamano total de fotos es muy grande. Sube imagenes mas livianas (maximo total: ${maxMb} MB).`,
+    optimizeFailed: "No pudimos optimizar las fotos. Intenta nuevamente con imagenes mas livianas.",
   },
   "pt-BR": {
     fileTooLarge: (fileName, maxMb) =>
       `O arquivo "${fileName}" e muito grande. Tamanho maximo por foto: ${maxMb} MB.`,
     totalTooLarge: (maxMb) =>
       `O tamanho total das fotos e muito grande. Envie imagens menores (maximo total: ${maxMb} MB).`,
+    optimizeFailed: "Nao foi possivel otimizar as fotos. Tente novamente com imagens menores.",
   },
   it: {
     fileTooLarge: (fileName, maxMb) =>
       `Il file "${fileName}" e troppo grande. Dimensione massima per foto: ${maxMb} MB.`,
     totalTooLarge: (maxMb) =>
       `La dimensione totale delle foto e troppo grande. Carica immagini piu leggere (totale massimo: ${maxMb} MB).`,
+    optimizeFailed: "Non siamo riusciti a ottimizzare le foto. Riprova con immagini piu leggere.",
   },
   "zh-CN": {
     fileTooLarge: (fileName, maxMb) =>
       `The file "${fileName}" is too large. Max size per photo: ${maxMb} MB.`,
     totalTooLarge: (maxMb) =>
       `The total photo size is too large. Upload lighter images (max total: ${maxMb} MB).`,
+    optimizeFailed: "We could not optimize your photos. Please retry with lighter images.",
   },
   de: {
     fileTooLarge: (fileName, maxMb) =>
       `Die Datei "${fileName}" ist zu gross. Maximale Groesse pro Foto: ${maxMb} MB.`,
     totalTooLarge: (maxMb) =>
       `Die Gesamtgroesse der Fotos ist zu hoch. Bitte kleinere Bilder hochladen (maximal gesamt: ${maxMb} MB).`,
+    optimizeFailed: "Die Fotos konnten nicht optimiert werden. Bitte versuche es mit kleineren Bildern erneut.",
   },
 };
 
@@ -814,6 +826,147 @@ function isFocusable(node: Element): node is HTMLElement {
   return node instanceof HTMLElement && !node.hasAttribute("disabled");
 }
 
+function replaceFileExtension(fileName: string, extension: string) {
+  const dotIndex = fileName.lastIndexOf(".");
+  const baseName = dotIndex > 0 ? fileName.slice(0, dotIndex) : fileName;
+  return `${baseName}.${extension}`;
+}
+
+function loadImageElement(file: File): Promise<HTMLImageElement> {
+  return new Promise((resolve, reject) => {
+    const imageUrl = URL.createObjectURL(file);
+    const image = new Image();
+
+    image.onload = () => {
+      URL.revokeObjectURL(imageUrl);
+      resolve(image);
+    };
+
+    image.onerror = () => {
+      URL.revokeObjectURL(imageUrl);
+      reject(new Error("image_load_failed"));
+    };
+
+    image.src = imageUrl;
+  });
+}
+
+function drawCompressedBlob({
+  image,
+  quality,
+  maxEdge,
+}: {
+  image: HTMLImageElement;
+  quality: number;
+  maxEdge: number;
+}) {
+  const longestEdge = Math.max(image.naturalWidth, image.naturalHeight);
+  const scale = longestEdge > maxEdge ? maxEdge / longestEdge : 1;
+  const width = Math.max(1, Math.round(image.naturalWidth * scale));
+  const height = Math.max(1, Math.round(image.naturalHeight * scale));
+  const canvas = document.createElement("canvas");
+  canvas.width = width;
+  canvas.height = height;
+
+  const context = canvas.getContext("2d");
+  if (!context) {
+    return Promise.resolve<Blob | null>(null);
+  }
+
+  context.drawImage(image, 0, 0, width, height);
+
+  return new Promise<Blob | null>((resolve) => {
+    canvas.toBlob((blob) => resolve(blob), "image/jpeg", quality);
+  });
+}
+
+async function compressImageToTarget(file: File, targetBytes: number) {
+  if (!file.type.startsWith("image/")) {
+    return file;
+  }
+
+  let image: HTMLImageElement;
+  try {
+    image = await loadImageElement(file);
+  } catch {
+    return file;
+  }
+  let quality = 0.88;
+  let maxEdge = 2400;
+  let bestBlob: Blob | null = null;
+
+  for (let attempt = 0; attempt < 8; attempt += 1) {
+    const blob = await drawCompressedBlob({ image, quality, maxEdge });
+    if (!blob) {
+      break;
+    }
+
+    if (!bestBlob || blob.size < bestBlob.size) {
+      bestBlob = blob;
+    }
+
+    if (blob.size <= targetBytes) {
+      bestBlob = blob;
+      break;
+    }
+
+    if (quality > 0.5) {
+      quality -= 0.1;
+    } else {
+      maxEdge = Math.max(1280, Math.round(maxEdge * 0.85));
+    }
+  }
+
+  if (!bestBlob || bestBlob.size >= file.size) {
+    return file;
+  }
+
+  return new File([bestBlob], replaceFileExtension(file.name, "jpg"), {
+    type: "image/jpeg",
+    lastModified: Date.now(),
+  });
+}
+
+async function optimizePhotoEntriesForUpload(
+  entries: Array<{ field: BookingPhotoField; file: File }>,
+  limits: {
+    maxSingleBytes: number;
+    maxTotalBytes: number;
+  },
+) {
+  const firstPass = await Promise.all(
+    entries.map(async (entry) => {
+      if (entry.file.size <= limits.maxSingleBytes) {
+        return entry;
+      }
+
+      const compressed = await compressImageToTarget(entry.file, limits.maxSingleBytes);
+      return { ...entry, file: compressed };
+    }),
+  );
+
+  const firstPassTotal = firstPass.reduce((sum, entry) => sum + entry.file.size, 0);
+  if (firstPassTotal <= limits.maxTotalBytes) {
+    return firstPass;
+  }
+
+  const dynamicTargetPerFile = Math.max(
+    Math.floor(limits.maxTotalBytes / firstPass.length) - 150 * 1024,
+    900 * 1024,
+  );
+
+  return Promise.all(
+    firstPass.map(async (entry) => {
+      if (entry.file.size <= dynamicTargetPerFile) {
+        return entry;
+      }
+
+      const recompressed = await compressImageToTarget(entry.file, dynamicTargetPerFile);
+      return { ...entry, file: recompressed };
+    }),
+  );
+}
+
 function BookingModal({
   isOpen,
   onClose,
@@ -831,10 +984,10 @@ function BookingModal({
   preselectedPlan: PlanSlug | null;
   onBooked: () => void;
 }) {
-  const MAX_SINGLE_PHOTO_SIZE_BYTES = 3 * 1024 * 1024;
-  const MAX_TOTAL_PHOTO_SIZE_BYTES = 5 * 1024 * 1024;
-  const MAX_SINGLE_PHOTO_SIZE_MB = 3;
-  const MAX_TOTAL_PHOTO_SIZE_MB = 5;
+  const MAX_SINGLE_PHOTO_SIZE_BYTES = BOOKING_MAX_PHOTO_BYTES;
+  const MAX_TOTAL_PHOTO_SIZE_BYTES = BOOKING_MAX_TOTAL_UPLOAD_BYTES;
+  const MAX_SINGLE_PHOTO_SIZE_MB = bytesToRoundedMb(MAX_SINGLE_PHOTO_SIZE_BYTES);
+  const MAX_TOTAL_PHOTO_SIZE_MB = bytesToRoundedMb(MAX_TOTAL_PHOTO_SIZE_BYTES);
 
   const dialogRef = useRef<HTMLDivElement | null>(null);
   const initialPlanSlugRef = useRef<"" | PlanSlug>("");
@@ -1317,9 +1470,29 @@ function BookingModal({
     const extraServiceDetailsValue = selectedExtraServices
       .flatMap((service) => service.details.map((detail) => `${service.name}: ${detail}`))
       .join(" | ");
-    const selectedPhotoFiles = allowedPhotoFields
-      .map((photoField) => formData[photoField])
-      .filter((file): file is File => Boolean(file));
+    const selectedPhotoEntries = allowedPhotoFields
+      .map((photoField) => ({
+        field: photoField,
+        file: formData[photoField],
+      }))
+      .filter((entry): entry is { field: BookingPhotoField; file: File } => Boolean(entry.file));
+
+    let optimizedPhotoEntries = selectedPhotoEntries;
+    try {
+      optimizedPhotoEntries = await optimizePhotoEntriesForUpload(selectedPhotoEntries, {
+        maxSingleBytes: MAX_SINGLE_PHOTO_SIZE_BYTES,
+        maxTotalBytes: MAX_TOTAL_PHOTO_SIZE_BYTES,
+      });
+    } catch {
+      setFormState({
+        status: "error",
+        errors: {},
+        message: photoValidationCopy.optimizeFailed,
+      });
+      return;
+    }
+
+    const selectedPhotoFiles = optimizedPhotoEntries.map((entry) => entry.file);
     const oversizePhoto = selectedPhotoFiles.find(
       (file) => file.size > MAX_SINGLE_PHOTO_SIZE_BYTES,
     );
@@ -1363,6 +1536,7 @@ function BookingModal({
       botField: formData.botField,
       source: "booking-modal" as const,
       planSlug: formData.planSlug || undefined,
+      vehicleTypeKey: formData.vehicleTypeKey,
       extraServiceKey: extraServiceKeysValue,
       extraServiceName: extraServiceNamesValue,
       extraServicePrice: extraServicePricesValue,
@@ -1402,6 +1576,7 @@ function BookingModal({
       body.append("locale", parsed.data.locale);
       body.append("source", parsed.data.source);
       body.append("planSlug", parsed.data.planSlug ?? "");
+      body.append("vehicleTypeKey", parsed.data.vehicleTypeKey ?? "");
       body.append("extraServiceKey", parsed.data.extraServiceKey ?? "");
       body.append("extraServiceName", parsed.data.extraServiceName ?? "");
       body.append("extraServicePrice", parsed.data.extraServicePrice ?? "");
@@ -1416,12 +1591,9 @@ function BookingModal({
       body.append("captchaToken", parsed.data.captchaToken ?? "");
       body.append("captchaValue", parsed.data.captchaValue ?? "");
 
-      for (const photoField of allowedPhotoFields) {
-        const photoFile = formData[photoField];
-        if (photoFile) {
-          body.append(photoField, photoFile);
-        }
-      }
+      optimizedPhotoEntries.forEach((entry) => {
+        body.append(entry.field, entry.file);
+      });
 
       const response = await fetch("/api/contact", {
         method: "POST",
