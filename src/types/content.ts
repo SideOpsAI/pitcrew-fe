@@ -200,6 +200,11 @@ export interface ContactLeadInput {
   locale: Locale;
   source?: "contact-form" | "booking-modal";
   planSlug?: PlanSlug;
+  extraServiceKey?: string;
+  extraServiceName?: string;
+  extraServicePrice?: string;
+  extraServiceDuration?: string;
+  extraServiceDetails?: string;
   vehicleMakeModel?: string;
   vehicleYear?: string;
   addressLine?: string;

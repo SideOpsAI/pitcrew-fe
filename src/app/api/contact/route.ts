@@ -64,6 +64,15 @@ function buildBookingSummaryTable({
     ["WhatsApp Link", whatsappLink],
     ["Email", formatValue(parsed.email)],
     ["Plan", getPlanLabel(parsed.planSlug)],
+    [
+      "Extra Service",
+      parsed.extraServiceName
+        ? `${parsed.extraServiceName} (${formatValue(parsed.extraServicePrice)} - ${formatValue(
+            parsed.extraServiceDuration,
+          )})`
+        : "N/A",
+    ],
+    ["Extra Service Details", formatValue(parsed.extraServiceDetails)],
     ["Vehicle Type", formatValue(parsed.vehicleType)],
     ["Vehicle Make/Model", formatValue(parsed.vehicleMakeModel)],
     ["Vehicle Year", formatValue(parsed.vehicleYear)],
@@ -131,6 +140,11 @@ function buildPayloadFromFormData(formData: FormData) {
     captchaValue: getString("captchaValue"),
     source: getString("source"),
     planSlug: getString("planSlug"),
+    extraServiceKey: getString("extraServiceKey"),
+    extraServiceName: getString("extraServiceName"),
+    extraServicePrice: getString("extraServicePrice"),
+    extraServiceDuration: getString("extraServiceDuration"),
+    extraServiceDetails: getString("extraServiceDetails"),
     vehicleMakeModel: getString("vehicleMakeModel"),
     vehicleYear: getString("vehicleYear"),
     addressLine: getString("addressLine"),
@@ -182,6 +196,11 @@ function buildNetlifyFormData({
   body.append("locale", parsed.locale);
   body.append("source", parsed.source);
   body.append("planSlug", parsed.planSlug ?? "");
+  body.append("extraServiceKey", parsed.extraServiceKey ?? "");
+  body.append("extraServiceName", parsed.extraServiceName ?? "");
+  body.append("extraServicePrice", parsed.extraServicePrice ?? "");
+  body.append("extraServiceDuration", parsed.extraServiceDuration ?? "");
+  body.append("extraServiceDetails", parsed.extraServiceDetails ?? "");
   body.append("vehicleMakeModel", parsed.vehicleMakeModel ?? "");
   body.append("vehicleYear", parsed.vehicleYear ?? "");
   body.append("addressLine", parsed.addressLine ?? "");

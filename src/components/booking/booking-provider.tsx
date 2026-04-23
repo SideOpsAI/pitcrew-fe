@@ -47,6 +47,7 @@ type BookingProviderProps = {
 
 type BookingFormData = {
   planSlug: "" | PlanSlug;
+  extraServiceKey: "" | ExtraServiceKey;
   vehicleTypeKey: "" | VehicleTypeKey;
   vehicleType: string;
   vehicleMakeModel: string;
@@ -85,6 +86,7 @@ type CaptchaApiResponse = {
 
 const initialFormData: BookingFormData = {
   planSlug: "",
+  extraServiceKey: "",
   vehicleTypeKey: "",
   vehicleType: "",
   vehicleMakeModel: "",
@@ -141,6 +143,24 @@ type BookingPhotoCopy = {
   remove: string;
 };
 
+type ExtraServiceKey = "interior-steam-cleaning" | "compound-polish" | "child-seat";
+
+type BookingExtraServiceOption = {
+  key: ExtraServiceKey;
+  name: string;
+  price: string;
+  duration: string;
+  details: string[];
+};
+
+type BookingExtraServiceCopy = {
+  title: string;
+  subtitle: string;
+  optionalTag: string;
+  noneLabel: string;
+  includesLabel: string;
+};
+
 const bookingPlanOrder = ["basic", "medium", "full"] as const satisfies readonly PlanSlug[];
 const bookingPhotoFields = [
   "vehiclePhotoFront",
@@ -151,6 +171,78 @@ const bookingPhotoLimitByPlan: Record<PlanSlug, number> = {
   basic: 1,
   medium: 2,
   full: 3,
+};
+
+const bookingExtraServiceOptions: readonly BookingExtraServiceOption[] = [
+  {
+    key: "interior-steam-cleaning",
+    name: "Interior steam cleaning",
+    price: "$30",
+    duration: "30 min",
+    details: ["Interior steam cleaning and disinfection"],
+  },
+  {
+    key: "compound-polish",
+    name: "Compound and polish",
+    price: "$60",
+    duration: "1.5 hours",
+    details: [
+      "Correct imperfections, remove surface scratches and stains.",
+      "A layer of wax applied to the bodywork to create a protective film over the paint.",
+    ],
+  },
+  {
+    key: "child-seat",
+    name: "Child seat",
+    price: "$50",
+    duration: "45 min",
+    details: ["Deep-cleaned, brushed, and disinfected"],
+  },
+] as const;
+
+const bookingExtraServiceCopy: Record<Locale, BookingExtraServiceCopy> = {
+  en: {
+    title: "Extra service (optional)",
+    subtitle: "Add one extra service to your booking request.",
+    optionalTag: "Optional",
+    noneLabel: "No extra service",
+    includesLabel: "Includes",
+  },
+  es: {
+    title: "Servicio extra (opcional)",
+    subtitle: "Agrega un servicio extra a tu solicitud de reserva.",
+    optionalTag: "Opcional",
+    noneLabel: "Sin servicio extra",
+    includesLabel: "Incluye",
+  },
+  "pt-BR": {
+    title: "Servico extra (opcional)",
+    subtitle: "Adicione um servico extra ao pedido de agendamento.",
+    optionalTag: "Opcional",
+    noneLabel: "Sem servico extra",
+    includesLabel: "Inclui",
+  },
+  it: {
+    title: "Servizio extra (opzionale)",
+    subtitle: "Aggiungi un servizio extra alla richiesta di prenotazione.",
+    optionalTag: "Opzionale",
+    noneLabel: "Nessun servizio extra",
+    includesLabel: "Include",
+  },
+  "zh-CN": {
+    title: "Extra service (optional)",
+    subtitle: "Add one extra service to your booking request.",
+    optionalTag: "Optional",
+    noneLabel: "No extra service",
+    includesLabel: "Includes",
+  },
+  de: {
+    title: "Extra-Service (optional)",
+    subtitle: "Fuege deiner Buchungsanfrage einen Extra-Service hinzu.",
+    optionalTag: "Optional",
+    noneLabel: "Kein Extra-Service",
+    includesLabel: "Enthaelt",
+  },
 };
 
 const bookingFlowCopyEn: BookingFlowCopy = {
@@ -339,6 +431,10 @@ function getBookingFlowCopy(locale: Locale) {
 
 function getBookingPhotoCopy(locale: Locale) {
   return bookingPhotoCopy[locale];
+}
+
+function getBookingExtraServiceCopy(locale: Locale) {
+  return bookingExtraServiceCopy[locale];
 }
 
 function getPhotoLimitHint(locale: Locale, planSlug: "" | PlanSlug) {
@@ -660,6 +756,7 @@ function BookingModal({
   const uiCopy = getBookingUiMessages(locale);
   const flowCopy = getBookingFlowCopy(locale);
   const photoCopy = getBookingPhotoCopy(locale);
+  const extraServiceCopy = getBookingExtraServiceCopy(locale);
 
   const selectedVehiclePlanOptions = useMemo(
     () =>
@@ -683,6 +780,13 @@ function BookingModal({
     [maxPhotoCount, photoCopy.extraLabel, photoCopy.frontLabel, photoCopy.sideLabel],
   );
   const photoLimitHint = useMemo(() => getPhotoLimitHint(locale, formData.planSlug), [locale, formData.planSlug]);
+  const selectedExtraService = useMemo(
+    () =>
+      formData.extraServiceKey
+        ? bookingExtraServiceOptions.find((option) => option.key === formData.extraServiceKey) ?? null
+        : null,
+    [formData.extraServiceKey],
+  );
 
   useEffect(() => {
     setFormData((prev) => {
@@ -711,6 +815,7 @@ function BookingModal({
 
     return (
       Boolean(formData.vehicleTypeKey) ||
+      Boolean(formData.extraServiceKey) ||
       Boolean(formData.vehicleType.trim()) ||
       Boolean(formData.vehicleMakeModel.trim()) ||
       Boolean(formData.vehicleYear.trim()) ||
@@ -1068,13 +1173,20 @@ function BookingModal({
         formData.vehicleType ||
         (formData.vehicleTypeKey ? flowCopy.vehicleTypes[formData.vehicleTypeKey] : ""),
       serviceInterest: selectedVehiclePlan
-        ? `${selectedVehiclePlan.name} - ${formData.vehicleType}`
+        ? `${selectedVehiclePlan.name} - ${formData.vehicleType}${
+            selectedExtraService ? ` + ${selectedExtraService.name}` : ""
+          }`
         : fallbackService?.name ?? formData.planSlug,
       message: formData.notes || "Booking modal request",
       locale,
       botField: formData.botField,
       source: "booking-modal" as const,
       planSlug: formData.planSlug || undefined,
+      extraServiceKey: selectedExtraService?.key || "",
+      extraServiceName: selectedExtraService?.name || "",
+      extraServicePrice: selectedExtraService?.price || "",
+      extraServiceDuration: selectedExtraService?.duration || "",
+      extraServiceDetails: selectedExtraService ? selectedExtraService.details.join(" | ") : "",
       vehicleMakeModel: formData.vehicleMakeModel,
       vehicleYear: formData.vehicleYear,
       addressLine: formData.addressLine,
@@ -1109,6 +1221,11 @@ function BookingModal({
       body.append("locale", parsed.data.locale);
       body.append("source", parsed.data.source);
       body.append("planSlug", parsed.data.planSlug ?? "");
+      body.append("extraServiceKey", parsed.data.extraServiceKey ?? "");
+      body.append("extraServiceName", parsed.data.extraServiceName ?? "");
+      body.append("extraServicePrice", parsed.data.extraServicePrice ?? "");
+      body.append("extraServiceDuration", parsed.data.extraServiceDuration ?? "");
+      body.append("extraServiceDetails", parsed.data.extraServiceDetails ?? "");
       body.append("vehicleMakeModel", parsed.data.vehicleMakeModel ?? "");
       body.append("vehicleYear", parsed.data.vehicleYear ?? "");
       body.append("addressLine", parsed.data.addressLine ?? "");
@@ -1319,6 +1436,69 @@ function BookingModal({
                 {errors.planSlug ? (
                   <p className="text-sm text-red-300">{errors.planSlug}</p>
                 ) : null}
+
+                <div className="rounded-xl border border-white/15 bg-black/60 p-4">
+                  <div className="mb-3 flex items-center justify-between gap-3">
+                    <div>
+                      <p className="text-sm font-semibold text-white">{extraServiceCopy.title}</p>
+                      <p className="mt-1 text-xs text-white/65">{extraServiceCopy.subtitle}</p>
+                    </div>
+                    <span className="rounded-full border border-accent/40 bg-accent/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-wide text-accent">
+                      {extraServiceCopy.optionalTag}
+                    </span>
+                  </div>
+
+                  <div className="grid gap-3">
+                    <button
+                      type="button"
+                      onClick={() => updateField("extraServiceKey", "")}
+                      className={`rounded-xl border px-4 py-3 text-left transition ${
+                        !formData.extraServiceKey
+                          ? "border-accent bg-accent/15"
+                          : "border-white/15 bg-white/5 hover:border-white/30"
+                      }`}
+                    >
+                      <p className="text-sm font-semibold uppercase tracking-wide text-white">
+                        {extraServiceCopy.noneLabel}
+                      </p>
+                    </button>
+
+                    {bookingExtraServiceOptions.map((extraService) => (
+                      <button
+                        key={extraService.key}
+                        type="button"
+                        onClick={() => updateField("extraServiceKey", extraService.key)}
+                        className={`rounded-xl border px-4 py-4 text-left transition ${
+                          formData.extraServiceKey === extraService.key
+                            ? "border-accent bg-accent/15"
+                            : "border-white/15 bg-white/5 hover:border-white/30"
+                        }`}
+                      >
+                        <div className="flex items-start justify-between gap-3">
+                          <p className="font-heading text-lg uppercase tracking-wider text-white">
+                            {extraService.name}
+                          </p>
+                          <div className="text-right">
+                            <p className="text-xs font-semibold uppercase tracking-wide text-accent">
+                              {extraService.price}
+                            </p>
+                            <p className="mt-1 text-[11px] uppercase tracking-wide text-white/55">
+                              {flowCopy.planDurationLabel}: {extraService.duration}
+                            </p>
+                          </div>
+                        </div>
+                        <p className="mt-3 text-xs font-semibold uppercase tracking-wide text-white/65">
+                          {extraServiceCopy.includesLabel}
+                        </p>
+                        <ul className="mt-2 space-y-1 text-sm text-white/75">
+                          {extraService.details.map((detail) => (
+                            <li key={`${extraService.key}-${detail}`}>- {detail}</li>
+                          ))}
+                        </ul>
+                      </button>
+                    ))}
+                  </div>
+                </div>
               </div>
             ) : null}
 
