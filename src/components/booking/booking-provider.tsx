@@ -276,7 +276,7 @@ const bookingFlowCopyEn: BookingFlowCopy = {
   },
   planIncludes: {
     basic: [
-      "Vacuum floors, mats cloth seats and trunk areas",
+      "Vacuum floors, mats, cloth seats, and trunk areas",
       "Clean dash, console, door panels, seats, and rubber floor mats",
       "Apply protective products to dash, console, door panels, seats, and rubber floor mats",
       "Clean door jambs",
@@ -284,19 +284,19 @@ const bookingFlowCopyEn: BookingFlowCopy = {
     ],
     medium: [
       "Hand wash wheels and tires",
-      "Decontaminate paint to remove bugs, tar, grime and any kind of dirt",
+      "Decontaminate paint to remove bugs, tar, grime, and any kind of dirt",
       "Apply tire dressing after cleaning the tires",
       "Clean glass inside",
     ],
     full: [
-      "Vacuum floors, mats cloth seats and trunk areas",
+      "Vacuum floors, mats, cloth seats, and trunk areas",
       "Clean dash, console, door panels, seats, and rubber floor mats",
       "Apply protective products to dash, console, door panels, seats, and rubber floor mats",
       "Clean door jambs",
       "Hand wash wheels and tires",
-      "Decontaminate paint to remove bugs, tar, grime and any kind of dirt",
+      "Decontaminate paint to remove bugs, tar, grime, and any kind of dirt",
       "Apply tire dressing after cleaning the tires",
-      "Clean glass out and inside",
+      "Clean glass outside and inside",
     ],
   },
 };
@@ -329,7 +329,7 @@ const bookingFlowCopy: Record<Locale, BookingFlowCopy> = {
     },
     planIncludes: {
       basic: [
-        "Vacuum floors, mats cloth seats and trunk areas",
+        "Vacuum floors, mats, cloth seats, and trunk areas",
         "Clean dash, console, door panels, seats, and rubber floor mats",
         "Apply protective products to dash, console, door panels, seats, and rubber floor mats",
         "Clean door jambs",
@@ -337,19 +337,19 @@ const bookingFlowCopy: Record<Locale, BookingFlowCopy> = {
       ],
       medium: [
         "Hand wash wheels and tires",
-        "Decontaminate paint to remove bugs, tar, grime and any kind of dirt",
+        "Decontaminate paint to remove bugs, tar, grime, and any kind of dirt",
         "Apply tire dressing after cleaning the tires",
         "Clean glass inside",
       ],
       full: [
-        "Vacuum floors, mats cloth seats and trunk areas",
+        "Vacuum floors, mats, cloth seats, and trunk areas",
         "Clean dash, console, door panels, seats, and rubber floor mats",
         "Apply protective products to dash, console, door panels, seats, and rubber floor mats",
         "Clean door jambs",
         "Hand wash wheels and tires",
-        "Decontaminate paint to remove bugs, tar, grime and any kind of dirt",
+        "Decontaminate paint to remove bugs, tar, grime, and any kind of dirt",
         "Apply tire dressing after cleaning the tires",
-        "Clean glass out and inside",
+        "Clean glass outside and inside",
       ],
     },
   },

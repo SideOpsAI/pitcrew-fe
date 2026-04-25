@@ -81,6 +81,17 @@ const contactItems: QuickContactItem[] = [
   },
 ];
 
+const fullDetailIncludes = [
+  "Vacuum floors, mats, cloth seats, and trunk areas",
+  "Clean dash, console, door panels, seats, and rubber floor mats",
+  "Apply protective products to dash, console, door panels, seats, and rubber floor mats",
+  "Clean door jambs",
+  "Hand wash wheels and tires",
+  "Decontaminate paint to remove bugs, tar, grime, and any kind of dirt",
+  "Apply tire dressing after cleaning the tires",
+  "Clean glass outside and inside",
+];
+
 const servicesByLocale: Record<Locale, ServiceItem[]> = {
   en: [
     {
@@ -121,11 +132,7 @@ const servicesByLocale: Record<Locale, ServiceItem[]> = {
         "Our most complete package for vehicles needing a full reset. Deep interior detailing, exterior decontamination, gloss enhancement, and protection from top to bottom.",
       price: "$210 - $270 USD",
       duration: "3.5 - 4 hours",
-      highlights: [
-        "Full interior detailing workflow",
-        "Exterior decontamination and polish enhancement",
-        "Longer-lasting protection finish",
-      ],
+      highlights: fullDetailIncludes,
       featured: true,
     },
   ],
@@ -168,11 +175,7 @@ const servicesByLocale: Record<Locale, ServiceItem[]> = {
         "Nuestro paquete más completo para reset total del vehículo. Interior y exterior con procesos detallados y protección duradera.",
       price: "$210 - $270 USD",
       duration: "3.5 - 4 horas",
-      highlights: [
-        "Flujo completo de detalle interior",
-        "Descontaminación exterior y mejora de brillo",
-        "Acabado premium con mayor duración",
-      ],
+      highlights: fullDetailIncludes,
       featured: true,
     },
   ],
@@ -215,11 +218,7 @@ const servicesByLocale: Record<Locale, ServiceItem[]> = {
         "Nosso pacote mais completo para reset total. Processo completo de interior e exterior com proteção duradoura.",
       price: "$210 - $270 USD",
       duration: "3.5 - 4 horas",
-      highlights: [
-        "Detalhamento interno completo",
-        "Melhoria de brilho externo",
-        "Proteção premium de longa duração",
-      ],
+      highlights: fullDetailIncludes,
       featured: true,
     },
   ],
@@ -262,11 +261,7 @@ const servicesByLocale: Record<Locale, ServiceItem[]> = {
         "Il pacchetto più completo per un reset totale del veicolo con workflow completo interno/esterno.",
       price: "$210 - $270 USD",
       duration: "3.5 - 4 ore",
-      highlights: [
-        "Workflow completo interno",
-        "Miglioria brillantezza esterna",
-        "Protezione premium duratura",
-      ],
+      highlights: fullDetailIncludes,
       featured: true,
     },
   ],
@@ -309,11 +304,7 @@ const servicesByLocale: Record<Locale, ServiceItem[]> = {
         "??????????,????????????????????",
       price: "$210 - $270 USD",
       duration: "3.5 - 4 ??",
-      highlights: [
-        "????????",
-        "?????????",
-        "??????",
-      ],
+      highlights: fullDetailIncludes,
       featured: true,
     },
   ],
@@ -356,11 +347,7 @@ const servicesByLocale: Record<Locale, ServiceItem[]> = {
         "Unser umfassendstes Paket für den kompletten Fahrzeug-Reset mit Premium-Schutz.",
       price: "$210 - $270 USD",
       duration: "3.5 - 4 Std",
-      highlights: [
-        "Kompletter Innenraum-Workflow",
-        "Glanzverbesserung außen",
-        "Langanhaltendes Schutzfinish",
-      ],
+      highlights: fullDetailIncludes,
       featured: true,
     },
   ],
