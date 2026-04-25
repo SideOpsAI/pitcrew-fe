@@ -289,39 +289,24 @@ function buildNetlifyFormData({
   files: UploadFileMap;
 }) {
   const body = new FormData();
-  const cleanPhone = sanitizePhoneForLink(parsed.phone);
-  const callLink = cleanPhone ? `tel:${cleanPhone}` : "";
-  const whatsappLink = cleanPhone
-    ? `https://wa.me/${cleanPhone.replace(/^\+/, "")}?text=${encodeURIComponent(
-        "Hola, quiero reservar un detailing.",
-      )}`
-    : "";
-  const pricing = calculateBookingTotal(parsed);
   const summaryText = buildBookingSummaryText({ parsed, files });
+  const isBookingLead = parsed.source === "booking-modal";
+  const formName = isBookingLead ? "pitcrew-booking" : "pitcrew-contact";
 
-  body.append("form-name", "pitcrew-contact");
+  body.append("form-name", formName);
   body.append("bot-field", "");
-  body.append("name", parsed.name);
-  body.append("phone", parsed.phone);
-  body.append("email", parsed.email ?? "");
-  body.append("locale", parsed.locale);
-  body.append("source", parsed.source);
-
-  if (parsed.source === "booking-modal") {
-    body.append("plan", getPlanLabel(parsed.planSlug));
-    body.append("vehicleType", parsed.vehicleType ?? "");
-    body.append("vehicle", [parsed.vehicleMakeModel, parsed.vehicleYear].filter(Boolean).join(" | "));
-    body.append("address", parsed.addressLine ?? "");
-    body.append("cityState", parsed.cityArea ?? "");
-    body.append("extraServices", parsed.extraServiceName ?? "");
-    body.append("bookingTotalPrice", pricing.formattedTotal);
-    body.append("callLink", callLink);
-    body.append("whatsAppLink", whatsappLink);
+  
+  if (isBookingLead) {
     body.append("bookingSummary", summaryText);
   } else {
+    body.append("name", parsed.name);
+    body.append("phone", parsed.phone);
+    body.append("email", parsed.email ?? "");
     body.append("vehicleType", parsed.vehicleType ?? "");
     body.append("serviceInterest", parsed.serviceInterest ?? "");
     body.append("message", parsed.message ?? "");
+    body.append("locale", parsed.locale);
+    body.append("source", parsed.source);
   }
 
   for (const fieldName of uploadFieldNames) {

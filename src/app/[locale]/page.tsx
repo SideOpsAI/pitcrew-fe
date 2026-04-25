@@ -97,7 +97,13 @@ export default async function HomePage({ params }: HomePageProps) {
                 <path d="M22 12.07C22 6.506 17.523 2 12 2S2 6.506 2 12.07c0 5.026 3.657 9.191 8.438 9.93v-7.03H7.898v-2.9h2.54V9.845c0-2.52 1.49-3.912 3.774-3.912 1.094 0 2.238.197 2.238.197v2.474H15.19c-1.242 0-1.63.777-1.63 1.574v1.89h2.773l-.443 2.9H13.56V22c4.78-.739 8.44-4.904 8.44-9.93Z" />
               </svg>
             </span>
-            <span className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/25 bg-white/5 text-white/85">
+            <a
+              href="https://www.instagram.com/pitcrewmobiledetailing?igsh=OXQ2NWx5dm83a3Q5&utm_source=ig_contact_invite"
+              target="_blank"
+              rel="noreferrer"
+              aria-label="Open Instagram"
+              className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/25 bg-white/5 text-white/85 transition hover:border-accent hover:text-accent"
+            >
               <svg
                 aria-hidden="true"
                 viewBox="0 0 24 24"
@@ -106,7 +112,7 @@ export default async function HomePage({ params }: HomePageProps) {
               >
                 <path d="M7.75 2h8.5A5.75 5.75 0 0 1 22 7.75v8.5A5.75 5.75 0 0 1 16.25 22h-8.5A5.75 5.75 0 0 1 2 16.25v-8.5A5.75 5.75 0 0 1 7.75 2Zm0 1.8A3.95 3.95 0 0 0 3.8 7.75v8.5a3.95 3.95 0 0 0 3.95 3.95h8.5a3.95 3.95 0 0 0 3.95-3.95v-8.5a3.95 3.95 0 0 0-3.95-3.95h-8.5Zm8.97 1.38a1.2 1.2 0 1 1 0 2.4 1.2 1.2 0 0 1 0-2.4ZM12 7a5 5 0 1 1 0 10 5 5 0 0 1 0-10Zm0 1.8a3.2 3.2 0 1 0 0 6.4 3.2 3.2 0 0 0 0-6.4Z" />
               </svg>
-            </span>
+            </a>
           </div>
         </div>
       </section>
