@@ -124,13 +124,13 @@ export default async function HiddenLinksPage({ params }: HiddenLinksPageProps) 
               className="object-cover object-right opacity-35"
             />
             <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/35 to-black/65" />
-            <div className="absolute inset-0 p-2 md:p-3">
+            <div className="absolute inset-0">
               <Image
                 src="/pitcrew-logo.jpeg"
                 alt="Pit Crew"
                 fill
                 sizes="(max-width: 768px) 100vw, 560px"
-                className="object-contain"
+                className="object-cover object-center"
               />
             </div>
           </div>

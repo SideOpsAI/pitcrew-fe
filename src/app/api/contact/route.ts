@@ -168,6 +168,33 @@ function buildBookingSummaryText({
   return lines.join("\n");
 }
 
+function buildContactSummaryText(parsed: ContactLeadPayload) {
+  const cleanPhone = sanitizePhoneForLink(parsed.phone);
+  const callLink = cleanPhone ? `tel:${cleanPhone}` : "N/A";
+  const whatsappLink = cleanPhone
+    ? `https://wa.me/${cleanPhone.replace(/^\+/, "")}?text=${encodeURIComponent(
+        "Hi, I want to book a detailing appointment.",
+      )}`
+    : "N/A";
+
+  return [
+    "CONTACT REQUEST",
+    "",
+    `- Name: ${formatValue(parsed.name)}`,
+    `- Phone: ${formatValue(parsed.phone)}`,
+    `- Email: ${formatValue(parsed.email)}`,
+    `- Vehicle Type: ${formatValue(parsed.vehicleType)}`,
+    `- Service Interest: ${formatValue(parsed.serviceInterest)}`,
+    `- Message: ${formatValue(parsed.message)}`,
+    `- Locale: ${formatValue(parsed.locale)}`,
+    `- Source: ${formatValue(parsed.source)}`,
+    "",
+    "Quick Actions:",
+    `- Call: ${callLink}`,
+    `- WhatsApp: ${whatsappLink}`,
+  ].join("\n");
+}
+
 function getNetlifyBaseUrl() {
   const value =
     process.env.NETLIFY_FORMS_URL ??
@@ -289,25 +316,15 @@ function buildNetlifyFormData({
   files: UploadFileMap;
 }) {
   const body = new FormData();
-  const summaryText = buildBookingSummaryText({ parsed, files });
   const isBookingLead = parsed.source === "booking-modal";
+  const summaryText = isBookingLead
+    ? buildBookingSummaryText({ parsed, files })
+    : buildContactSummaryText(parsed);
   const formName = "pitcrew-contact";
 
   body.append("form-name", formName);
   body.append("bot-field", "");
-  
-  if (isBookingLead) {
-    body.append("bookingSummary", summaryText);
-  } else {
-    body.append("name", parsed.name);
-    body.append("phone", parsed.phone);
-    body.append("email", parsed.email ?? "");
-    body.append("vehicleType", parsed.vehicleType ?? "");
-    body.append("serviceInterest", parsed.serviceInterest ?? "");
-    body.append("message", parsed.message ?? "");
-    body.append("locale", parsed.locale);
-    body.append("source", parsed.source);
-  }
+  body.append("bookingSummary", summaryText);
 
   for (const fieldName of uploadFieldNames) {
     const file = files[fieldName];
