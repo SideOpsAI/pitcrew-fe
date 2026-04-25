@@ -5,6 +5,7 @@ import type { Metadata } from "next";
 import { BookNowButton } from "@/components/booking/book-now-button";
 import { ServiceCard } from "@/components/service-card";
 import { getDictionary, getLocaleFromParams } from "@/lib/content";
+import { extraServicesByLocale, extraServicesCopyByLocale } from "@/lib/extra-services";
 
 type HomePageProps = {
   params: Promise<{ locale: string }>;
@@ -29,6 +30,8 @@ export default async function HomePage({ params }: HomePageProps) {
   const dict = getDictionary(safeLocale);
 
   const featuredServices = dict.services.filter((service) => service.featured);
+  const extraServicesCopy = extraServicesCopyByLocale[safeLocale];
+  const extraServices = extraServicesByLocale[safeLocale];
 
   return (
     <>
@@ -193,6 +196,56 @@ export default async function HomePage({ params }: HomePageProps) {
                 detailLabel={dict.serviceDetail.viewDetails}
               />
             </div>
+          ))}
+        </div>
+      </section>
+
+      <section
+        className="section-shell py-8 md:py-12"
+        data-scroll-fade
+        data-scroll-fade-delay={145}
+      >
+        <div className="mb-6">
+          <h2 className="font-heading text-3xl uppercase tracking-wider text-white">
+            {extraServicesCopy.title}
+          </h2>
+          <p className="mt-2 max-w-3xl text-white/75">{extraServicesCopy.subtitle}</p>
+        </div>
+
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          {extraServices.map((service, index) => (
+            <article
+              key={service.key}
+              className="panel p-6"
+              data-scroll-fade
+              data-scroll-fade-delay={170 + index * 65}
+            >
+              <div className="flex items-start justify-between gap-3">
+                <h3 className="font-heading text-lg uppercase tracking-wider text-white">
+                  {service.name}
+                </h3>
+                <div className="text-right">
+                  <p className="text-sm font-bold uppercase tracking-wide text-accent">
+                    {service.price}
+                  </p>
+                  <p className="text-xs uppercase tracking-wide text-white/60">
+                    {service.duration}
+                  </p>
+                </div>
+              </div>
+
+              <p className="mt-4 text-xs uppercase tracking-wide text-white/60">
+                {extraServicesCopy.includesLabel}
+              </p>
+              <ul className="mt-3 space-y-2 text-sm text-white/80">
+                {service.details.map((detail) => (
+                  <li key={`${service.key}-${detail}`} className="flex items-start gap-2">
+                    <span className="mt-1 block h-2 w-2 rounded-full bg-accent" />
+                    <span>{detail}</span>
+                  </li>
+                ))}
+              </ul>
+            </article>
           ))}
         </div>
       </section>
