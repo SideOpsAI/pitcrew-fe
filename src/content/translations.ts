@@ -72,7 +72,7 @@ const contactItems: QuickContactItem[] = [
   {
     label: "WhatsApp",
     value: "+1 (603) 205-1026",
-    href: "https://wa.me/16032051026?text=Hola%2C%20quiero%20reservar%20un%20detailing.",
+    href: "https://wa.me/16032051026?text=Hi%2C%20I%20want%20to%20book%20a%20detailing%20appointment.",
   },
   {
     label: "Email",

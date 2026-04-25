@@ -117,7 +117,7 @@ function buildBookingSummaryText({
   const callLink = cleanPhone ? `tel:${cleanPhone}` : "N/A";
   const whatsappLink = cleanPhone
     ? `https://wa.me/${cleanPhone.replace(/^\+/, "")}?text=${encodeURIComponent(
-        "Hola, quiero reservar un detailing.",
+        "Hi, I want to book a detailing appointment.",
       )}`
     : "N/A";
   const uploadedFiles = uploadFieldNames
@@ -291,7 +291,7 @@ function buildNetlifyFormData({
   const body = new FormData();
   const summaryText = buildBookingSummaryText({ parsed, files });
   const isBookingLead = parsed.source === "booking-modal";
-  const formName = isBookingLead ? "pitcrew-booking" : "pitcrew-contact";
+  const formName = "pitcrew-contact";
 
   body.append("form-name", formName);
   body.append("bot-field", "");
