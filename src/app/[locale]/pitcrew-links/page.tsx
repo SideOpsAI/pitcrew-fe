@@ -58,7 +58,8 @@ const hiddenLinksCopy: Record<Locale, HiddenLinksCopy> = {
 
 const socialLinks = {
   facebook: "https://www.facebook.com/",
-  instagram: "https://www.instagram.com/",
+  instagram:
+    "https://www.instagram.com/pitcrewmobiledetailing?igsh=OXQ2NWx5dm83a3Q5&utm_source=ig_contact_invite",
   whatsapp: "https://wa.me/16032051026?text=Hola%2C%20quiero%20reservar%20un%20detailing.",
 } as const;
 
