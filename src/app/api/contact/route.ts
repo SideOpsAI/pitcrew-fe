@@ -7,7 +7,11 @@ import {
 } from "@/lib/booking-upload";
 import { verifyCaptchaChallenge } from "@/lib/captcha";
 import { contactLeadSchema, type ContactLeadPayload } from "@/lib/contact";
-import { bookingPlanPricing, type VehicleTypeKey } from "@/lib/vehicle-plans";
+import {
+  bookingPlanPricing,
+  type VehiclePlanSlug,
+  type VehicleTypeKey,
+} from "@/lib/vehicle-plans";
 
 export const runtime = "nodejs";
 
@@ -85,11 +89,17 @@ function resolveVehicleTypeKey(parsed: ContactLeadPayload): VehicleTypeKey | nul
   return aliases[normalized] ?? null;
 }
 
+function isVehiclePlanSlug(planSlug: ContactLeadPayload["planSlug"]): planSlug is VehiclePlanSlug {
+  return planSlug === "basic" || planSlug === "medium" || planSlug === "full";
+}
+
 function calculateBookingTotal(parsed: ContactLeadPayload) {
   const vehicleTypeKey = resolveVehicleTypeKey(parsed);
   const planSlug = parsed.planSlug;
   const basePrice =
-    vehicleTypeKey && planSlug ? parseUsdAmount(bookingPlanPricing[vehicleTypeKey][planSlug]) : 0;
+    vehicleTypeKey && isVehiclePlanSlug(planSlug)
+      ? parseUsdAmount(bookingPlanPricing[vehicleTypeKey][planSlug])
+      : 0;
   const extrasTotal = splitList(parsed.extraServicePrice, /\s*,\s*/).reduce(
     (sum, entry) => sum + parseUsdAmount(entry),
     0,
