@@ -1,5 +1,6 @@
+import type { PlanSlug } from "@/types/content";
+
 export type VehicleTypeKey = "sedan" | "small-suv" | "big-suv-minivan" | "pickup-plus";
-export type VehiclePlanSlug = "basic" | "medium" | "full";
 
 export const vehicleTypeOrder = [
   "sedan",
@@ -8,7 +9,7 @@ export const vehicleTypeOrder = [
   "pickup-plus",
 ] as const satisfies readonly VehicleTypeKey[];
 
-export const bookingPlanPricing: Record<VehicleTypeKey, Record<VehiclePlanSlug, string>> = {
+export const bookingPlanPricing: Record<VehicleTypeKey, Record<PlanSlug, string>> = {
   sedan: {
     basic: "$150 USD",
     medium: "$100 USD",
@@ -31,7 +32,7 @@ export const bookingPlanPricing: Record<VehicleTypeKey, Record<VehiclePlanSlug, 
   },
 };
 
-export const bookingPlanDurations: Record<VehicleTypeKey, Record<VehiclePlanSlug, string>> = {
+export const bookingPlanDurations: Record<VehicleTypeKey, Record<PlanSlug, string>> = {
   sedan: {
     basic: "2 hours",
     medium: "1 hour",
@@ -54,7 +55,7 @@ export const bookingPlanDurations: Record<VehicleTypeKey, Record<VehiclePlanSlug
   },
 };
 
-export function getVehiclePlanBreakdown(planSlug: VehiclePlanSlug) {
+export function getVehiclePlanBreakdown(planSlug: PlanSlug) {
   return vehicleTypeOrder.map((vehicleTypeKey) => ({
     vehicleTypeKey,
     price: bookingPlanPricing[vehicleTypeKey][planSlug],

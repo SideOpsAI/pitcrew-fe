@@ -4,13 +4,7 @@ import { locales } from "@/lib/locales";
 import { vehicleTypeOrder } from "@/lib/vehicle-plans";
 import type { ContactLeadInput, FormStatus, PlanSlug } from "@/types/content";
 
-const planSlugs = [
-  "basic",
-  "medium",
-  "full",
-  "engine-bay-cleaning",
-  "pet-hair-removal",
-] as const satisfies readonly PlanSlug[];
+const planSlugs = ["basic", "medium", "full"] as const satisfies readonly PlanSlug[];
 const usStateCodes = new Set([
   "AL",
   "AK",

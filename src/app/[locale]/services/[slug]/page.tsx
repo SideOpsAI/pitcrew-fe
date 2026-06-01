@@ -2,11 +2,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 
 import { BookNowButton } from "@/components/booking/book-now-button";
-import {
-  getVehiclePlanBreakdown,
-  type VehiclePlanSlug,
-  type VehicleTypeKey,
-} from "@/lib/vehicle-plans";
+import { getVehiclePlanBreakdown, type VehicleTypeKey } from "@/lib/vehicle-plans";
 import {
   getDictionary,
   getLocaleFromParams,
@@ -77,10 +73,6 @@ const tableHeaderCopy: Record<Locale, { vehicle: string; price: string; time: st
   de: { vehicle: "Fahrzeug", price: "Preis", time: "Dauer" },
 };
 
-function isVehiclePlanSlug(slug: string): slug is VehiclePlanSlug {
-  return slug === "basic" || slug === "medium" || slug === "full";
-}
-
 export function generateStaticParams() {
   const slugs = getServiceSlugs();
 
@@ -128,9 +120,7 @@ export default async function ServiceDetailPage({
   const safeLocale = getLocaleFromParams(locale);
   const dict = getDictionary(safeLocale);
   const service = getServiceBySlug(safeLocale, slug);
-  const planBreakdown = isVehiclePlanSlug(service.slug)
-    ? getVehiclePlanBreakdown(service.slug)
-    : [];
+  const planBreakdown = getVehiclePlanBreakdown(service.slug);
   const headers = tableHeaderCopy[safeLocale];
 
   return (
@@ -185,8 +175,7 @@ export default async function ServiceDetailPage({
               </div>
             </dl>
 
-            {isVehiclePlanSlug(service.slug) ? (
-              <div className="mt-6 rounded-xl border border-white/10 bg-black/35 p-3">
+            <div className="mt-6 rounded-xl border border-white/10 bg-black/35 p-3">
               <p className="mb-2 text-xs uppercase tracking-wider text-steel">
                 {byVehicleLabel[safeLocale]}
               </p>
@@ -210,8 +199,7 @@ export default async function ServiceDetailPage({
                   ))}
                 </tbody>
               </table>
-              </div>
-            ) : null}
+            </div>
 
             <BookNowButton
               label={dict.serviceDetail.getQuote}

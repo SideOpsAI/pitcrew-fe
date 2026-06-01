@@ -1,10 +1,6 @@
 import Link from "next/link";
 
-import {
-  getVehiclePlanBreakdown,
-  type VehiclePlanSlug,
-  type VehicleTypeKey,
-} from "@/lib/vehicle-plans";
+import { getVehiclePlanBreakdown, type VehicleTypeKey } from "@/lib/vehicle-plans";
 import type { Locale, ServiceItem, TranslationSchema } from "@/types/content";
 
 type ServiceCardProps = {
@@ -107,10 +103,6 @@ const vehicleTypeLabels: Record<Locale, Record<VehicleTypeKey, string>> = {
   },
 };
 
-function isVehiclePlanSlug(slug: string): slug is VehiclePlanSlug {
-  return slug === "basic" || slug === "medium" || slug === "full";
-}
-
 export function ServiceCard({
   locale,
   service,
@@ -118,9 +110,7 @@ export function ServiceCard({
   detailLabel,
 }: ServiceCardProps) {
   const copy = serviceCardCopy[locale];
-  const planBreakdown = isVehiclePlanSlug(service.slug)
-    ? getVehiclePlanBreakdown(service.slug)
-    : [];
+  const planBreakdown = getVehiclePlanBreakdown(service.slug);
 
   return (
     <article className="panel flex h-full flex-col gap-5 p-6">
@@ -148,8 +138,7 @@ export function ServiceCard({
         </div>
       </dl>
 
-      {isVehiclePlanSlug(service.slug) ? (
-        <div className="rounded-lg border border-white/10 bg-white/5 p-3">
+      <div className="rounded-lg border border-white/10 bg-white/5 p-3">
         <p className="mb-2 text-xs uppercase tracking-wider text-steel">{copy.byVehicle}</p>
         <table className="w-full text-xs text-white/85">
           <thead>
@@ -169,8 +158,7 @@ export function ServiceCard({
             ))}
           </tbody>
         </table>
-        </div>
-      ) : null}
+      </div>
 
       <div>
         <p className="mb-2 text-xs uppercase tracking-wider text-steel">
