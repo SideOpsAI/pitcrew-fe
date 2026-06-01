@@ -73,6 +73,28 @@ export const extraServicesByLocale: Record<Locale, ExtraServiceItem[]> = {
       duration: "45 min",
       details: ["Deep-cleaned, brushed, and disinfected"],
     },
+    {
+      key: "engine-bay-cleaning",
+      name: "ENGINE BAY CLEANING",
+      price: "$50",
+      duration: "1 hour",
+      details: [
+        "Deep degreasing with premium products.",
+        "Meticulous hand-brushing, agitation, and rinse.",
+        "Air-pressure blow dry and heat-resistant non-greasy dressing.",
+      ],
+    },
+    {
+      key: "pet-hair-removal",
+      name: "Pet hair removal",
+      price: "$80",
+      duration: "1.5 hours",
+      details: [
+        "Deep fabric agitation with professional rubberized brushes.",
+        "High-powered vacuuming removes fur, dander, and hidden allergens.",
+        "Fresh, odor-free finish for a clean cabin.",
+      ],
+    },
   ],
   es: [
     {
@@ -98,6 +120,28 @@ export const extraServicesByLocale: Record<Locale, ExtraServiceItem[]> = {
       price: "$50",
       duration: "45 min",
       details: ["Limpieza profunda, cepillado y desinfeccion"],
+    },
+    {
+      key: "engine-bay-cleaning",
+      name: "ENGINE BAY CLEANING",
+      price: "$50",
+      duration: "1 hora",
+      details: [
+        "Desengrase profundo con productos premium.",
+        "Agitacion manual meticulosa con cepillado y enjuague.",
+        "Secado con aire a presion y dressing no graso resistente al calor.",
+      ],
+    },
+    {
+      key: "pet-hair-removal",
+      name: "Pet hair removal",
+      price: "$80",
+      duration: "1.5 horas",
+      details: [
+        "Agitacion profunda de tela con cepillos de goma profesionales.",
+        "Aspirado de alta potencia para pelo, caspa y alergenos ocultos.",
+        "Acabado fresco y libre de olores.",
+      ],
     },
   ],
   "pt-BR": [
@@ -125,6 +169,28 @@ export const extraServicesByLocale: Record<Locale, ExtraServiceItem[]> = {
       duration: "45 min",
       details: ["Limpeza profunda, escovacao e desinfeccao"],
     },
+    {
+      key: "engine-bay-cleaning",
+      name: "ENGINE BAY CLEANING",
+      price: "$50",
+      duration: "1 hora",
+      details: [
+        "Desengorduramento profundo com produtos premium.",
+        "Agitacao manual meticulosa com escovacao e enxague.",
+        "Secagem com ar pressurizado e acabamento nao oleoso resistente ao calor.",
+      ],
+    },
+    {
+      key: "pet-hair-removal",
+      name: "Pet hair removal",
+      price: "$80",
+      duration: "1.5 horas",
+      details: [
+        "Agitacao profunda de tecido com escovas emborrachadas profissionais.",
+        "Aspiracao de alta potencia para pelos, caspa e alergenos ocultos.",
+        "Acabamento fresco e livre de odores.",
+      ],
+    },
   ],
   it: [
     {
@@ -150,6 +216,28 @@ export const extraServicesByLocale: Record<Locale, ExtraServiceItem[]> = {
       price: "$50",
       duration: "45 min",
       details: ["Pulizia profonda, spazzolatura e disinfezione"],
+    },
+    {
+      key: "engine-bay-cleaning",
+      name: "ENGINE BAY CLEANING",
+      price: "$50",
+      duration: "1 ora",
+      details: [
+        "Sgrassaggio profondo con prodotti premium.",
+        "Spazzolatura manuale accurata con agitazione e risciacquo.",
+        "Asciugatura ad aria compressa e dressing non grasso resistente al calore.",
+      ],
+    },
+    {
+      key: "pet-hair-removal",
+      name: "Pet hair removal",
+      price: "$80",
+      duration: "1.5 ore",
+      details: [
+        "Agitazione profonda dei tessuti con spazzole gommate professionali.",
+        "Aspirazione ad alta potenza per peli, forfora e allergeni nascosti.",
+        "Finitura fresca e senza odori.",
+      ],
     },
   ],
   "zh-CN": [
@@ -177,6 +265,28 @@ export const extraServicesByLocale: Record<Locale, ExtraServiceItem[]> = {
       duration: "45 min",
       details: ["Deep-cleaned, brushed, and disinfected"],
     },
+    {
+      key: "engine-bay-cleaning",
+      name: "ENGINE BAY CLEANING",
+      price: "$50",
+      duration: "1 hour",
+      details: [
+        "Deep degreasing with premium products.",
+        "Meticulous hand-brushing, agitation, and rinse.",
+        "Air-pressure blow dry and heat-resistant non-greasy dressing.",
+      ],
+    },
+    {
+      key: "pet-hair-removal",
+      name: "Pet hair removal",
+      price: "$80",
+      duration: "1.5 hours",
+      details: [
+        "Deep fabric agitation with professional rubberized brushes.",
+        "High-powered vacuuming removes fur, dander, and hidden allergens.",
+        "Fresh, odor-free finish for a clean cabin.",
+      ],
+    },
   ],
   de: [
     {
@@ -202,6 +312,28 @@ export const extraServicesByLocale: Record<Locale, ExtraServiceItem[]> = {
       price: "$50",
       duration: "45 min",
       details: ["Tiefenreinigung, Buerstenreinigung und Desinfektion"],
+    },
+    {
+      key: "engine-bay-cleaning",
+      name: "ENGINE BAY CLEANING",
+      price: "$50",
+      duration: "1 Stunde",
+      details: [
+        "Tiefen-Entfettung mit Premium-Produkten.",
+        "Sorgfaltige Handburstung mit Agitation und Spulung.",
+        "Trocknung mit Luftdruck und nicht-fettendes, hitzebestandiges Finish.",
+      ],
+    },
+    {
+      key: "pet-hair-removal",
+      name: "Pet hair removal",
+      price: "$80",
+      duration: "1.5 Stunden",
+      details: [
+        "Tiefe Textil-Agitation mit professionellen Gummibursten.",
+        "Hochleistungs-Saugen fur Fell, Schuppen und versteckte Allergene.",
+        "Frisches, geruchsfreies Finish.",
+      ],
     },
   ],
 };

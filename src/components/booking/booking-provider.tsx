@@ -133,9 +133,9 @@ type BookingFlowCopy = {
   planIncludesLabel: string;
   planDurationLabel: string;
   vehicleTypes: Record<VehicleTypeKey, string>;
-  planTitles: Record<BookingBasePlanSlug, string>;
-  planDescriptions: Record<BookingBasePlanSlug, string>;
-  planIncludes: Record<BookingBasePlanSlug, string[]>;
+  planTitles: Record<PlanSlug, string>;
+  planDescriptions: Record<PlanSlug, string>;
+  planIncludes: Record<PlanSlug, string[]>;
 };
 
 type BookingPhotoCopy = {
@@ -148,7 +148,12 @@ type BookingPhotoCopy = {
   remove: string;
 };
 
-type ExtraServiceKey = "interior-steam-cleaning" | "compound-polish" | "child-seat";
+type ExtraServiceKey =
+  | "interior-steam-cleaning"
+  | "compound-polish"
+  | "child-seat"
+  | "engine-bay-cleaning"
+  | "pet-hair-removal";
 
 type BookingExtraServiceOption = {
   key: ExtraServiceKey;
@@ -166,14 +171,13 @@ type BookingExtraServiceCopy = {
   includesLabel: string;
 };
 
-const bookingPlanOrder = ["basic", "medium", "full"] as const;
-type BookingBasePlanSlug = (typeof bookingPlanOrder)[number];
+const bookingPlanOrder = ["basic", "medium", "full"] as const satisfies readonly PlanSlug[];
 const bookingPhotoFields = [
   "vehiclePhotoFront",
   "vehiclePhotoSide",
   "vehiclePhotoExtra",
 ] as const satisfies readonly BookingPhotoField[];
-const bookingPhotoLimitByPlan: Record<BookingBasePlanSlug, number> = {
+const bookingPhotoLimitByPlan: Record<PlanSlug, number> = {
   basic: 1,
   medium: 2,
   full: 3,
@@ -203,6 +207,28 @@ const bookingExtraServiceOptions: readonly BookingExtraServiceOption[] = [
     price: "$50",
     duration: "45 min",
     details: ["Deep-cleaned, brushed, and disinfected"],
+  },
+  {
+    key: "engine-bay-cleaning",
+    name: "ENGINE BAY CLEANING",
+    price: "$50",
+    duration: "1 hour",
+    details: [
+      "Deep degreasing with premium products.",
+      "Meticulous hand-brushing, agitation, and rinse.",
+      "Air-pressure blow dry and heat-resistant non-greasy dressing.",
+    ],
+  },
+  {
+    key: "pet-hair-removal",
+    name: "Pet hair removal",
+    price: "$80",
+    duration: "1.5 hours",
+    details: [
+      "Deep fabric agitation with professional rubberized brushes.",
+      "High-powered vacuuming removes fur, dander, and hidden allergens.",
+      "Fresh, odor-free finish for a clean cabin.",
+    ],
   },
 ] as const;
 
@@ -444,7 +470,7 @@ function getBookingExtraServiceCopy(locale: Locale) {
 }
 
 function getPhotoLimitHint(locale: Locale, planSlug: "" | PlanSlug) {
-  if (!planSlug || !(planSlug in bookingPhotoLimitByPlan)) {
+  if (!planSlug) {
     if (locale === "es") {
       return "Selecciona un plan para definir el limite de fotos.";
     }
@@ -452,7 +478,7 @@ function getPhotoLimitHint(locale: Locale, planSlug: "" | PlanSlug) {
     return "Choose a plan to define the photo upload limit.";
   }
 
-  const maxPhotos = bookingPhotoLimitByPlan[planSlug as BookingBasePlanSlug];
+  const maxPhotos = bookingPhotoLimitByPlan[planSlug];
   const planLabel =
     planSlug === "basic" ? "Interior" : planSlug === "medium" ? "Exterior" : "Full Detail";
 
@@ -1021,10 +1047,7 @@ function BookingModal({
         : [],
     [formData.vehicleTypeKey, locale],
   );
-  const maxPhotoCount =
-    formData.planSlug && formData.planSlug in bookingPhotoLimitByPlan
-      ? bookingPhotoLimitByPlan[formData.planSlug as BookingBasePlanSlug]
-      : 3;
+  const maxPhotoCount = formData.planSlug ? bookingPhotoLimitByPlan[formData.planSlug] : 3;
   const allowedPhotoFields = bookingPhotoFields.slice(
     0,
     maxPhotoCount,
@@ -1067,6 +1090,9 @@ function BookingModal({
   }, [maxPhotoCount]);
 
   const isSubmitting = formState.status === "submitting";
+  const showPetHairDisclaimer =
+    step === 3 &&
+    (formData.planSlug === "basic" || formData.planSlug === "full");
   const isFormDirty = useMemo(() => {
     if (formData.planSlug && formData.planSlug !== initialPlanSlugRef.current) {
       return true;
@@ -1154,11 +1180,6 @@ function BookingModal({
       setCaptchaLoading(false);
     }
   }, []);
-
-  const showPetHairDisclaimer =
-    step === 3 &&
-    !!formData.planSlug &&
-    formData.planSlug !== "engine-bay-cleaning";
 
   const resetModalState = useCallback(
     (planSlug: PlanSlug | null) => {

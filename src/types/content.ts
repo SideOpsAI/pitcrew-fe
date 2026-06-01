@@ -1,11 +1,6 @@
 ﻿export type Locale = "en" | "es" | "pt-BR" | "it" | "zh-CN" | "de";
 
-export type PlanSlug =
-  | "basic"
-  | "medium"
-  | "full"
-  | "engine-bay-cleaning"
-  | "pet-hair-removal";
+export type PlanSlug = "basic" | "medium" | "full";
 
 export type FormStatus = "idle" | "submitting" | "success" | "error";
 
