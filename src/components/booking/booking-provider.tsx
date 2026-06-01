@@ -1151,6 +1151,11 @@ function BookingModal({
     }
   }, []);
 
+  const showPetHairDisclaimer =
+    step === 3 &&
+    !!formData.planSlug &&
+    formData.planSlug !== "engine-bay-cleaning";
+
   const resetModalState = useCallback(
     (planSlug: PlanSlug | null) => {
       initialPlanSlugRef.current = planSlug ?? "";
@@ -2087,6 +2092,13 @@ function BookingModal({
           </div>
 
           <div className="border-t border-white/10 p-5 sm:p-6">
+            {showPetHairDisclaimer ? (
+              <p className="mb-4 rounded-xl border border-amber-300/40 bg-amber-200/10 px-4 py-3 text-sm text-amber-100">
+                Advisory: For services that include interior work, if your vehicle has heavy pet
+                hair buildup, the <strong>Pet hair removal</strong> extra service will be added and
+                the operator will notify you before completion.
+              </p>
+            ) : null}
             <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-between">
               {step > 1 ? (
                 <button
