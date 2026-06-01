@@ -133,9 +133,9 @@ type BookingFlowCopy = {
   planIncludesLabel: string;
   planDurationLabel: string;
   vehicleTypes: Record<VehicleTypeKey, string>;
-  planTitles: Record<PlanSlug, string>;
-  planDescriptions: Record<PlanSlug, string>;
-  planIncludes: Record<PlanSlug, string[]>;
+  planTitles: Record<BookingBasePlanSlug, string>;
+  planDescriptions: Record<BookingBasePlanSlug, string>;
+  planIncludes: Record<BookingBasePlanSlug, string[]>;
 };
 
 type BookingPhotoCopy = {
@@ -166,13 +166,14 @@ type BookingExtraServiceCopy = {
   includesLabel: string;
 };
 
-const bookingPlanOrder = ["basic", "medium", "full"] as const satisfies readonly PlanSlug[];
+const bookingPlanOrder = ["basic", "medium", "full"] as const;
+type BookingBasePlanSlug = (typeof bookingPlanOrder)[number];
 const bookingPhotoFields = [
   "vehiclePhotoFront",
   "vehiclePhotoSide",
   "vehiclePhotoExtra",
 ] as const satisfies readonly BookingPhotoField[];
-const bookingPhotoLimitByPlan: Record<PlanSlug, number> = {
+const bookingPhotoLimitByPlan: Record<BookingBasePlanSlug, number> = {
   basic: 1,
   medium: 2,
   full: 3,
@@ -443,7 +444,7 @@ function getBookingExtraServiceCopy(locale: Locale) {
 }
 
 function getPhotoLimitHint(locale: Locale, planSlug: "" | PlanSlug) {
-  if (!planSlug) {
+  if (!planSlug || !(planSlug in bookingPhotoLimitByPlan)) {
     if (locale === "es") {
       return "Selecciona un plan para definir el limite de fotos.";
     }
@@ -451,7 +452,7 @@ function getPhotoLimitHint(locale: Locale, planSlug: "" | PlanSlug) {
     return "Choose a plan to define the photo upload limit.";
   }
 
-  const maxPhotos = bookingPhotoLimitByPlan[planSlug];
+  const maxPhotos = bookingPhotoLimitByPlan[planSlug as BookingBasePlanSlug];
   const planLabel =
     planSlug === "basic" ? "Interior" : planSlug === "medium" ? "Exterior" : "Full Detail";
 
@@ -1020,7 +1021,10 @@ function BookingModal({
         : [],
     [formData.vehicleTypeKey, locale],
   );
-  const maxPhotoCount = formData.planSlug ? bookingPhotoLimitByPlan[formData.planSlug] : 3;
+  const maxPhotoCount =
+    formData.planSlug && formData.planSlug in bookingPhotoLimitByPlan
+      ? bookingPhotoLimitByPlan[formData.planSlug as BookingBasePlanSlug]
+      : 3;
   const allowedPhotoFields = bookingPhotoFields.slice(
     0,
     maxPhotoCount,
@@ -1150,6 +1154,11 @@ function BookingModal({
       setCaptchaLoading(false);
     }
   }, []);
+
+  const showPetHairDisclaimer =
+    step === 3 &&
+    !!formData.planSlug &&
+    formData.planSlug !== "engine-bay-cleaning";
 
   const resetModalState = useCallback(
     (planSlug: PlanSlug | null) => {
@@ -2087,6 +2096,13 @@ function BookingModal({
           </div>
 
           <div className="border-t border-white/10 p-5 sm:p-6">
+            {showPetHairDisclaimer ? (
+              <p className="mb-4 rounded-xl border border-amber-300/40 bg-amber-200/10 px-4 py-3 text-sm text-amber-100">
+                Advisory: For services that include interior work, if your vehicle has heavy pet
+                hair buildup, the <strong>Pet hair removal</strong> extra service will be added and
+                the operator will notify you before completion.
+              </p>
+            ) : null}
             <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-between">
               {step > 1 ? (
                 <button

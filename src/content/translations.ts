@@ -135,6 +135,36 @@ const servicesByLocale: Record<Locale, ServiceItem[]> = {
       highlights: fullDetailIncludes,
       featured: true,
     },
+    {
+      slug: "engine-bay-cleaning",
+      name: "ENGINE BAY CLEANING",
+      shortDescription: "Deep degreasing and protection for a factory-shine engine bay.",
+      longDescription:
+        "Restore your engine bay with a safe, premium process that removes grease and grime while protecting surfaces from heat and residue.",
+      price: "$50",
+      duration: "1 hour",
+      highlights: [
+        "Deep degreasing with premium products",
+        "Meticulous hand-brushing, agitation, and rinse",
+        "Air-pressure blow dry and heat-resistant non-greasy dressing",
+      ],
+      featured: true,
+    },
+    {
+      slug: "pet-hair-removal",
+      name: "Pet hair removal",
+      shortDescription: "Targeted interior treatment to remove embedded pet hair and allergens.",
+      longDescription:
+        "Designed for cabins with heavy pet use. We extract woven hair from fabric fibers, vacuum deeply, and leave the interior clean and odor-free.",
+      price: "$80",
+      duration: "1.5 hours",
+      highlights: [
+        "Deep fabric agitation with professional rubberized brushes",
+        "High-powered vacuuming for fur, dander, and hidden allergens",
+        "Fresh, odor-free finish for a pristine cabin",
+      ],
+      featured: true,
+    },
   ],
   es: [
     {
@@ -176,6 +206,36 @@ const servicesByLocale: Record<Locale, ServiceItem[]> = {
       price: "$210 - $270 USD",
       duration: "3.5 - 4 horas",
       highlights: fullDetailIncludes,
+      featured: true,
+    },
+    {
+      slug: "engine-bay-cleaning",
+      name: "ENGINE BAY CLEANING",
+      shortDescription: "Desengrase profundo y protección para un acabado tipo fábrica.",
+      longDescription:
+        "Recupera el compartimiento del motor con un proceso seguro que elimina grasa y suciedad, y deja protección resistente al calor.",
+      price: "$50",
+      duration: "1 hora",
+      highlights: [
+        "Desengrase profundo con productos premium",
+        "Agitación manual meticulosa con cepillado y enjuague",
+        "Secado con aire a presión y dressing no graso resistente al calor",
+      ],
+      featured: true,
+    },
+    {
+      slug: "pet-hair-removal",
+      name: "Pet hair removal",
+      shortDescription: "Tratamiento interior para remover pelo de mascota incrustado.",
+      longDescription:
+        "Ideal para interiores con alto uso de mascotas. Extraemos pelo incrustado, aspiramos a profundidad y dejamos la cabina fresca y limpia.",
+      price: "$80",
+      duration: "1.5 horas",
+      highlights: [
+        "Agitación profunda de tela con cepillos de goma profesionales",
+        "Aspirado de alta potencia para pelo, caspa y alérgenos ocultos",
+        "Acabado fresco y libre de olores",
+      ],
       featured: true,
     },
   ],
@@ -221,6 +281,36 @@ const servicesByLocale: Record<Locale, ServiceItem[]> = {
       highlights: fullDetailIncludes,
       featured: true,
     },
+    {
+      slug: "engine-bay-cleaning",
+      name: "ENGINE BAY CLEANING",
+      shortDescription: "Desengorduramento profundo e proteção com acabamento de fábrica.",
+      longDescription:
+        "Renove o cofre do motor com um processo seguro que remove gordura e sujeira e aplica proteção resistente ao calor.",
+      price: "$50",
+      duration: "1 hora",
+      highlights: [
+        "Desengorduramento profundo com produtos premium",
+        "Agitação manual meticulosa com escovação e enxágue",
+        "Secagem com ar pressurizado e acabamento não oleoso resistente ao calor",
+      ],
+      featured: true,
+    },
+    {
+      slug: "pet-hair-removal",
+      name: "Pet hair removal",
+      shortDescription: "Tratamento interno para remover pelos de pet incrustados.",
+      longDescription:
+        "Indicado para veículos com uso frequente por pets. Extraímos pelos das fibras, aspiramos profundamente e deixamos a cabine limpa e sem odores.",
+      price: "$80",
+      duration: "1.5 horas",
+      highlights: [
+        "Agitação profunda de tecido com escovas emborrachadas profissionais",
+        "Aspiração de alta potência para pelos, caspa e alérgenos ocultos",
+        "Acabamento fresco e livre de odores",
+      ],
+      featured: true,
+    },
   ],
   it: [
     {
@@ -262,6 +352,36 @@ const servicesByLocale: Record<Locale, ServiceItem[]> = {
       price: "$210 - $270 USD",
       duration: "3.5 - 4 ore",
       highlights: fullDetailIncludes,
+      featured: true,
+    },
+    {
+      slug: "engine-bay-cleaning",
+      name: "ENGINE BAY CLEANING",
+      shortDescription: "Sgrassaggio profondo e protezione per un vano motore effetto fabbrica.",
+      longDescription:
+        "Ripristina il vano motore con un processo sicuro che rimuove grasso e sporco e applica una protezione resistente al calore.",
+      price: "$50",
+      duration: "1 ora",
+      highlights: [
+        "Sgrassaggio profondo con prodotti premium",
+        "Spazzolatura manuale accurata con agitazione e risciacquo",
+        "Asciugatura ad aria compressa e dressing non grasso resistente al calore",
+      ],
+      featured: true,
+    },
+    {
+      slug: "pet-hair-removal",
+      name: "Pet hair removal",
+      shortDescription: "Trattamento interno mirato per rimuovere peli di animali incastrati.",
+      longDescription:
+        "Pensato per abitacoli con uso frequente da parte di animali. Estrae i peli dalle fibre, aspira in profondità e lascia un interno fresco e pulito.",
+      price: "$80",
+      duration: "1.5 ore",
+      highlights: [
+        "Agitazione profonda dei tessuti con spazzole gommate professionali",
+        "Aspirazione ad alta potenza per peli, forfora e allergeni nascosti",
+        "Finitura fresca e senza odori",
+      ],
       featured: true,
     },
   ],
@@ -307,6 +427,36 @@ const servicesByLocale: Record<Locale, ServiceItem[]> = {
       highlights: fullDetailIncludes,
       featured: true,
     },
+    {
+      slug: "engine-bay-cleaning",
+      name: "ENGINE BAY CLEANING",
+      shortDescription: "Deep degreasing and protection for a factory-shine engine bay.",
+      longDescription:
+        "Restore your engine bay with a safe, premium process that removes grease and grime while protecting surfaces from heat and residue.",
+      price: "$50",
+      duration: "1 hour",
+      highlights: [
+        "Deep degreasing with premium products",
+        "Meticulous hand-brushing, agitation, and rinse",
+        "Air-pressure blow dry and heat-resistant non-greasy dressing",
+      ],
+      featured: true,
+    },
+    {
+      slug: "pet-hair-removal",
+      name: "Pet hair removal",
+      shortDescription: "Targeted interior treatment to remove embedded pet hair and allergens.",
+      longDescription:
+        "Designed for cabins with heavy pet use. We extract woven hair from fabric fibers, vacuum deeply, and leave the interior clean and odor-free.",
+      price: "$80",
+      duration: "1.5 hours",
+      highlights: [
+        "Deep fabric agitation with professional rubberized brushes",
+        "High-powered vacuuming for fur, dander, and hidden allergens",
+        "Fresh, odor-free finish for a pristine cabin",
+      ],
+      featured: true,
+    },
   ],
   de: [
     {
@@ -348,6 +498,36 @@ const servicesByLocale: Record<Locale, ServiceItem[]> = {
       price: "$210 - $270 USD",
       duration: "3.5 - 4 Std",
       highlights: fullDetailIncludes,
+      featured: true,
+    },
+    {
+      slug: "engine-bay-cleaning",
+      name: "ENGINE BAY CLEANING",
+      shortDescription: "Tiefen-Entfettung und Schutz für einen Motorraum mit Werksglanz.",
+      longDescription:
+        "Erfrischt den Motorraum mit einem sicheren Premium-Prozess, der Fett und Schmutz entfernt und hitzebeständigen Schutz hinterlässt.",
+      price: "$50",
+      duration: "1 Stunde",
+      highlights: [
+        "Tiefen-Entfettung mit Premium-Produkten",
+        "Sorgfältige Handbürstung mit Agitation und Spülung",
+        "Trocknung mit Luftdruck und nicht-fettendes, hitzebeständiges Finish",
+      ],
+      featured: true,
+    },
+    {
+      slug: "pet-hair-removal",
+      name: "Pet hair removal",
+      shortDescription: "Gezielte Innenraumbehandlung zur Entfernung von Tierhaaren und Allergenen.",
+      longDescription:
+        "Für stark beanspruchte Innenräume mit Haustieren. Eingearbeitete Haare werden aus den Fasern gelöst, gründlich abgesaugt und geruchsneutral abgeschlossen.",
+      price: "$80",
+      duration: "1.5 Stunden",
+      highlights: [
+        "Tiefe Textil-Agitation mit professionellen Gummibürsten",
+        "Hochleistungs-Saugen für Fell, Schuppen und versteckte Allergene",
+        "Frisches, geruchsfreies Finish",
+      ],
       featured: true,
     },
   ],
